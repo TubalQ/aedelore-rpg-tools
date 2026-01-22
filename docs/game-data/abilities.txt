@@ -1,0 +1,111 @@
+================================================================================
+                          AEDELORE - CLASS ABILITIES
+================================================================================
+
+Abilities are special actions available to melee classes (Warrior, Thief/Rogue,
+Hunter, Outcast). They cost Weakened points to use and grant bonus dice (Gain).
+
+================================================================================
+WARRIOR ABILITIES (14)
+================================================================================
+
+Name                 Weakened   Gain   Check                              Effect
+-------------------------------------------------------------------------------------
+Last Stand           2          2D10   Armor, min 1 success               Take focus from enemy
+Hero                 Worthiness 0      Passive                            Hero of the people
+Me First             +1 Init    3D10   Initiative, min 2 success          Ignore turns of initiative, 1 round
+Ultimate Sacrifice   2          3D10   Strength, min 1 success            You get full of adrenaline, you take 2 dmg
+Paladin's Sacrifice  4          3D10   Strength, min 2 success            Ignore Pain, you faint after
+Crusader             2          3D10   Armor, min 1 success               Use armor, 1 round
+Give In              4          4D10   Strength, min 2 success            Massive Adrenaline, you lose control
+Shield Wall          3          3D10   Defense, min 2 success             Protect allies behind you, Requires shield, 2 rounds
+Battle Cry           2          2D10   Intimidation, min 1 success        Inspire nearby allies, 1 round
+Second Wind          3          3D10   Endurance, min 2 success           Push through exhaustion
+Disarm               3          2D10   Athletics, min 2 success           Remove enemy weapon
+Whirlwind            4          4D10   Strength, min 2 success            Strike multiple nearby foes, 1 round
+Intercept            2          3D10   Toughness, min 1 success           Take hit meant for ally
+Unbreakable          3          3D10   Toughness, min 2 success           Resist being knocked down, 2 rounds
+
+================================================================================
+THIEF/ROGUE ABILITIES (13)
+================================================================================
+
+Name                 Weakened   Gain   Check                              Effect
+-------------------------------------------------------------------------------------
+Lockpicking          4          1D10   Sleight of Hand, min 2 success     Open normal locks and chests, not in battle
+Sneaking             3          2D10   Stealth, min 2 success             Extra quiet when sneaking
+Awareness            4          4D10   Third Eye, min 2 success           You are granted third eye, not in battle
+Vanish               4          4D10   Stealth, min 3 success             You vanish into thin air
+Footloose            3          5D10   Dexterity, min 3 success           You move fast as lightning
+Fixed Mind           4          2D10   Deception, min 2 success           You deceive someone
+Backstab             3          3D10   Dexterity, min 2 success           Strike from behind for extra damage
+Pickpocket           4          2D10   Sleight of Hand, min 2 success     Steal from someone unnoticed, not in battle
+Evasion              3          4D10   Acrobatics, min 2 success          Dodge incoming attack, 1 round
+Shadow Cloak         3          3D10   Stealth, min 2 success             Blend into shadows, 2 rounds
+Disengage            2          2D10   Acrobatics, min 1 success          Escape without provoking attack
+Poison Blade         3          3D10   Sleight of Hand, min 2 success     Coat weapon with poison, not in battle
+Silent Step          2          2D10   Stealth, min 1 success             Move without making sound, not in battle
+
+================================================================================
+HUNTER ABILITIES (14)
+================================================================================
+
+Name                 Weakened   Gain   Check                              Effect
+-------------------------------------------------------------------------------------
+Steady Shot          3          2D10   Dexterity, min 2 success           Your arrow hits exactly where you aim
+Tame a Beast         5          5D10   Animal Handling, min 3 success     Tame a normal non-magical beast, not in battle
+Unveil Path          2          2D10   Survival, min 1 success            You notice tracks no one else notices, not in battle
+Set Trap             3          3D10   Nature, min 2 success              You build natural traps, not in battle
+Shadow Meld          4          4D10   Stealth, min 3 success             You melt into the shadows, not in battle
+Spider Senses        2          2D10   Perception, min 1 success          Take notice of surroundings, not in battle
+Rain of Death        4          3D10   Dexterity, min 3 success           Shoot multiple arrows at targets
+Hunter's Mark        2          2D10   Survival, min 1 success            Mark target for tracking, 4 rounds
+Camouflage           3          3D10   Stealth, min 2 success             Blend into natural surroundings, not in battle
+Precision Strike     4          4D10   Dexterity, min 3 success           Strike a vital point
+Call Companion       3          3D10   Animal Handling, min 2 success     Summon your animal companion, not in battle
+Quick Draw           2          3D10   Dexterity, min 2 success           Draw and attack in one motion
+Foraging             2          1D10   Nature, min 1 success              Find food and supplies in nature, not in battle
+Sniper Shot          4          4D10   Dexterity, min 3 success           Shoot from extreme distance
+
+================================================================================
+OUTCAST ABILITIES (14)
+================================================================================
+
+Name                 Weakened   Gain   Check                              Effect
+-------------------------------------------------------------------------------------
+Shadow Step          3          3D10   Stealth, min 2 success             Blend into shadows, move silently, not in battle
+Wilderness Survival  3          2D10   Survival, min 2 success            Proficiency in tracking & navigation, not in battle
+Street Smarts        2          2D10   Insight, min 1 success             Read people and intentions, not in battle
+Unseen Ally          3          2D10   Animal Handling, min 2 success     Communicate with small creatures, not in battle
+Improvised Weaponry  3          3D10   Unarmed, min 2 success             Use anything as a weapon, no disadvantage
+Resilient Spirit     3          3D10   Endurance, min 2 success           Resist mental & emotional manipulation
+Counterculture       2          2D10   History, min 1 success             Familiarity with forbidden knowledge
+Scavenge             2          2D10   Investigation, min 1 success       Find useful items in ruins, not in battle
+Blend In             2          2D10   Deception, min 1 success           Disappear in crowds, not in battle
+Iron Will            3          3D10   Endurance, min 2 success           Resist fear and intimidation
+Dirty Fighting       3          3D10   Unarmed, min 2 success             Fight without honor for advantage
+Underground Network  3          3D10   Insight, min 2 success             Contact hidden allies, not in battle
+Endure Elements      2          2D10   Survival, min 1 success            Resist harsh weather conditions, 4 rounds
+Adapt                3          3D10   Intelligence, min 2 success        Quickly learn new skill or trade, not in battle
+
+================================================================================
+LEGEND
+================================================================================
+
+Weakened    = Cost in Weakened points to use ability (or special condition)
+Gain        = Bonus dice rolled when using ability (e.g., 3D10 = roll 3 D10s)
+Check       = Required skill check and minimum successes
+Effect      = What the ability does
+
+USAGE NOTES:
+  - "not in battle" = Cannot be used during combat
+  - "X rounds" = Effect lasts for X rounds
+  - Passive abilities are always active
+  - Weakened points are restored after rest
+
+STARTING ABILITIES BY CLASS:
+  - Warrior: Last Stand, Hero, Battle Cry
+  - Thief/Rogue: Lockpicking, Sneaking, Backstab
+  - Hunter: Steady Shot, Tame a Beast, Unveil Path
+  - Outcast: Shadow Step, Wilderness Survival, Street Smarts
+

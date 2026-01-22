@@ -1,0 +1,21 @@
+{
+  "name": "Aedelore Character Sheet",
+  "short_name": "Aedelore",
+  "description": "Fantasy RPG character sheet for the Aedelore game system",
+  "start_url": "/character-sheet",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#8b5cf6",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "lang": "en",
+  "dir": "ltr"
+}

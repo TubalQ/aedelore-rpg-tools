@@ -1,0 +1,109 @@
+================================================================================
+                          AEDELORE - ARMOR & SHIELDS
+================================================================================
+
+================================================================================
+HEAD ARMOR
+================================================================================
+
+Name            Type      HP    Block      Disadvantage
+-----------------------------------------------------------------------
+Cloth Hood      Light     1     0+block    None
+Leather Cap     Light     2     0+block    None
+Chain Coif      Medium    8     1+block    Stealth, -1D10 on Perception
+Light Helmet    Medium    10    1+block    -1D10 on Perception
+Heavy Helmet    Heavy     12    2+block    Stealth, -1D10 on Perception
+Great Helm      Heavy     14    2+block    Stealth, -1D10 on Perception & Investigation
+
+================================================================================
+SHOULDER ARMOR
+================================================================================
+
+Name              Type      HP    Block      Disadvantage
+-----------------------------------------------------------------------
+Cloth Mantle      Light     1     0+block    None
+Leather Pauldrons Light     3     1+block    None
+Studded Pauldrons Light     3     1+block    None
+Chain Pauldrons   Medium    10    1+block    Stealth
+Plate Pauldrons   Heavy     14    2+block    Stealth, -1D10 on Acrobatics
+
+================================================================================
+CHEST ARMOR (Main Armor)
+================================================================================
+
+Name              Type      HP    Block      Disadvantage
+-----------------------------------------------------------------------
+Cloth             Cloth     2     0+block    None
+Padded            Light     3     1+block    Stealth
+Leather           Light     5     1+block    None
+Studded Leather   Light     6     2+block    None
+Hide              Medium    10    2+block    Stealth
+Chain Shirt       Medium    15    3+block    Stealth
+Scale Mail        Medium    18    3+block    Stealth
+Breastplate       Medium    20    3+block    Stealth
+Half Plate        Medium    25    4+block    Stealth, -1D10 on Acrobatics
+Ring Mail         Heavy     16    3+block    Stealth
+Chainmail         Heavy     22    4+block    Stealth, -1D10 on Acrobatics & Athletics
+Splint            Heavy     28    5+block    Stealth, -1D10 on Acrobatics & Athletics
+Plate             Heavy     35    6+block    Stealth, -1D10 on Acrobatics & Athletics
+
+================================================================================
+HAND ARMOR
+================================================================================
+
+Name              Type      HP    Block      Disadvantage
+-----------------------------------------------------------------------
+Cloth Gloves      Light     1     0+block    None
+Leather Gloves    Light     2     0+block    None
+Studded Gloves    Light     3     1+block    None
+Chain Gloves      Medium    8     1+block    Stealth, -1D10 on Sleight of Hand
+Plate Gauntlets   Heavy     12    2+block    Stealth, -1D10 on Sleight of Hand
+
+================================================================================
+LEG ARMOR
+================================================================================
+
+Name              Type      HP    Block      Disadvantage
+-----------------------------------------------------------------------
+Cloth Pants       Light     1     0+block    None
+Leather Greaves   Light     3     1+block    None
+Studded Greaves   Light     3     1+block    None
+Chain Greaves     Medium    10    1+block    Stealth
+Plate Greaves     Heavy     14    2+block    Stealth, -1D10 on Athletics
+
+================================================================================
+SHIELDS
+================================================================================
+
+Name              HP    Block   Defence   Damage   Disadvantage
+-----------------------------------------------------------------------
+Small Shield      5     1       1         1d6      None
+Shield (Wooden)   15    3       2         1d6      None
+Spiked Shield     18    4       2         1d10     None
+Shield (Metal)    22    5       3         1d6      None
+Shield (Tower)    45    10      5         1d6      Dexterity checks
+
+================================================================================
+LEGEND
+================================================================================
+
+HP          = Armor Hit Points (damage absorbed before breaking)
+Block       = Added to block roll (X+block means X plus your block skill)
+Defence     = Added to defence value (shields only)
+Damage      = Shield bash damage (shields only)
+Disadvantage= Penalties while wearing this armor
+
+ARMOR TYPES:
+  Cloth   = No protection, no penalties
+  Light   = Light protection, minimal penalties
+  Medium  = Good protection, stealth penalty
+  Heavy   = Best protection, multiple penalties
+
+ARMOR DAMAGE:
+  - When hit, damage goes to armor HP first
+  - When armor HP reaches 0, armor is BROKEN
+  - Broken armor provides no protection until repaired
+
+BLOCK MECHANIC:
+  - Block value = Armor block + Block skill
+  - Successful block reduces incoming damage

@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aedelore - A World Born from Dragons | Fantasy RPG World</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Explore Aedelore, a fantasy RPG world born from dragons. Discover seven unique races, ancient magic, 40+ locations, and rich lore. Create characters and embark on epic adventures.">
+    <meta name="keywords" content="Aedelore, fantasy RPG, tabletop RPG, roleplaying game, dragons, elves, dwarves, orcs, fantasy world, character sheet, RPG lore">
+    <meta name="author" content="World of Aedelore">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://aedelore.nu/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://aedelore.nu/">
+    <meta property="og:title" content="Aedelore - A World Born from Dragons">
+    <meta property="og:description" content="Explore Aedelore, a fantasy RPG world shaped by Dragon Gods. Seven races, ancient magic, and endless adventures await.">
+    <meta property="og:image" content="https://aedelore.nu/uploads/images/system/2025-09/world-of-aedelore.jpg">
+    <meta property="og:site_name" content="World of Aedelore">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://aedelore.nu/">
+    <meta name="twitter:title" content="Aedelore - A World Born from Dragons">
+    <meta name="twitter:description" content="Explore Aedelore, a fantasy RPG world shaped by Dragon Gods. Seven races, ancient magic, and endless adventures await.">
+    <meta name="twitter:image" content="https://aedelore.nu/uploads/images/system/2025-09/world-of-aedelore.jpg">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="https://aedelore.nu/uploads/images/system/2025-09/world-of-aedelore.jpg">
+    <link rel="apple-touch-icon" href="https://aedelore.nu/uploads/images/system/2025-09/world-of-aedelore.jpg">
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Aedelore",
+        "alternateName": "World of Aedelore",
+        "url": "https://aedelore.nu/",
+        "description": "A fantasy RPG world born from dragons, featuring seven races, ancient magic, and rich lore.",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://wiki.aedelore.nu/search?term={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "World of Aedelore",
+        "url": "https://aedelore.nu/",
+        "logo": "https://aedelore.nu/uploads/images/system/2025-09/world-of-aedelore.jpg",
+        "sameAs": []
+    }
+    </script>
+
+    <!-- Modern Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Dark Premium + Vibrant Colors */
+            --bg-base: #0a0a0f;
+            --bg-elevated: #0f0f18;
+            --bg-surface: #141420;
+            --bg-surface-hover: #1a1a2e;
+            --bg-highlight: #252538;
+
+            --text-base: #ffffff;
+            --text-subdued: #b0b0c0;
+            --text-muted: #6a6a80;
+
+            /* Vibrant accents */
+            --accent-gold: #f0c040;
+            --accent-gold-glow: rgba(240, 192, 64, 0.3);
+            --accent-purple: #a855f7;
+            --accent-purple-glow: rgba(168, 85, 247, 0.25);
+            --accent-blue: #3b9eff;
+            --accent-blue-glow: rgba(59, 158, 255, 0.25);
+            --accent-green: #22d97f;
+            --accent-green-glow: rgba(34, 217, 127, 0.25);
+            --accent-cyan: #22d3ee;
+
+            /* Legacy aliases */
+            --primary-purple: #a855f7;
+            --primary-purple-dark: #9333ea;
+            --primary-blue: #3b9eff;
+            --primary-blue-dark: #2563eb;
+            --primary-green: #22d97f;
+            --primary-green-dark: #16a34a;
+            --dark-bg: var(--bg-surface);
+            --darker-bg: var(--bg-base);
+            --card-bg: var(--bg-surface);
+            --card-bg-hover: var(--bg-surface-hover);
+            --text-primary: var(--text-base);
+            --text-secondary: var(--text-subdued);
+            --accent-gold-dark: #d4a030;
+            --border-glow: var(--accent-purple-glow);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-default: rgba(255, 255, 255, 0.12);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--darker-bg);
+            color: var(--text-primary);
+            line-height: 1.8;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Vibrant background gradients */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(ellipse at 10% 20%, rgba(168, 85, 247, 0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 70%, rgba(59, 158, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 100%, rgba(34, 217, 127, 0.08) 0%, transparent 40%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Side navigation */
+        .side-nav {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 72px;
+            height: 100vh;
+            background: var(--bg-elevated);
+            border-right: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 0;
+            z-index: 1000;
+        }
+
+        .logo-side {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            border: none;
+            margin-bottom: 40px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(240, 192, 64, 0.15) 100%);
+            border: 1px solid rgba(240, 192, 64, 0.3);
+        }
+
+        .logo-side:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 20px rgba(240, 192, 64, 0.3);
+            border-color: var(--accent-gold);
+        }
+
+        .logo-side svg {
+            width: 28px;
+            height: 28px;
+            color: var(--accent-gold);
+        }
+
+        .nav-icons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-icon {
+            width: 56px;
+            height: auto;
+            padding: 8px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: var(--text-subdued);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+
+        .nav-icon:hover {
+            color: var(--text-base);
+            background: var(--bg-highlight);
+        }
+
+        .nav-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .nav-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }
+
+        /* Main content area */
+        .main-content {
+            margin-left: 72px;
+            padding: 0;
+        }
+
+        /* Hero section - full screen scroll */
+        .hero-section {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            text-align: center;
+            max-width: 900px;
+            padding: 40px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-size: 5rem;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--primary-purple), var(--primary-blue), var(--primary-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: uppercase;
+            animation: fadeIn 2s ease-out;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: var(--accent-gold);
+            font-style: italic;
+            margin-bottom: 40px;
+            animation: fadeIn 2s ease-out 0.5s both;
+        }
+
+        .hero-text {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 50px;
+            animation: fadeIn 2s ease-out 1s both;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translate(-50%, 0); }
+            50% { transform: translate(-50%, 10px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Content sections - book pages style */
+        .content-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 100px 80px;
+            position: relative;
+        }
+
+        .section-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .section-number {
+            font-size: 1rem;
+            color: var(--primary-purple);
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            margin-bottom: 20px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .section-title {
+            font-size: 3.5rem;
+            margin-bottom: 40px;
+            color: var(--accent-gold);
+            font-weight: 300;
+        }
+
+        /* Two column layout */
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            margin-top: 40px;
+        }
+
+        .column-content {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            line-height: 2;
+        }
+
+        .column-content h3 {
+            color: var(--primary-blue);
+            margin: 30px 0 15px 0;
+            font-size: 1.5rem;
+            font-weight: 400;
+        }
+
+        .column-content p {
+            margin-bottom: 20px;
+        }
+
+        /* Decorative elements */
+        .decorative-line {
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-purple), transparent);
+            margin: 30px 0;
+        }
+
+        /* Quote blocks */
+        .quote-block {
+            background: rgba(139, 92, 246, 0.05);
+            border-left: 4px solid var(--primary-purple);
+            padding: 30px 40px;
+            margin: 40px 0;
+            font-style: italic;
+            font-size: 1.3rem;
+            color: var(--accent-gold);
+        }
+
+        /* Grid layout for races/classes */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .info-card {
+            background: var(--bg-surface);
+            padding: 24px;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .info-card:hover {
+            background: var(--bg-surface-hover);
+            border-color: var(--accent-purple);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px var(--accent-purple-glow);
+        }
+
+        .info-card:hover::before {
+            opacity: 1;
+        }
+
+        .info-card h4 {
+            color: var(--accent-green);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .info-card p {
+            color: var(--text-subdued);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Stats display */
+        .stats-display {
+            display: flex;
+            justify-content: space-around;
+            margin: 60px 0;
+            padding: 40px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue), var(--accent-cyan), var(--accent-green));
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            margin-top: 10px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* CTA section */
+        .cta-section {
+            text-align: center;
+            padding: 100px 40px;
+            background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-elevated) 100%);
+            position: relative;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-purple), var(--accent-blue), transparent);
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 18px 56px;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-blue) 100%);
+            color: #fff;
+            text-decoration: none;
+            border: none;
+            border-radius: 500px;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .cta-button:hover {
+            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+            transform: scale(1.05);
+            box-shadow: 0 0 30px var(--accent-purple-glow), 0 0 60px var(--accent-blue-glow);
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px;
+            text-align: center;
+            border-top: 1px solid var(--border-subtle);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            background: var(--bg-elevated);
+        }
+
+        footer a {
+            color: var(--text-subdued);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        footer a:hover {
+            color: var(--text-base);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .side-nav {
+                width: 48px;
+            }
+
+            .main-content {
+                margin-left: 48px;
+            }
+
+            .nav-icon {
+                width: 44px;
+                padding: 6px 2px;
+            }
+
+            .nav-icon svg {
+                width: 16px;
+                height: 16px;
+            }
+
+            .nav-label {
+                font-size: 7px;
+            }
+
+            .hero-title {
+                font-size: 3rem;
+            }
+
+            .content-section {
+                padding: 60px 24px;
+            }
+
+            .two-column {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .section-title {
+                font-size: 2.5rem;
+            }
+
+            .stats-display {
+                flex-direction: column;
+                gap: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Side Navigation -->
+    <nav class="side-nav">
+        <a href="/" class="logo-side" title="Aedelore">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <!-- Dragon head profile -->
+                <path d="M3 13c0-4 3-8 8-8c2 0 4 1 5 2l3-2v3l-2 2c1 1 1 3 1 4c0 3-2 6-6 6c-2 0-3-.5-4-1l-1 2l-2-2l2-2c-2-1-4-3-4-4z" fill="currentColor" opacity="0.9"/>
+                <!-- Wing -->
+                <path d="M14 7c2-1 5 0 6 2c-1 0-3 0-4 1"/>
+                <!-- Horn -->
+                <path d="M9 5l-1-3l2 2"/>
+                <!-- Eye -->
+                <circle cx="8" cy="10" r="1" fill="var(--bg-base)"/>
+                <!-- Nostril steam -->
+                <path d="M4 14l-1 1m1-2l-2 1" opacity="0.5"/>
+            </svg>
+        </a>
+        <div class="nav-icons">
+            <a href="#world" class="nav-icon" title="The World">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                <span class="nav-label">World</span>
+            </a>
+            <a href="#history" class="nav-icon" title="History">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+                <span class="nav-label">History</span>
+            </a>
+            <a href="#races" class="nav-icon" title="Races">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <span class="nav-label">Races</span>
+            </a>
+            <a href="character-sheet" class="nav-icon" title="Character Sheet">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                <span class="nav-label">Sheet</span>
+            </a>
+            <a href="dm-session" class="nav-icon" title="DM Session">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                <span class="nav-label">DM</span>
+            </a>
+            <a href="#wiki" class="nav-icon" title="Wiki">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+                <span class="nav-label">Wiki</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <h1 class="hero-title">Aedelore</h1>
+                <p class="hero-subtitle">A World Born from Dragons</p>
+                <p class="hero-text">
+                    In the timeless void, the Black Sun gave birth to the Dragon Aspects. 
+                    They discovered a desolate world and shaped it into Aedelore—a realm where seven races walk different paths, 
+                    where ancient magic flows through the land, and where the echoes of war still shape the present.
+                </p>
+            </div>
+            <div class="scroll-indicator">
+                ↓ Scroll to explore
+            </div>
+        </section>
+
+        <!-- The World Section -->
+        <section id="world" class="content-section">
+            <div class="section-inner">
+                <div class="section-number">Chapter I</div>
+                <h2 class="section-title">The World</h2>
+                <div class="decorative-line"></div>
+                
+                <div class="two-column">
+                    <div class="column-content">
+                        <h3>The Dragon Gods</h3>
+                        <p>
+                            Aedelore was shaped by the Dragon Aspects in the wake of the Black Sun's birth. 
+                            Taninsam brought fire and creation. Tiamat embodied earth and stability. 
+                            Leviathan commanded air and storms. Tanin'iver offered water and healing. 
+                            Tatsu governed souls and rebirth. Tohu wielded magic and transformation.
+                        </p>
+                        <p>
+                            Their influence echoes through every corner of the realm, from the highest peaks 
+                            to the deepest oceans. The races they created still honor them through various creeds and faiths.
+                        </p>
+
+                        <h3>Lands & Cities</h3>
+                        <p>
+                            Tyralia stands as the grand capital of humanity. Lorenzia shimmers with High Elven magic. 
+                            The dwarven fortress of Amber's Call endures in frozen mountains. Moon Elves guard their 
+                            secrets in Feldale. The Sunken City lies in ruin beneath the waves.
+                        </p>
+                    </div>
+                    <div class="column-content">
+                        <h3>The Floating Isles</h3>
+                        <p>
+                            During the First War, the very fabric of reality tore. Entire landmasses were ripped 
+                            from the ground and suspended in the sky. These Floating Isles remain—monuments to the 
+                            devastating power unleashed when the races turned against each other.
+                        </p>
+
+                        <h3>Faith & Power</h3>
+                        <p>
+                            Fourteen distinct religions guide the faithful. The Flame of Taninsam burns in temples 
+                            of renewal. The Silent Hunt follows the Groove Guardian through wild places. 
+                            The Shattered Path offers solace to outcasts. Each creed shapes how its followers 
+                            understand their place in Aedelore.
+                        </p>
+
+                        <div class="quote-block">
+                            "From the void came fire, from fire came life, and from life came Aedelore."
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-display">
+                    <div class="stat-item">
+                        <div class="stat-number">40+</div>
+                        <div class="stat-label">Locations</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">7</div>
+                        <div class="stat-label">Races</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">6</div>
+                        <div class="stat-label">Paths</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">14</div>
+                        <div class="stat-label">Religions</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- History Section -->
+        <section id="history" class="content-section" style="background: rgba(30, 41, 59, 0.2);">
+            <div class="section-inner">
+                <div class="section-number">Chapter II</div>
+                <h2 class="section-title">Ages Past</h2>
+                <div class="decorative-line"></div>
+
+                <div class="column-content" style="max-width: 800px; margin: 0 auto;">
+                    <h3>The Dawn of the 4th Birth</h3>
+                    <p>
+                        The Black Sun gathered energy since the dawn of existence. When it erupted, 
+                        it gave birth to the Dragon Aspects—primordial beings who discovered a desolate world 
+                        and shaped it into Aedelore.
+                    </p>
+
+                    <h3>The First War</h3>
+                    <p>
+                        Harmony was fleeting. Centuries into the Age of Magic, the races turned against each other. 
+                        The war that followed shattered continents, created the Floating Isles, and nearly destroyed 
+                        the world the Dragon Gods had built.
+                    </p>
+
+                    <h3>The Age of Silence</h3>
+                    <p>
+                        In the aftermath, magic faded. The world grew quiet. It was during this time that Halflings 
+                        emerged, a race born without the touch of the Dragon Gods. Cities were built, alliances formed, 
+                        and life continued in a world where magic was but a whisper.
+                    </p>
+
+                    <h3>The Rising Threat</h3>
+                    <p>
+                        Orcs and Trolls, hardened by centuries of survival, began organizing. The Siege of Rivermount 
+                        tested the elven defenses. Dark forces stirred. Ancient knowledge resurfaced. 
+                        This is Aedelore as it stands today—a world shaped by its past, living in an uncertain present.
+                    </p>
+                    
+                    <p style="margin-top: 40px; text-align: center; font-size: 1.2rem;">
+                        Want to dive into the full story? Start with the
+                        <a href="https://wiki.aedelore.nu/books/miscs-of-aedelore/page/first-time-guide"
+                           style="color: var(--accent-gold); text-decoration: none; border-bottom: 2px solid var(--accent-gold);">
+                            First Time Guide
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Races Section -->
+        <section id="races" class="content-section">
+            <div class="section-inner">
+                <div class="section-number">Chapter III</div>
+                <h2 class="section-title">The Seven Races</h2>
+                <div class="decorative-line"></div>
+
+                <div class="info-grid">
+                    <a href="https://wiki.aedelore.nu/books/aedelore/page/humans" class="info-card">
+                        <h4>Humans</h4>
+                        <p>
+                            Versatile and adaptable, humans populate diverse regions. They built grand capitals
+                            like Tyralia and East Trade, forming kingdoms through determination and ingenuity.
+                        </p>
+                    </a>
+                    <a href="https://wiki.aedelore.nu/books/aedelore/page/dwarves" class="info-card">
+                        <h4>Dwarves</h4>
+                        <p>
+                            Stout and resilient craftsmen, dwelling in mountain halls and underground cities.
+                            Their mastery of stone and metal is unmatched throughout Aedelore.
+                        </p>
+                    </a>
+                    <a href="https://wiki.aedelore.nu/books/aedelore/page/high-elves" class="info-card">
+                        <h4>High Elves</h4>
+                        <p>
+                            Gifted with ancient wisdom and magical prowess, High Elves channel the arcane arts
+                            from their shimmering city of Lorenzia.
+                        </p>
+                    </a>
+                    <a href="https://wiki.aedelore.nu/books/aedelore/page/moon-elves" class="info-card">
+                        <h4>Moon Elves</h4>
+                        <p>
+                            Attuned to nature and lunar cycles, these enigmatic beings guard their secrets
+                            in secluded settlements deep within ancient forests.
+                        </p>
+                    </a>
+                    <a href="https://wiki.aedelore.nu/books/aedelore/page/halflings" class="info-card">
+                        <h4>Halflings</h4>
+                        <p>
+                            Small in stature but strong in spirit, Halflings emerged during the Age of Silence.
+                            They find joy in simple pleasures and communal living.
+                        </p>
+                    </a>
+                    <a href="https://wiki.aedelore.nu/books/aedelore/page/orcs" class="info-card">
+                        <h4>Orcs</h4>
+                        <p>
+                            Fierce and strong, orcs survive in harsh lands through clan bonds and warrior traditions.
+                            Their strength and endurance are legendary.
+                        </p>
+                    </a>
+                    <a href="https://wiki.aedelore.nu/books/aedelore/page/trolls" class="info-card">
+                        <h4>Trolls</h4>
+                        <p>
+                            Ancient beings with shamanistic traditions, trolls follow the Path of the Ancestors
+                            and commune with the Forgotten Loa spirits.
+                        </p>
+                    </a>
+                </div>
+
+                <div style="margin-top: 80px;">
+                    <h3 style="color: var(--primary-blue); font-size: 2rem; margin-bottom: 30px;">Paths of Power</h3>
+                    <div class="info-grid">
+                        <a href="https://wiki.aedelore.nu/books/aedelore/page/warriors" class="info-card">
+                            <h4>Warriors</h4>
+                            <p>Stalwart defenders clad in armor, masters of blade and shield.</p>
+                        </a>
+                        <a href="https://wiki.aedelore.nu/books/aedelore/page/mage" class="info-card">
+                            <h4>Mages</h4>
+                            <p>Wielders of arcane power, manipulating cosmic energies through ancient knowledge.</p>
+                        </a>
+                        <a href="https://wiki.aedelore.nu/books/aedelore/page/druid" class="info-card">
+                            <h4>Druids</h4>
+                            <p>Nature's priests, communing with the land and its primal forces.</p>
+                        </a>
+                        <a href="https://wiki.aedelore.nu/books/aedelore/page/hunters" class="info-card">
+                            <h4>Hunters</h4>
+                            <p>Masters of wilderness survival, tracking prey through any terrain.</p>
+                        </a>
+                        <a href="https://wiki.aedelore.nu/books/aedelore/page/thiefrogue" class="info-card">
+                            <h4>Thieves</h4>
+                            <p>Shadows incarnate, moving unseen through darkness and deception.</p>
+                        </a>
+                        <a href="https://wiki.aedelore.nu/books/aedelore/page/outcast" class="info-card">
+                            <h4>Outcasts</h4>
+                            <p>Those who walk no prescribed path, forging their own way through the world.</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section id="wiki" class="cta-section">
+            <div class="section-number">The Journey Continues</div>
+            <h2 class="section-title" style="text-align: center;">Explore the Wiki</h2>
+            <p style="color: var(--text-secondary); font-size: 1.2rem; max-width: 600px; margin: 30px auto 50px; line-height: 1.8;">
+                Detailed lore, character information, city descriptions, and the complete history of Aedelore
+                can be found in the comprehensive wiki.
+            </p>
+            <a href="https://wiki.aedelore.nu" class="cta-button">Visit Wiki</a>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2025 World of Aedelore</p>
+            <p style="margin-top: 10px;">
+                <a href="https://wiki.aedelore.nu">Wiki</a> ·
+                <a href="https://wiki.aedelore.nu/books">Books</a> ·
+                <a href="https://wiki.aedelore.nu/shelves">Shelves</a>
+            </p>
+        </footer>
+    </main>
+
+    <!-- Privacy Banner -->
+    <div id="privacy-banner" class="privacy-banner">
+        <div class="privacy-banner-content">
+            <div class="privacy-banner-text">
+                <div class="privacy-banner-title">Privacy & Analytics</div>
+                <div class="privacy-banner-description">
+                    We use privacy-friendly analytics to understand how Aedelore is used. No cookies, no personal data, fully anonymous.
+                    <a class="privacy-banner-link" onclick="AedelorePrivacy.showPrivacyDetails()">Learn more</a>
+                </div>
+            </div>
+            <div class="privacy-banner-actions">
+                <button class="privacy-btn privacy-btn-secondary" onclick="AedelorePrivacy.declineAnalytics()">Decline</button>
+                <button class="privacy-btn privacy-btn-primary" onclick="AedelorePrivacy.acceptAnalytics()">Accept</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Details Modal -->
+    <div id="privacy-details-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Privacy Information</h2>
+                <button class="modal-close" onclick="AedelorePrivacy.hidePrivacyDetails()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="privacy-status-row">
+                    <span class="privacy-status-label">Anonymous Analytics</span>
+                    <div class="privacy-status-value">
+                        <span id="privacy-analytics-status" class="privacy-status-disabled">Disabled</span>
+                        <button id="privacy-analytics-toggle" class="privacy-btn privacy-btn-primary" onclick="AedelorePrivacy.toggleAnalytics()">Enable</button>
+                    </div>
+                </div>
+
+                <div class="privacy-details-section">
+                    <h4>What We Collect</h4>
+                    <ul>
+                        <li>Page views and navigation patterns</li>
+                        <li>Referrer (where you came from)</li>
+                        <li>Browser type and screen size</li>
+                        <li>Country (from anonymized IP)</li>
+                    </ul>
+                </div>
+
+                <div class="privacy-details-section">
+                    <h4>What We Do NOT Collect</h4>
+                    <ul>
+                        <li>No cookies or tracking pixels</li>
+                        <li>No personal information</li>
+                        <li>No IP addresses stored</li>
+                        <li>No connection to your account</li>
+                    </ul>
+                </div>
+
+                <div class="privacy-details-section">
+                    <h4>Why We Collect This</h4>
+                    <p>To understand how Aedelore is used and improve the tools for the community. All data is aggregated and anonymous.</p>
+                </div>
+
+                <div class="privacy-details-section">
+                    <h4>Data Deletion</h4>
+                    <p>Since analytics are completely anonymous, we cannot identify or delete individual user data. You can disable analytics at any time using the toggle above.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/privacy.js"></script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+================================================================================
+                           AEDELORE - WEAPONS
+================================================================================
+
+================================================================================
+SIMPLE MELEE WEAPONS
+================================================================================
+
+Name            Type                Ability      Atk    Damage   Range   Break
+--------------------------------------------------------------------------------
+Club            Simple Melee        Strength     +1     1d4      1       1
+Dagger          Simple Melee        Dexterity    +1     1d4      1       0
+Greatclub       Simple Melee        Strength     +2     1d8      2       3
+Handaxe         Simple Melee        Strength     +1     1d6      1       2
+Javelin         Simple Melee/Ranged Strength     +1     1d6      3/10    1
+Light Hammer    Simple Melee        Strength     +1     1d4      1       2
+Mace            Simple Melee        Strength     +1     1d6      1       2
+Quarterstaff    Simple Melee        Strength     +1     1d6      3       1
+Sickle          Simple Melee        Strength     +1     1d4      1       0
+Spear           Simple Melee        Strength     +1     1d6      3       1
+
+================================================================================
+MARTIAL MELEE WEAPONS
+================================================================================
+
+Name            Type                    Ability      Atk    Damage   Range   Break
+----------------------------------------------------------------------------------
+Battleaxe       Martial Melee           Strength     +2     1d8      1       3
+Flail           Martial Melee           Strength     +2     1d8      1       2
+Glaive          Martial Melee (Reach)   Strength     +2     1d10     3       2
+Greataxe        Martial Melee           Strength     +3     1d12     2       5
+Greatsword      Martial Melee           Strength     +3     2d6      2       3
+Halberd         Martial Melee (Reach)   Strength     +2     1d10     3       3
+Lance           Martial Melee (Reach)   Strength     +2     1d12     3       2
+Longsword       Martial Melee           Strength     +2     1d8      2       2
+Maul            Martial Melee           Strength     +3     2d6      2       5
+Morningstar     Martial Melee           Strength     +2     1d8      1       3
+Pike            Martial Melee (Reach)   Strength     +2     1d10     3       2
+Rapier          Martial Melee           Dexterity    +2     1d8      2       0
+Scimitar        Martial Melee           Dexterity    +2     1d6      1       1
+Shortsword      Martial Melee           Dexterity    +2     1d6      1       1
+Trident         Martial Melee           Strength     +1     1d6      3       1
+War Pick        Martial Melee           Strength     +2     1d8      1       4
+Warhammer       Martial Melee           Strength     +2     1d8      1       4
+Whip            Martial Melee (Reach)   Dexterity    +1     1d4      3       0
+
+================================================================================
+RANGED WEAPONS
+================================================================================
+
+Name            Type      Ability      Atk    Damage   Range    Break
+----------------------------------------------------------------------
+Crossbow Light  Ranged    Dexterity    +2     1d8      20/40    0
+Crossbow Hand   Ranged    Dexterity    +2     1d6      10/30    0
+Crossbow Heavy  Ranged    Strength     +2     1d10     30/60    1
+Dart            Ranged    Dexterity    +1     1d4      5/15     0
+Shortbow        Ranged    Dexterity    +2     1d6      20/40    0
+Sling           Ranged    Dexterity    +1     1d4      10/30    0
+Blowgun         Ranged    Dexterity    +1     1        8/24     0
+Longbow         Ranged    Dexterity    +2     1d8      40/80    0
+Net             Ranged    Dexterity    +0     -        2/5      0
+
+================================================================================
+FANTASY WEAPONS
+================================================================================
+
+Name            Type                    Ability          Atk    Damage   Range   Break
+--------------------------------------------------------------------------------------
+Falchion        Fantasy Melee           Strength         +2     1d8      1       2
+Claymore        Fantasy Melee           Strength         +3     2d6      2       4
+Katana          Fantasy Melee           Strength/Dex     +2     1d10     2       2
+Guisarme        Fantasy Melee (Reach)   Strength         +2     1d10     3       3
+Scythe          Fantasy Melee           Strength         +1     2d4      2       1
+Throwing Axe    Fantasy Ranged          Dexterity        +2     1d6      5/15    1
+Spiked Shield   Fantasy Melee           Strength         +1     1d6      1       1
+Chakram         Fantasy Ranged          Dexterity        +2     1d6      10/30   0
+Flamberge       Fantasy Melee           Strength         +2     2d6      2       3
+Bone Club       Fantasy Melee           Strength         +1     1d6      1       1
+
+================================================================================
+AMMUNITION
+================================================================================
+
+Item                      Cost
+------------------------------
+Arrows (20-50)            1 gold
+Bolts (20-50)             1 gold
+Blowgun Needles (20-50)   1 gold
+Sling Bullets (20)        4 copper
+
+================================================================================
+LEGEND
+================================================================================
+
+Atk     = Attack Bonus (added to attack roll)
+Damage  = Damage dice rolled on hit
+Range   = Melee reach or Ranged short/long range
+Break   = Weapon breaks if this many 1s are rolled on attack
+
+Ability = Which attribute is used for attack rolls:
+  - Strength: Melee weapons, heavy ranged
+  - Dexterity: Finesse weapons, light ranged
+  - Strength/Dex: Player chooses
+
+(Reach) = Can attack targets up to 3 spaces away

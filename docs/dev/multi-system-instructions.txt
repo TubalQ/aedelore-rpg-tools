@@ -1,0 +1,509 @@
+# INSTRUKTION: Multi-System Karaktärsblad för Aedelore
+
+## UPPGIFT
+Implementera stöd för flera rollspelssystem i det befintliga Aedelore-karaktärsbladet. 
+Användaren ska kunna välja systemlayout via dropdown som dynamiskt ändrar attribut, skills, och terminologi.
+
+## NUVARANDE IMPLEMENTATION
+URL: https://aedelore.nu/character-sheet
+Teknologi: HTML/CSS/JavaScript med localStorage och cloud-sync
+
+## SYSTEMEN ATT IMPLEMENTERA
+
+---
+
+### 1. AEDELORE (befintligt system - behåll som default)
+Dokumentation: https://wiki.aedelore.nu/books/miscs-of-aedelore/page/rules
+
+---
+
+### 2. D&D 5th Edition (5e)
+
+**Officiella regler (SRD):**
+- SRD 5.2 PDF: https://media.dndbeyond.com/compendium-images/srd/5.2/SRD_CC_v5.2.pdf
+- SRD 5.1 PDF: https://media.wizards.com/2016/downloads/DND/SRD-OGL_V5.1.pdf
+- Online SRD: https://5e.d20srd.org/
+- Open5e: https://open5e.com/
+- D&D Beyond SRD: https://www.dndbeyond.com/srd
+
+**Attribut (6 st):**
+Strength, Dexterity, Constitution, Intelligence, Wisdom, Charisma
+
+**Skills (18 st) med attributkoppling:**
+- STR: Athletics
+- DEX: Acrobatics, Sleight of Hand, Stealth
+- CON: (inga skills)
+- INT: Arcana, History, Investigation, Nature, Religion
+- WIS: Animal Handling, Insight, Medicine, Perception, Survival
+- CHA: Deception, Intimidation, Performance, Persuasion
+
+**Övriga fält:**
+- HP (Current/Max), Temporary HP
+- Armor Class (AC), Initiative, Speed
+- Proficiency Bonus, Passive Perception
+- Hit Dice, Death Saves (3 successes/3 failures)
+- Saving Throws (checkboxes per attribut för proficiency)
+- Spell Slots (1st-9th level), Spell DC, Spell Attack Modifier
+- Inspiration (checkbox)
+- Conditions: Blinded, Charmed, Deafened, Frightened, Grappled, Incapacitated, Invisible, Paralyzed, Petrified, Poisoned, Prone, Restrained, Stunned, Unconscious, Exhaustion (1-6)
+
+**Tärningssystem:** d20 + modifier vs DC
+
+---
+
+### 3. PATHFINDER 2nd Edition (PF2e)
+
+**Officiella regler:**
+- Archives of Nethys (officiell SRD): https://2e.aonprd.com/
+- Skills: https://2e.aonprd.com/Skills.aspx
+- Rules: https://2e.aonprd.com/Rules.aspx
+- Remaster Core Preview PDF: https://downloads.paizo.com/RemasterCorePreview.pdf
+- Paizo Get Started: https://paizo.com/pathfinder/getstarted
+
+**Attribut (6 st):**
+Strength, Dexterity, Constitution, Intelligence, Wisdom, Charisma
+
+**Skills (17 + Lore):**
+- STR: Athletics
+- DEX: Acrobatics, Stealth, Thievery
+- INT: Arcana, Crafting, Lore (freeform speciality), Occultism, Society
+- WIS: Medicine, Nature, Religion, Survival
+- CHA: Deception, Diplomacy, Intimidation, Performance
+
+**Proficiency Ranks:** Untrained (+0), Trained (+2+level), Expert (+4+level), Master (+6+level), Legendary (+8+level)
+
+**Övriga fält:**
+- HP, AC, Perception (separat stat, inte skill)
+- Speed, Hero Points (0-3)
+- Class DC, Spell DC, Spell Attack
+- Saving Throws: Fortitude (CON), Reflex (DEX), Will (WIS)
+- Resistances, Immunities, Weaknesses
+- Conditions (egen lista)
+
+**Tärningssystem:** d20 + modifier vs DC (degrees of success: crit fail, fail, success, crit success)
+
+---
+
+### 4. STORYTELLER SYSTEM (Classic World of Darkness - Vampire: The Masquerade, Werewolf, Mage etc.)
+
+**Dokumentation:**
+- White Wolf Wiki Storyteller: https://whitewolf.fandom.com/wiki/Storyteller_System
+- Attributes: http://wodpedia.wikidot.com/attributes
+- Character sheets: http://www.technovampire.com/whitewolf/
+
+**Attribut (9 st) - 3x3 matris:**
+
+|           | Physical  | Social       | Mental       |
+|-----------|-----------|--------------|--------------|
+| Power     | Strength  | Charisma     | Intelligence |
+| Finesse   | Dexterity | Manipulation | Wits         |
+| Resistance| Stamina   | Appearance   | Perception   |
+
+**Abilities (30 st) i tre kategorier:**
+
+**Talents (10):**
+Alertness, Athletics, Awareness, Brawl, Empathy, Expression, Intimidation, Leadership, Streetwise, Subterfuge
+
+**Skills (10):**
+Animal Ken, Crafts, Drive, Etiquette, Firearms, Larceny, Melee, Performance, Stealth, Survival
+
+**Knowledges (10):**
+Academics, Computer, Finance, Investigation, Law, Medicine, Occult, Politics, Science, Technology
+
+**Övriga fält:**
+- Willpower (1-10, current/permanent)
+- Health Levels: Bruised, Hurt (-1), Injured (-1), Wounded (-2), Mauled (-2), Crippled (-5), Incapacitated
+- Blood Pool / Gnosis / Quintessence (beroende på splat)
+- Virtues: Conscience/Conviction, Self-Control/Instinct, Courage (1-5)
+- Humanity / Path (1-10)
+- Backgrounds: Allies, Contacts, Fame, Generation, Herd, Influence, Mentor, Resources, Retainers, Status
+
+**Tärningssystem:** Dice pool (Attribute + Ability) med d10, difficulty 6-9, successes on difficulty+
+
+---
+
+### 5. CHRONICLES OF DARKNESS (Storytelling System 2.0 / New World of Darkness)
+
+**Dokumentation:**
+- White Wolf Wiki: https://whitewolf.fandom.com/wiki/Storytelling_System
+- Skills: https://whitewolf.fandom.com/wiki/Skill
+- Free Rules Update PDF: https://www.drivethrurpg.com/product/114078/World-of-Darkness-GodMachine-Rules-Update (gratis)
+- DriveThruRPG: https://www.drivethrurpg.com/en/product/168428/chronicles-of-darkness
+
+**Attribut (9 st) - 3x3 matris:**
+
+|          | Power        | Finesse      | Resistance |
+|----------|--------------|--------------|------------|
+| Mental   | Intelligence | Wits         | Resolve    |
+| Physical | Strength     | Dexterity    | Stamina    |
+| Social   | Presence     | Manipulation | Composure  |
+
+**Skills (24 st) i tre kategorier:**
+
+**Mental (8):**
+Academics, Computer, Crafts, Investigation, Medicine, Occult, Politics, Science
+
+**Physical (8):**
+Athletics, Brawl, Drive, Firearms, Larceny, Stealth, Survival, Weaponry
+
+**Social (8):**
+Animal Ken, Empathy, Expression, Intimidation, Persuasion, Socialize, Streetwise, Subterfuge
+
+**Derived Stats (automatiskt beräknade):**
+- Willpower = Resolve + Composure
+- Health = Stamina + Size (default Size 5)
+- Defense = lower of (Wits or Dexterity) + Athletics
+- Initiative = Dexterity + Composure
+- Speed = Strength + Dexterity + 5
+
+**Övriga fält:**
+- Integrity (1-10) med Breaking Points
+- Virtue & Vice (freeform anchors)
+- Conditions (freeform lista)
+- Tilts (combat conditions)
+- Beats (0-4) → Experiences
+- Size (default 5)
+
+**Tärningssystem:** Dice pool med d10, target number 8+, 10 explodes (roll again)
+
+---
+
+## IMPLEMENTATION GUIDELINES
+
+### Datastruktur (förslag)
+```javascript
+const SYSTEM_CONFIGS = {
+  aedelore: {
+    name: "Aedelore",
+    dice: { primary: "d10", pool: true },
+    attributes: [...],
+    skills: {...},
+    derived: {...},
+    conditions: [...],
+    resources: {...}
+  },
+  dnd5e: { ... },
+  pathfinder2e: { ... },
+  storyteller: { ... },
+  cod: { ... }
+};
+```
+
+### UI-komponenter
+1. System-selector dropdown i header (sparas i localStorage)
+2. Dynamiska attribut-sektioner baserat på valt system
+3. Skills grupperade efter attribut/kategori per system
+4. System-specifika derived stats med auto-beräkning
+5. Anpassad dice roller per system
+6. Import/Export ska inkludera system-typ
+
+### Prioriteringsordning
+1. Behåll Aedelore som fullt fungerande default
+2. D&D 5e (störst community)
+3. Chronicles of Darkness
+4. Storyteller (Classic WoD)
+5. Pathfinder 2e
+
+### Kompatibilitet
+- Alla befintliga Aedelore-saves ska fortsätta fungera
+- System-typ ska sparas med karaktärsdata
+- Varning vid byte av system om data kan gå förlorad
+
+~3200 tokens använt för denna sökning och sammanställning.lägg till att när man öppnar character-sheet.html ska man först få en prompt att välja de olika setting. endast valet "Aedelore" ska visa sidan exakt som den redan är. de andra ska bara ge ett karaktärsblad i samma stil som det redan är, fast med den unika settingen som för just den settingen man väljer.15:59Reformulerade instruktion för systemval vid öppning av karaktärsblad.The user wants me to add to the instruction that when opening character-sheet.html, the user should first get a prompt to choose between the different settings/systems. Only "Aedelore" should show the page exactly as it already is. The other options should give a character sheet in the same style, but with the unique settings for that particular system.
+Let me update the instruction to include this.# INSTRUKTION: Multi-System Karaktärsblad för Aedelore
+
+## UPPGIFT
+Implementera stöd för flera rollspelssystem i det befintliga Aedelore-karaktärsbladet. 
+Vid första besök ska användaren mötas av en system-väljare innan karaktärsbladet visas.
+Endast "Aedelore" visar sidan exakt som den är idag - övriga system får samma visuella stil men med systemspecifika attribut, skills och fält.
+
+## NUVARANDE IMPLEMENTATION
+URL: https://aedelore.nu/character-sheet
+Teknologi: HTML/CSS/JavaScript med localStorage och cloud-sync
+
+---
+
+## STARTUP FLOW
+
+### Vid sidladdning:
+1. Kontrollera om system redan är valt (localStorage)
+2. Om INTE valt → Visa system-väljare modal/overlay
+3. Om valt → Ladda karaktärsbladet för det systemet
+
+### System-väljare (modal vid start):
+┌─────────────────────────────────────────┐
+│         Välj Rollspelssystem            │
+│                                         │
+│  ┌─────────────────────────────────┐   │
+│  │  🎲 Aedelore                    │   │
+│  │  Fantasy RPG med D10-system     │   │
+│  └─────────────────────────────────┘   │
+│                                         │
+│  ┌─────────────────────────────────┐   │
+│  │  🐉 D&D 5th Edition             │   │
+│  │  Dungeons & Dragons d20-system  │   │
+│  └─────────────────────────────────┘   │
+│                                         │
+│  ┌─────────────────────────────────┐   │
+│  │  ⚔️ Pathfinder 2e               │   │
+│  │  Paizo's d20-system             │   │
+│  └─────────────────────────────────┘   │
+│                                         │
+│  ┌─────────────────────────────────┐   │
+│  │  🧛 Storyteller (Classic WoD)   │   │
+│  │  Vampire, Werewolf, Mage etc.   │   │
+│  └─────────────────────────────────┘   │
+│                                         │
+│  ┌─────────────────────────────────┐   │
+│  │  🌙 Chronicles of Darkness      │   │
+│  │  New World of Darkness 2.0      │   │
+│  └─────────────────────────────────┘   │
+│                                         │
+│         [ ] Kom ihåg mitt val           │
+└─────────────────────────────────────────┘
+
+### Beteende per val:
+- **Aedelore**: Visar EXAKT nuvarande sida utan ändringar
+- **Övriga system**: Samma CSS/styling, men:
+  - Attribut-sektion byts ut mot systemets attribut
+  - Skills byts ut mot systemets skills
+  - Combat/spells/inventory anpassas
+  - Dice roller anpassas för systemet
+
+### System-byte:
+- Lägg till "Byt system" i menyn (bredvid Save/Load)
+- Varning om osparad data vid byte
+- Möjlighet att skapa ny karaktär eller behålla kompatibla fält
+
+---
+
+## SYSTEMEN ATT IMPLEMENTERA
+
+### 1. AEDELORE (befintligt system - EXAKT som nu)
+Dokumentation: https://wiki.aedelore.nu/books/miscs-of-aedelore/page/rules
+
+**VIKTIGT:** När Aedelore väljs ska INGEN kod ändras - sidan ska vara 100% identisk med nuvarande implementation.
+
+---
+
+### 2. D&D 5th Edition (5e)
+
+**Officiella regler (SRD):**
+- SRD 5.2 PDF: https://media.dndbeyond.com/compendium-images/srd/5.2/SRD_CC_v5.2.pdf
+- SRD 5.1 PDF: https://media.wizards.com/2016/downloads/DND/SRD-OGL_V5.1.pdf
+- Online SRD: https://5e.d20srd.org/
+- Open5e: https://open5e.com/
+- D&D Beyond SRD: https://www.dndbeyond.com/srd
+
+**Attribut (6 st):**
+Strength, Dexterity, Constitution, Intelligence, Wisdom, Charisma
+
+**Skills (18 st) med attributkoppling:**
+- STR: Athletics
+- DEX: Acrobatics, Sleight of Hand, Stealth
+- CON: (inga skills)
+- INT: Arcana, History, Investigation, Nature, Religion
+- WIS: Animal Handling, Insight, Medicine, Perception, Survival
+- CHA: Deception, Intimidation, Performance, Persuasion
+
+**Övriga fält:**
+- HP (Current/Max), Temporary HP
+- Armor Class (AC), Initiative, Speed
+- Proficiency Bonus, Passive Perception
+- Hit Dice, Death Saves (3 successes/3 failures)
+- Saving Throws (checkboxes per attribut för proficiency)
+- Spell Slots (1st-9th level), Spell DC, Spell Attack Modifier
+- Inspiration (checkbox)
+- Conditions: Blinded, Charmed, Deafened, Frightened, Grappled, Incapacitated, Invisible, Paralyzed, Petrified, Poisoned, Prone, Restrained, Stunned, Unconscious, Exhaustion (1-6)
+
+**Tärningssystem:** d20 + modifier vs DC
+
+---
+
+### 3. PATHFINDER 2nd Edition (PF2e)
+
+**Officiella regler:**
+- Archives of Nethys (officiell SRD): https://2e.aonprd.com/
+- Skills: https://2e.aonprd.com/Skills.aspx
+- Rules: https://2e.aonprd.com/Rules.aspx
+- Remaster Core Preview PDF: https://downloads.paizo.com/RemasterCorePreview.pdf
+- Paizo Get Started: https://paizo.com/pathfinder/getstarted
+
+**Attribut (6 st):**
+Strength, Dexterity, Constitution, Intelligence, Wisdom, Charisma
+
+**Skills (17 + Lore):**
+- STR: Athletics
+- DEX: Acrobatics, Stealth, Thievery
+- INT: Arcana, Crafting, Lore (freeform speciality), Occultism, Society
+- WIS: Medicine, Nature, Religion, Survival
+- CHA: Deception, Diplomacy, Intimidation, Performance
+
+**Proficiency Ranks:** Untrained (+0), Trained (+2+level), Expert (+4+level), Master (+6+level), Legendary (+8+level)
+
+**Övriga fält:**
+- HP, AC, Perception (separat stat, inte skill)
+- Speed, Hero Points (0-3)
+- Class DC, Spell DC, Spell Attack
+- Saving Throws: Fortitude (CON), Reflex (DEX), Will (WIS)
+- Resistances, Immunities, Weaknesses
+
+**Tärningssystem:** d20 + modifier vs DC (degrees of success: crit fail, fail, success, crit success)
+
+---
+
+### 4. STORYTELLER SYSTEM (Classic World of Darkness)
+
+**Dokumentation:**
+- White Wolf Wiki Storyteller: https://whitewolf.fandom.com/wiki/Storyteller_System
+- Attributes: http://wodpedia.wikidot.com/attributes
+- Character sheets: http://www.technovampire.com/whitewolf/
+
+**Attribut (9 st) - 3x3 matris:**
+
+|           | Physical  | Social       | Mental       |
+|-----------|-----------|--------------|--------------|
+| Power     | Strength  | Charisma     | Intelligence |
+| Finesse   | Dexterity | Manipulation | Wits         |
+| Resistance| Stamina   | Appearance   | Perception   |
+
+**Abilities (30 st) i tre kategorier:**
+
+**Talents (10):**
+Alertness, Athletics, Awareness, Brawl, Empathy, Expression, Intimidation, Leadership, Streetwise, Subterfuge
+
+**Skills (10):**
+Animal Ken, Crafts, Drive, Etiquette, Firearms, Larceny, Melee, Performance, Stealth, Survival
+
+**Knowledges (10):**
+Academics, Computer, Finance, Investigation, Law, Medicine, Occult, Politics, Science, Technology
+
+**Övriga fält:**
+- Willpower (1-10, current/permanent)
+- Health Levels: Bruised, Hurt (-1), Injured (-1), Wounded (-2), Mauled (-2), Crippled (-5), Incapacitated
+- Blood Pool / Gnosis / Quintessence (beroende på splat)
+- Virtues: Conscience/Conviction, Self-Control/Instinct, Courage (1-5)
+- Humanity / Path (1-10)
+- Backgrounds: Allies, Contacts, Fame, Generation, Herd, Influence, Mentor, Resources, Retainers, Status
+
+**Tärningssystem:** Dice pool (Attribute + Ability) med d10, difficulty 6-9, successes on difficulty+
+
+---
+
+### 5. CHRONICLES OF DARKNESS (Storytelling System 2.0)
+
+**Dokumentation:**
+- White Wolf Wiki: https://whitewolf.fandom.com/wiki/Storytelling_System
+- Skills: https://whitewolf.fandom.com/wiki/Skill
+- Free Rules Update PDF: https://www.drivethrurpg.com/product/114078/World-of-Darkness-GodMachine-Rules-Update
+- DriveThruRPG: https://www.drivethrurpg.com/en/product/168428/chronicles-of-darkness
+
+**Attribut (9 st) - 3x3 matris:**
+
+|          | Power        | Finesse      | Resistance |
+|----------|--------------|--------------|------------|
+| Mental   | Intelligence | Wits         | Resolve    |
+| Physical | Strength     | Dexterity    | Stamina    |
+| Social   | Presence     | Manipulation | Composure  |
+
+**Skills (24 st) i tre kategorier:**
+
+**Mental (8):**
+Academics, Computer, Crafts, Investigation, Medicine, Occult, Politics, Science
+
+**Physical (8):**
+Athletics, Brawl, Drive, Firearms, Larceny, Stealth, Survival, Weaponry
+
+**Social (8):**
+Animal Ken, Empathy, Expression, Intimidation, Persuasion, Socialize, Streetwise, Subterfuge
+
+**Derived Stats (automatiskt beräknade):**
+- Willpower = Resolve + Composure
+- Health = Stamina + Size (default Size 5)
+- Defense = lower of (Wits or Dexterity) + Athletics
+- Initiative = Dexterity + Composure
+- Speed = Strength + Dexterity + 5
+
+**Övriga fält:**
+- Integrity (1-10) med Breaking Points
+- Virtue & Vice (freeform anchors)
+- Conditions, Tilts
+- Beats (0-4) → Experiences
+- Size (default 5)
+
+**Tärningssystem:** Dice pool med d10, target number 8+, 10 explodes
+
+---
+
+## IMPLEMENTATION GUIDELINES
+
+### Filstruktur (förslag)
+character-sheet.html          # Huvudfil med system-väljare
+css/
+character-sheet.css         # Gemensam styling (behåll exakt)
+js/
+system-selector.js          # Startup modal logik
+systems/
+aedelore.js               # Aedelore-specifik logik (nuvarande)
+dnd5e.js                  # D&D 5e layout och logik
+pathfinder2e.js           # PF2e layout och logik
+storyteller.js            # Classic WoD layout och logik
+cod.js                    # Chronicles of Darkness layout och logik
+system-config.js            # Konfiguration för alla system
+
+### Startup-logik (pseudokod)
+```javascript
+document.addEventListener('DOMContentLoaded', () => {
+  const savedSystem = localStorage.getItem('selectedSystem');
+  
+  if (!savedSystem) {
+    showSystemSelector();
+  } else {
+    loadSystem(savedSystem);
+  }
+});
+
+function showSystemSelector() {
+  // Visa modal overlay
+  // Dölj karaktärsbladet
+  // Vänta på val
+}
+
+function loadSystem(systemId) {
+  if (systemId === 'aedelore') {
+    // Gör INGENTING - behåll allt som det är
+    return;
+  }
+  
+  // För andra system: byt ut DOM-element
+  renderSystemSheet(systemId);
+}
+```
+
+### Visuell konsistens
+- Behåll EXAKT samma CSS för alla system
+- Samma färgschema, typsnitt, knappstilar
+- Samma layout-principer (tabs, collapsible sections)
+- Samma header/footer-design
+- Endast INNEHÅLLET i sektionerna ändras per system
+
+### Prioriteringsordning
+1. Implementera system-väljare modal
+2. Säkerställ att Aedelore fungerar 100% som tidigare
+3. D&D 5e (störst community)
+4. Chronicles of Darkness
+5. Storyteller (Classic WoD)
+6. Pathfinder 2e
+
+### localStorage-struktur
+```javascript
+{
+  "selectedSystem": "dnd5e",
+  "rememberChoice": true,
+  "characters": {
+    "aedelore": [...],
+    "dnd5e": [...],
+    // etc
+  }
+}
+```

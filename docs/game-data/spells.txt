@@ -1,0 +1,278 @@
+================================================================================
+                            AEDELORE - ARCANE SPELLS
+================================================================================
+
+Spells are magical abilities available to arcane classes (Mage, Druid).
+They cost Arcana points to cast and deal Spelldamage.
+
+================================================================================
+MAGE SPELLS (79)
+================================================================================
+
+OFFENSIVE SPELLS
+--------------------------------------------------------------------------------
+Name                  Arcana   Damage   School         Description
+--------------------------------------------------------------------------------
+Scorch                1        2D10     Fire           Scorch an enemy
+Fireball              1        2D6      Fire           Shoot a fireball
+Arcane Bolt           1        1D10     Arcane         Shoot arcane bolt
+Icebolt               1        1D10     Frost          Cast bolt of frost
+Thunderclap           1        1D6      Lightning      Summon lightning
+Frostbite             1        1D6      Frost          Freeze target with cold
+Magic Missile         1        1D6      Arcane         Never-miss magic projectile
+Acid Splash           1        1D6      Arcane         1-2 targets
+Sword Burst           1        1D6      Arcane         AoE around caster
+Icelance              2        2D6      Frost          Slice with sharp icelance
+Mage Blade            2        2D10     Arcane         Control a magical sword, 1 round
+Shadow Bolt           2        2D6      Shadow         Cast bolt of shadow
+Ice Knife             2        2D10     Frost          Explodes on impact
+Cloud of Daggers      2        2D6      Arcane         2 rounds
+Arms of Despair       2        2D6      Shadow         AoE tentacles
+Ray of Frost          3        3D6      Frost          Pierce with frost
+Arcane Blast          3        2D10     Arcane         Blast with arcane
+Mind Blast            3        2D10     Psychic        Psychic damage to mind
+Spray of Cards        3        2D10     Arcane         Magical cutting cards
+Conjure Barrage       3        2D10     Arcane         Rain of projectiles
+Thunder Step          3        2D10     Lightning      Teleport + AoE
+Fireblast             4        3D6      Fire           Blast with fire
+Spirit Guardians      4        3D6      Arcane         4 rounds
+Black Tentacles       4        3D6      Shadow         2 rounds
+Chain Lightning       5        3D6      Lightning      Multi-target
+Banishing Smite       5        3D6      Arcane         Banishes target
+Conjure Volley        5        3D6      Arcane         Massive AoE
+Steel Wind Strike     5        3D6      Arcane         Multi-target + teleport
+Arcane Missiles       6        4D6      Arcane         Multiple missiles
+Incendiary Cloud      6        4D6      Fire           Moving fire, 4 rounds
+Disintegrate          7        4D10     Arcane         Disintegrate target
+Blade of Disaster     7        4D10     Arcane         4 rounds
+
+BLACK MAGIC / SUMMONING
+--------------------------------------------------------------------------------
+Name                  Arcana   Damage   School         Description
+--------------------------------------------------------------------------------
+Summon Imp            3        1D10     Black Magic    Summon small imp, 1 round
+Summon Shadowspawn    3        1D10     Black Magic    Shadow creature, 1 round
+Summon Lesser Demons  3        1D10     Black Magic    Multiple lesser demons, 1 round
+Summon Void           4        2D6      Black Magic    Creature from void, 1 round
+Summon Aberration     4        2D6      Black Magic    Aberration, 1 round
+Hunger of the Fallen  4        2D6      Black Magic    Sphere of darkness, 2 rounds
+Summon Greater Demon  4        2D6      Black Magic    Greater demon, 2 rounds
+Summon Infernal       5        2D10     Black Magic    Infernal demon, 2 rounds
+Infernal Calling      5        2D10     Black Magic    Devil, 2 rounds
+Summon Fiend          6        3D6      Black Magic    Fiend, 4 rounds
+Maze                  7        -        Black Magic    Trap target in labyrinth
+
+CONJURATION
+--------------------------------------------------------------------------------
+Name                  Arcana   Damage   School         Description
+--------------------------------------------------------------------------------
+Mage Hand             3        -        Conjuration    Magical hand, 1 round
+Unseen Servant        3        -        Conjuration    Invisible helper, 10 rounds
+Find Familiar         3        -        Conjuration    Magic companion, Permanent
+Flock of Familiars    3        -        Conjuration    Multiple familiars, 4 rounds
+Flaming Sphere        3        2D6      Conjuration    Rolling fireball, 2 rounds
+Summon Construct      4        2D6      Conjuration    Construct, 2 rounds
+Guardian of Faith     4        2D6      Conjuration    Protective spirit, 4 rounds
+Teleport              5        -        Conjuration    Short distance, Instant
+Minor Elementals      5        2D10     Conjuration    Small elementals, 2 rounds
+Summon Elemental      5        2D10     Conjuration    Elemental ally, 2 rounds
+Conjure Elemental     6        3D6      Conjuration    Powerful elemental, 4 rounds
+
+PROTECTION
+--------------------------------------------------------------------------------
+Name                  Arcana   Damage   School         Description
+--------------------------------------------------------------------------------
+Prismatic Barrier     2        -        Protection     Shield ally, 1 round
+Ice Armor             2        -        Protection     Self shield, 4 rounds
+
+TRANSMUTATION / MOVEMENT
+--------------------------------------------------------------------------------
+Name                  Arcana   Damage   School         Description
+--------------------------------------------------------------------------------
+Water Breathing       1        -        Transmutation  Breathe underwater, 10 rounds
+Flickering Tongue     2        -        Transmutation  Understand creature, 1 round
+Levitate              2        -        Transmutation  Float, 4 rounds
+Polymorph             3        -        Transmutation  Transform, 2 rounds
+Control Flames        3        -        Transmutation  Manipulate fire, 1 round
+Vortex Warp           3        -        Transmutation  Teleport other, Instant
+Invisibility          4        -        Transformation Make invisible, 4 rounds
+Far Step              5        -        Transmutation  Teleport each round, 4 rounds
+Arcane Gate           6        -        Transmutation  Portal between points, 4 rounds
+
+ENCHANTMENT
+--------------------------------------------------------------------------------
+Name                  Arcana   Damage   School         Description
+--------------------------------------------------------------------------------
+Sleep                 2        -        Enchantment    Put to sleep, 3 rounds
+Charm Person          3        -        Enchantment    Charm humanoid, 2 rounds
+
+DIVINATION
+--------------------------------------------------------------------------------
+Name                  Arcana   Damage   School         Description
+--------------------------------------------------------------------------------
+Detect Magic          1        -        Divination     Sense magical auras, 2 rounds
+Arcane Eye            3        -        Divination     Remote vision, 4 rounds
+
+ABJURATION
+--------------------------------------------------------------------------------
+Name                  Arcana   Damage   School         Description
+--------------------------------------------------------------------------------
+Arcane Lock           2        -        Abjuration     Lock door, Permanent
+Counterspell          4        -        Abjuration     Counter spell, Instant
+Dispel Magic          4        -        Abjuration     Remove magic, 1 round
+
+ILLUSION
+--------------------------------------------------------------------------------
+Name                  Arcana   Damage   School         Description
+--------------------------------------------------------------------------------
+Mirror Image          3        -        Illusion       Create duplicates, 3 rounds
+
+MANIPULATION / NECROMANCY
+--------------------------------------------------------------------------------
+Name                  Arcana   Damage   School         Description
+--------------------------------------------------------------------------------
+Animate Dead          6        -        Necromancy     Animate corpse, 1 round
+Time Warp             6        -        Manipulation   Slow/rewind time, 1 round
+
+UTILITY
+--------------------------------------------------------------------------------
+Name                  Arcana   Damage   School         Description
+--------------------------------------------------------------------------------
+Light                 2        -        Fire           Light source, 1 round
+Create Bonfire        2        1D10     Fire           Magic fire, 1 round
+Web                   3        -        Utility        Sticky webs, 2 rounds
+Grease                3        -        Utility        Slippery area, 2 rounds
+Wish                  8        Special  Utility        Grant a wish, Instant
+
+================================================================================
+DRUID SPELLS (60)
+================================================================================
+
+OFFENSIVE NATURE SPELLS
+--------------------------------------------------------------------------------
+Name                  Arcana   Damage   School         Description
+--------------------------------------------------------------------------------
+Sunfire               1        1D10     Fire           Channel sun energy, Daytime only
+Moonfall              1        1D10     Arcana         Channel moon energy, Nighttime only
+Poison Spray          1        1D10     Nature         Spray poison at target
+Produce Flame         1        1D10     Nature         Create flame to throw
+Infestation           1        1D6      Nature         Insects plague target
+Thorns                2        1D10     Nature         Thorns pierce target
+Vine Lash             2        1D10     Nature         Vines strike target
+Hail of Thorns        2        2D6      Nature         Explodes on hit
+Ensnaring Strike      2        1D10     Nature         Snares target, 1 round
+Earthshaping          3        2D6      Nature         Earth moves at will, 1 round
+Insect Plague         3        1D6      Nature         Summon insects, 1 round
+Moonbeam              3        2D6      Arcana         Beam of moonlight, 2 rounds
+Blight                3        2D6      Nature         Drain life from target
+Dust Devil            3        2D6      Nature         Small whirlwind, 2 rounds
+Whips                 4        2D10     Nature         Roots attack, 1 round
+Storm                 4        2D6      Nature         Summon the winds
+Thunderclap (Druid)   4        3D6      Arcana         Summon thunder, 1 round
+Starfall              4        2D10     Arcana         Stars fall on target, Nighttime only
+Tidal Wave            4        3D6      Nature         Massive wave
+Call Lightning        5        3D6      Arcana         Strike with lightning, 4 rounds
+Cloudkill             5        3D6      Nature         Deadly poison cloud, 4 rounds
+Earthquake            6        3D6      Nature         Shake the earth violently
+Wall of Thorns        6        4D6      Nature         Wall of thorns, 4 rounds
+Tsunami               6        4D6      Nature         Devastating tsunami
+Warrior of Tohu       6        8 flat   Arcana         Channel raw arcana
+Storm of Vengeance    7        4D10     Nature         Apocalyptic storm, 4 rounds
+
+HEALING SPELLS
+--------------------------------------------------------------------------------
+Name                  Arcana   Heal     School         Description
+--------------------------------------------------------------------------------
+Mending               3        1D10     Nature         Single target
+Cure Poison           3        -        Nature         Remove poison
+Tunes of Healing      4        2D6      Nature         Single target
+Healing Circle        5        2D10     Nature         Multiple targets
+Rebirth               8        Revive   Nature         Revive someone, Not in battle
+
+SUMMONING
+--------------------------------------------------------------------------------
+Name                  Arcana   Damage   School         Description
+--------------------------------------------------------------------------------
+Packleader            3        -        Nature         Summon allies, Same region
+Summon Beast          3        1D10     Nature         Beast companion, 2 rounds
+Summon Fey            4        2D6      Nature         Fey creature, 2 rounds
+Giant Insect          4        -        Nature         Transform insects to giants, 4 rounds
+Conjure Woodland      5        2D10     Nature         Forest creatures, 2 rounds
+Conjure Animals       5        2D10     Nature         Animal spirits, 2 rounds
+Summon Celestial      5        2D10     Nature         Celestial being, 4 rounds
+Summon Draconic       5        2D10     Nature         Dragon spirit, 4 rounds
+Conjure Fey           6        3D6      Nature         Powerful fey, 4 rounds
+
+CONTROL
+--------------------------------------------------------------------------------
+Name                  Arcana   Damage   School         Description
+--------------------------------------------------------------------------------
+Entangle              2        -        Nature         Roots hold targets, 2 rounds
+Fog Cloud             2        -        Nature         Thick fog, 3 rounds
+Sleet Storm           4        -        Nature         Hinders movement, 2 rounds
+Stinking Cloud        4        -        Nature         Nauseating gas, 2 rounds
+Grasping Vine         4        -        Nature         Vine pulls target, 2 rounds
+Watery Sphere         4        -        Nature         Trap in water, 2 rounds
+
+SUPPORT & UTILITY
+--------------------------------------------------------------------------------
+Name                  Arcana   Damage   School         Description
+--------------------------------------------------------------------------------
+Purify Water          1        -        Nature         Cleanse water, Permanent
+Barkskin              2        -        Nature         Harden skin, 4 rounds
+Air Bubble            2        -        Nature         Breathe underwater, 24 hours
+Speak with Plants     2        -        Nature         Communicate, 2 rounds
+Animal Handling       3        -        Nature         Communicate with animals, 2 rounds
+Innervate             3        -        Arcana         Give initiative
+Tree Stride           3        -        Nature         Teleport between trees, 1 round
+Plant Growth          4        -        Nature         Grow plants, Permanent
+Prowler's Eyes        4        -        Nature         Darkvision, 1 round
+Wildshape             4        -        Nature         Become animal, 4 rounds
+Create Food/Water     4        -        Nature         Conjure sustenance, Instant
+Heroes' Feast         6        -        Nature         Magical feast, Permanent
+Temple of the Gods    7        -        Nature         Create temple, 24 hours
+
+================================================================================
+LEGEND
+================================================================================
+
+Arcana      = Cost in Arcana points to cast spell
+Damage      = Spelldamage dice rolled (e.g., 2D6 = roll 2 D6s)
+School      = Type of magic (Nature, Fire, Arcana, Black Magic, etc.)
+Description = What the spell does and duration
+
+DURATION NOTES:
+  - "X rounds" = Effect lasts for X rounds of combat
+  - "Instant" = Immediate effect, no duration
+  - "Permanent" = Effect lasts indefinitely
+  - "Not in battle" = Cannot be cast during combat
+  - "Only daytime/nighttime" = Restricted to time of day
+
+DAMAGE NOTATION:
+  - 1D6 = Roll 1 six-sided die
+  - 2D10 = Roll 2 ten-sided dice
+  - "-" = No damage (utility/support spell)
+
+HEALING SPELLS:
+  - Healing spells restore HP equal to the "damage" value
+  - Mending: 1D10 HP, Tunes of Healing: 2D6 HP, Healing Circle: 2D10 HP
+
+ARCANA POOLS:
+  - Mage: Max 20 Arcana, Starts with 10
+  - Druid: Max 16 Arcana, Starts with 8
+  - Non-arcane classes: 0 Arcana
+
+STARTING SPELLS BY CLASS:
+  - Mage (10): Fireball, Arcane Bolt, Prismatic Barrier, Ice Armor,
+              Detect Magic, Mage Hand, Sleep, Arcane Blast,
+              Teleport, Dispel Magic
+  - Druid (5): Sunfire, Mending, Entangle, Barkskin, Animal Handling
+
+ARCANE ELIXIR:
+  - 1 pot = 10 Arcana restored
+  - Mage starts with 2 pots
+  - Druid starts with 1 pot
+
+================================================================================
+Last updated: 2026-01-20
+================================================================================

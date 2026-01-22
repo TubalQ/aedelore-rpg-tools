@@ -1,0 +1,77 @@
+services:
+  aedelore-proffs-db:
+    image: postgres:16-alpine
+    container_name: aedelore-proffs-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - aedelore-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  aedelore-proffs-web:
+    image: nginx:alpine
+    container_name: aedelore-proffs-web
+    restart: unless-stopped
+    ports:
+      - "9020:80"
+    volumes:
+      - ./html:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - aedelore-proffs-api
+
+  aedelore-proffs-api:
+    build: ./api
+    container_name: aedelore-proffs-api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+    volumes:
+      - ./api/data:/app/data
+    expose:
+      - "3000"
+    depends_on:
+      aedelore-proffs-db:
+        condition: service_healthy
+
+  aedelore-umami-db:
+    image: postgres:16-alpine
+    container_name: aedelore-umami-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: ${UMAMI_DB_PASSWORD}
+    volumes:
+      - aedelore-umami-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U umami -d umami"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  aedelore-umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    container_name: aedelore-umami
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://umami:${UMAMI_DB_PASSWORD}@aedelore-umami-db:5432/umami
+      APP_SECRET: ${UMAMI_APP_SECRET}
+    ports:
+      - "9021:3000"
+    expose:
+      - "3000"
+    depends_on:
+      aedelore-umami-db:
+        condition: service_healthy
+
+volumes:
+  aedelore-pgdata:
+  aedelore-umami-pgdata:

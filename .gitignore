@@ -1,0 +1,55 @@
+# Environment and secrets
+.env
+*.env.local
+*.env.production
+
+# Claude Code files (all Claude-related folders and files)
+.claude/
+claude/
+Claude/
+CLAUDE.md
+
+# Database backups
+backups/
+*.sql.gz
+*.dump
+
+# API data files (contains user data)
+api/data/
+
+# Node modules
+node_modules/
+api/node_modules/
+package-lock.json
+
+# Build outputs
+*.apk
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Docker volumes (if local)
+pgdata/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Test coverage
+coverage/
+.nyc_output/

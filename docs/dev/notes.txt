@@ -1,0 +1,159 @@
+Jenka = Luna (moon elf, outcast, creed of shadows)
+
+Johanna = Amryl (moon elf, thief)
+
+Victor = Tillo Vindsnäva (Halfling, rogue,creed of shadows)
+
+Jessika = Haphina (Halfling, hunter)
+
+Albin = Thorfir Stenhand (Dwarf, warrior, the stone's heart)
+
+# Scen: Det första mötet – "Facklor i Frostnatten"
+
+Plats: City of Thir, dvärgarnas uråldriga hjärtland, vilande bland snöklädda toppar och rykande smedjor. Ett rike återuppbyggt på minnen av eld, sten och blod.
+
+I dess hjärta Huvudsalen, där den stora fredsfesten hålls. För första gången på hundratals år är alla folk samlade under ett tak – ett tak där sånger om både sorg och seger ekar mellan pelarna.
+
+//
+
+Och där står en stolt, rakryggad alv, Luna, vid elden. Du vänder en bit vildsvin över glöden med långsam precision, som om det vore en ritual snarare än matlagning. Du har hållit dig lite i utkanten – kanske för att minnas. Kanske för att glömma.
+
+Men så hör du de tunga steg som bara kan komma från ett folkslag, krigarna ifrån bergen, det är dvärgen Thorfin, som närmar sig med ett horn i handen och ett skratt som nästan känns främmande här. "Det där luktar som hemma – eller åtminstone som något jag skulle kalla det." Det är inget påträngande i orden. Bara ärlighet. Och ett försiktigt leende. Du får ögonkontakt. Elden sprakar mellan er. Vad säger du?
+
+//
+
+En bit bort reser sig en liten figur från skuggan under en pelare, Tillo Vindsnäva, Du har suttit stilla länge, med en skål gryta i knäet och ett föremål gömt i din väska – ett minne från ett slagfält, eller något äldre. Du ser de andra. Något i det där skrattet – eller kanske eldens sken över deras ansikten – får dig att ta ett steg framåt. Det känns som om det är dags att tala.
+
+Vad säger du?
+
+//
+
+Vid sidan av en långbänk lägger Amryl, en lång stolt Alv, ifrån sig ett brädspel som precis vunnits med en kritisk tärningskastning och en charmig bluff. Applåder hörs, men du hör dem knappt – för när du vänder dig mot elden ser du något som drar i din uppmärksamhet. De tre där… något säger dig att ni borde mötas. Du reser dig, med statyetten i handen, och går dit.
+
+Vad säger du?
+
+//
+
+Samtidigt smäller portarna till Huvudsalen upp och släpper in frostig nattluft. Där står Kaphina, en omtalad jägare, Du är sent anländ, men blicken är stadig. Du har färdats långt, med frågor som inte besvaras i ensamhet. En dvärg vid porten – kanske en smed, kanske en kapten – ler och slår dig lätt på axeln. "Ingen fest är hel utan någon som bär på tystnad. Gå till elden. Där finns folk som förstår." Du går sakta dit, din gångstil bär karaktär trots dina korta ben och de närvarande tittar på dig medan du går mot elden. Du sätter dig ner vid de andra.
+
+Vad säger du?
+
+//
+
+Nu sitter ni fem kring samma eld. Eldens sken kastar skuggor över stenpelarna. Ljuden av festen dämpas just här – som om salen självt ger er utrymme utan att ni ber om det.
+
+En bard slår an en ny ton på sin luta, en stillsammare melodi. Ni hör en gitarr som spelar stämma till lutan, elden sprakar. Värmen känns inte bara fysisk längre – ni känner den inom er.
+
+## Slå för intiativ
+
+## Vad säger ni – till varandra?
+
+# SCEN2
+
+### Dörrarna till salen flyger upp…och så kliver hon fram.
+
+Ingen av er såg henne komma, men plötsligt står hon där. En äldre kvinna med hår som flyter som silverrök över en mörkblå kåpa. Ni skymtar en eldröd strimma i hennes lugg - konstigt tycker ni, aldrig tidigare har ni sett någon med silvrigt hår ha toner av den evige elden.  
+En luta vilar på ryggen, men det är inte hon som spelar.
+
+"Freden ska firas," säger hon med mjuk röst, "men minnen i vattnet simmar ännu."  
+Hennes ögon vandrar över er fem.  
+"Det är alltid så. När folk vänder blicken mot framtiden… glömmer de vad som ligger kvar bakom dem - freden ligger i era hjärtan, men striden får ej lämna er själ"
+
+Hon lutar sig framåt, räcker fram en liten rulle pergament – bunden med en tråd i blekt rött.  
+"Fem skuggor väcks i norr. Fem namn står skrivna i ruinerna vid Morningstars brunn. Men bara fem händer kan röra vid dem utan att världen börjar darra."
+
+"Ingen har öppnat det här brevet. Det ska lämnas till dem som valde att stanna kvar vid elden, utan att värmen höll dom varm mot kylan."  
+Hon ser på er. "Ni sitter redan där."
+
+//
+
+Hon lämnar rullen på stenen mellan er, reser sig utan att förklara mer, och försvinner in i sorlet av festen som om hon aldrig varit där.
+
+### Slå för intiativ.
+
+Vad gör du?
+
+//
+
+📜 Pergamentet ligger kvar. En symbol är stämplad i vax – en uråldrig sigillring, bruten men fortfarande glödande svagt av en forna magi. Ni känner alla igen den. Inte från något ni läst – utan från drömmar ni haft. Samma symbol. Samma känsla av… kallt vatten, eld under ytan, diamantögonen som har stirrat in i era själar sen ni föddes, rösten som inom er ekat och lett er framåt, strid för strid, förlust efter förlust väcker någonting inom er och säger er att något väntar.
+
+Ni känner på er att berättelserna ni vaggades till sömns till som små inte bara var myt, men ni minns dom inte, som att någonting har fördunklat era minnen, som en drog som stulit ifrån er.
+
+# Vad gör ni?
+
+# Scen 3
+
+###### Pergamentet:
+
+Symbolen:
+
+![Symbol.png](.attachments.580103/ChatGPT%20Image%20Apr%207%2C%202025%2C%2009_51_44%20AM%20%282%29.png)
+
+Där freden föddes, vilar lögnen.  
+Där jord och grönska blev aska, sover ett namn i elden. (Burning Passage)
+
+I skuggan av trädet,  
+under de tre rotlösa löven,  
+växer något som aldrig borde gro. (Zelgors krafter)
+
+En av de fallna talar ännu. (Malcath, Sunken City)  
+5 av de levande bär dess röst. (Dyrkare av Malcath)
+
+Ni har setts i drömmen. (Taninsams talan till spelarna)  
+Ni har känt kylan i benen,(Thorsheim)  
+och värmen som leder liv och förödelse. (Taninsams löfte)
+
+Res innan fullmånen sjunker.  
+Sök visdomen under den frusna muren. (Biblioteket i Mithandrirs Watch)  
+Där kommer ni förstå varför just ni.
+
+Ödet vet redan era namn. (Dom är kallade)
+
+# Vad gör ni?
+
+## Ledtrådar mot The Great Tree of Morningstar
+
+//
+
+### 1. Greve Lioras hushållare i Thir (leder dom till Värdshuset)
+
+> En hushållare vid hovet hör deras namn viskas av en gammal gäst. Hon ger dem ett ristat mynt med samma sigill som brevet.  
+> "Min herre Greve Liora sa alltid: 'När världen vänder sig från ljuset, går vissa mot källan istället. Det är de man måste följa.'"  
+> Hon säger att en kurir med samma symbol nyligen lämnade Thir – mot sydöst.
+
+Val: Spelarna kan börja jaga kuriren. Om inte? Inget tvingar dem. Men fröet är sått.
+
+//
+
+### 2. Värdshuset "Den Fällda Hjorten" (Här hittar dom kartan)
+
+När spelarna lämnar Thir.
+
+> Ett gammalt värdshus vars ägare är en pensionerad spejare från kriget. På väggen hänger en karta – trasigt och bränt, men sigillet från brevet är inristat i träet under en fläck i nordväst.  
+> Han minns platsen: "Jag red dit en gång. Marken sjöng där. Inget jag glömt." (det är isen som sjunger i Mithandrirs Watch)
+
+Spelarna kan be att få kopiera kartan, fråga ut honom, eller bara notera platsen.
+
+//
+
+### 3. En glömd bok på ett bibliotek i Mithandrirs Watch(Här hittar dom pergamentet med runskrift)
+
+Om de istället reser söderut eller söker kunskap:
+
+> En bok om "Sorgens Rötter" innehåller en anteckning:  
+> "Brunnen bär inte vatten, utan minnen. Och vissa minnen vill bli druckna.  
+> Kom ihåg, Dvärgarna grävde inte bara djupt i bergen, dom grävde till själva rötterna av Aedelore."  
+> Samma symbol som på brevet syns i marginalen – blek men tydlig.
+
+Val: Spelarna kan börja nysta i brunnens historia, söka efter "namnen i ruinerna", kontakta akademiker eller magiker.  
+Viktigt: Det finns en väg genom Ambers Call till The great Tree of Morningstar
+
+## 3. Mot Ambers Call
+
+Om dom vågar sig
+
+> En bok om "Sorgens Rötter" innehåller en anteckning:  
+> "Brunnen bär inte vatten, utan minnen. Och vissa minnen vill bli druckna."  
+> Samma symbol som på brevet syns i marginalen – blek men tydlig.
+
+Val: Spelarna kan börja nysta i brunnens historia, söka efter "namnen i ruinerna", kontakta akademiker eller magiker.

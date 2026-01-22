@@ -1,0 +1,13 @@
+# Robots.txt for aedelore.nu
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://aedelore.nu/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1
+
+# Disallow test files
+Disallow: /test-*.html
+Disallow: /.claude/
