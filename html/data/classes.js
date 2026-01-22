@@ -44,7 +44,7 @@ const CLASSES = {
             "+1 Acrobatics",
             "+1 Perception",
             "+1 Deception",
-            "Starting Armor: Leather (chest, legs)",
+            "Starting Armor: Leather (chest, legs), Cloth (shoulders)",
             "Starting Weapon: Dagger",
             "Starting Gold: 7",
             "Starting Worthiness: -4",
@@ -55,6 +55,7 @@ const CLASSES = {
         startingEquipment: {
             armor: {
                 chest: "Leather",
+                shoulders: "Cloth Mantle",
                 legs: "Leather Greaves"
             },
             weapon: "Dagger",
@@ -74,7 +75,7 @@ const CLASSES = {
             "+1 Resistance",
             "+1 Investigation",
             "+1 Nature",
-            "Starting Armor: Leather (chest)",
+            "Starting Armor: Leather (chest), Cloth (legs)",
             "Starting Weapon: Mace",
             "Starting Gold: 2",
             "Starting Food: 1D10",
@@ -85,7 +86,8 @@ const CLASSES = {
         ],
         startingEquipment: {
             armor: {
-                chest: "Leather"
+                chest: "Leather",
+                legs: "Cloth Pants"
             },
             weapon: "Mace",
             gold: 2,
