@@ -2214,3 +2214,202 @@ function spendAttributePoint() {
 
     updateProgressionSection();
 }
+
+// ============================================
+// ONBOARDING GUIDE
+// ============================================
+
+function initOnboarding() {
+    // Check if user has dismissed the guide permanently
+    const dismissed = localStorage.getItem('onboarding_dismissed');
+    if (dismissed === 'true') {
+        return;
+    }
+
+    // Check if user already has significant data (not a new user)
+    const hasCharacter = localStorage.getItem('characterName') ||
+                         document.getElementById('character_name')?.value;
+    const isLoggedIn = !!authToken;
+
+    // Show guide for new users or those who haven't completed setup
+    if (!dismissed) {
+        showOnboarding();
+    }
+
+    // Set up auto-check for completed steps
+    setInterval(updateOnboardingProgress, 1000);
+
+    // Also clone content for mobile
+    cloneOnboardingForMobile();
+}
+
+function cloneOnboardingForMobile() {
+    const mobileContent = document.getElementById('onboarding-mobile-content');
+    const steps = document.querySelector('.onboarding-steps');
+    const footer = document.querySelector('.onboarding-footer');
+
+    if (mobileContent && steps && footer) {
+        mobileContent.innerHTML = `
+            <div class="onboarding-steps">${steps.innerHTML}</div>
+            <div class="onboarding-footer">${footer.innerHTML}</div>
+        `;
+    }
+}
+
+function showOnboarding() {
+    const sidebar = document.getElementById('onboarding-sidebar');
+    const mobile = document.getElementById('onboarding-mobile');
+
+    if (window.innerWidth > 768) {
+        sidebar?.classList.add('visible');
+        document.body.classList.add('onboarding-active');
+    } else {
+        mobile?.classList.add('visible');
+    }
+
+    updateOnboardingProgress();
+}
+
+function hideOnboarding() {
+    const sidebar = document.getElementById('onboarding-sidebar');
+    const mobile = document.getElementById('onboarding-mobile');
+
+    sidebar?.classList.remove('visible');
+    mobile?.classList.remove('visible', 'expanded');
+    document.body.classList.remove('onboarding-active');
+}
+
+function hideOnboardingPermanent() {
+    localStorage.setItem('onboarding_dismissed', 'true');
+    hideOnboarding();
+}
+
+function toggleOnboardingMobile() {
+    const mobile = document.getElementById('onboarding-mobile');
+    mobile?.classList.toggle('expanded');
+}
+
+function updateOnboardingProgress() {
+    const steps = {
+        'register': checkStepRegister(),
+        'name': checkStepName(),
+        'save': checkStepSave(),
+        'race-class': checkStepRaceClass(),
+        'lock-rc': checkStepLockRaceClass(),
+        'attributes': checkStepAttributes(),
+        'lock-attr': checkStepLockAttributes(),
+        'campaign': checkStepCampaign(),
+        'overview': checkStepOverview()
+    };
+
+    let firstIncomplete = null;
+
+    Object.keys(steps).forEach((stepId, index) => {
+        const stepEl = document.querySelector(`[data-step="${stepId}"]`);
+        const mobileStepEl = document.querySelector(`#onboarding-mobile-content [data-step="${stepId}"]`);
+
+        if (stepEl) {
+            stepEl.classList.toggle('completed', steps[stepId]);
+            stepEl.classList.remove('current');
+        }
+        if (mobileStepEl) {
+            mobileStepEl.classList.toggle('completed', steps[stepId]);
+            mobileStepEl.classList.remove('current');
+        }
+
+        if (!steps[stepId] && !firstIncomplete) {
+            firstIncomplete = stepId;
+            stepEl?.classList.add('current');
+            mobileStepEl?.classList.add('current');
+        }
+    });
+
+    // Check if all steps are complete
+    const allComplete = Object.values(steps).every(v => v);
+    if (allComplete) {
+        // Auto-hide after a delay when all complete
+        setTimeout(() => {
+            hideOnboardingPermanent();
+        }, 2000);
+    }
+}
+
+function checkStepRegister() {
+    return !!authToken;
+}
+
+function checkStepName() {
+    const nameField = document.getElementById('character_name');
+    return nameField && nameField.value.trim().length > 0;
+}
+
+function checkStepSave() {
+    return !!currentCharacterId;
+}
+
+function checkStepRaceClass() {
+    const race = document.getElementById('race')?.value;
+    const charClass = document.getElementById('class')?.value;
+    const religion = document.getElementById('religion')?.value;
+    return race && charClass && religion;
+}
+
+function checkStepLockRaceClass() {
+    return raceClassLocked === true;
+}
+
+function checkStepAttributes() {
+    // Check if user has distributed some points
+    // They start with 10 free points, so check if any talents have been increased
+    const talents = document.querySelectorAll('[id$="_talent"]');
+    let totalTalent = 0;
+    talents.forEach(t => {
+        totalTalent += parseInt(t.value) || 0;
+    });
+    return totalTalent > 0;
+}
+
+function checkStepLockAttributes() {
+    return attributesLocked === true;
+}
+
+function checkStepCampaign() {
+    // Check if character is linked to a campaign
+    const campaignInfo = document.getElementById('campaign-info');
+    if (campaignInfo) {
+        const noCampaign = campaignInfo.querySelector('.no-campaign');
+        return !noCampaign || noCampaign.style.display === 'none';
+    }
+    return false;
+}
+
+function checkStepOverview() {
+    // Check if Overview tab has been visited (is currently active)
+    const overviewTab = document.querySelector('[data-tab="overview"]');
+    return overviewTab && overviewTab.classList.contains('active');
+}
+
+// Initialize onboarding when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Delay slightly to let other initialization complete
+    setTimeout(initOnboarding, 500);
+});
+
+// Handle window resize for responsive switching
+window.addEventListener('resize', function() {
+    const sidebar = document.getElementById('onboarding-sidebar');
+    const mobile = document.getElementById('onboarding-mobile');
+
+    if (document.body.classList.contains('onboarding-active') ||
+        mobile?.classList.contains('visible')) {
+        if (window.innerWidth > 768) {
+            sidebar?.classList.add('visible');
+            mobile?.classList.remove('visible', 'expanded');
+            document.body.classList.add('onboarding-active');
+        } else {
+            sidebar?.classList.remove('visible');
+            mobile?.classList.add('visible');
+            document.body.classList.remove('onboarding-active');
+        }
+    }
+});

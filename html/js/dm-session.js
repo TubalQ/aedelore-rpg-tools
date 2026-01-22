@@ -2078,7 +2078,18 @@ function renderTimeGroup(time, group, day) {
         return true;
     });
     const unlinkedNpcs = group.npcs.filter(n => !placeNames.includes(n.plannedLocation));
-    const unlinkedItems = group.items.filter(i => !placeNames.includes(i.plannedLocation));
+
+    // Collect all item names that are already shown inside encounters (via findItemsForEncounter)
+    const itemsShownInEncounters = new Set();
+    group.encounters.forEach(enc => {
+        const encItems = findItemsForEncounter(enc);
+        encItems.forEach(item => itemsShownInEncounters.add(item.name));
+    });
+
+    // Filter out items that are linked to a place OR already shown in an encounter
+    const unlinkedItems = group.items.filter(i =>
+        !placeNames.includes(i.plannedLocation) && !itemsShownInEncounters.has(i.name)
+    );
 
     if (unlinkedEnc.length > 0 || unlinkedRA.length > 0 || unlinkedNpcs.length > 0 || unlinkedItems.length > 0) {
         html += renderUnlinkedContent(unlinkedEnc, unlinkedRA, unlinkedNpcs, unlinkedItems, day);
@@ -2104,7 +2115,18 @@ function renderPlaceWithLinkedContent(place, group, day) {
     const linkedNpcs = group.npcs.filter(n => n.plannedLocation === place.name);
     const linkedNpcNames = linkedNpcs.map(n => n.name).filter(n => n);
     const linkedRAtoNPCs = group.readAloud.filter(r => r.linkedType === 'npc' && linkedNpcNames.includes(r.linkedTo));
-    const linkedItems = group.items.filter(i => i.plannedLocation === place.name);
+
+    // Collect items that are shown inside encounters at this place
+    const itemsInEncounters = new Set();
+    linkedEnc.forEach(enc => {
+        const encItems = findItemsForEncounter(enc);
+        encItems.forEach(item => itemsInEncounters.add(item.name));
+    });
+
+    // Filter out items that are already shown inside encounters
+    const linkedItems = group.items.filter(i =>
+        i.plannedLocation === place.name && !itemsInEncounters.has(i.name)
+    );
 
     let html = `
         <div class="place-container" style="margin-bottom: var(--space-3); border: 1px solid var(--accent-cyan); border-radius: var(--radius-md); overflow: hidden;">
@@ -2816,7 +2838,18 @@ function renderPlayPlaceWithLinkedContent(place, group, day) {
     const linkedNpcs = group.npcs.filter(n => n.plannedLocation === place.name);
     const linkedNpcNames = linkedNpcs.map(n => n.name).filter(n => n);
     const linkedRAtoNPCs = group.readAloud.filter(r => r.linkedType === 'npc' && linkedNpcNames.includes(r.linkedTo));
-    const linkedItems = group.items.filter(i => i.plannedLocation === place.name);
+
+    // Collect items that are shown inside encounters at this place
+    const itemsInEncounters = new Set();
+    linkedEnc.forEach(enc => {
+        const encItems = findItemsForEncounter(enc);
+        encItems.forEach(item => itemsInEncounters.add(item.name));
+    });
+
+    // Filter out items that are already shown inside encounters
+    const linkedItems = group.items.filter(i =>
+        i.plannedLocation === place.name && !itemsInEncounters.has(i.name)
+    );
 
     let html = `
         <div class="place-container" style="margin-bottom: var(--space-3); border: 1px solid ${place.visited ? 'var(--accent-green)' : 'var(--accent-cyan)'}; border-radius: var(--radius-md); overflow: hidden;">

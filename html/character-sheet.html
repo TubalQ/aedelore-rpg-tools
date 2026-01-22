@@ -87,6 +87,118 @@
         <span>Saving...</span>
     </div>
 
+    <!-- Onboarding Guide Sidebar -->
+    <div id="onboarding-sidebar" class="onboarding-sidebar">
+        <div class="onboarding-header">
+            <h3>Getting Started</h3>
+            <button class="onboarding-close" onclick="hideOnboarding()" title="Close guide">&times;</button>
+        </div>
+        <p class="onboarding-subtitle">Follow these steps to get started and to enable campaign mode:</p>
+
+        <div class="onboarding-steps">
+            <div class="onboarding-step" id="onboard-step-1" data-step="register">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <div class="step-title">Register an account</div>
+                    <div class="step-desc">Click <strong>Cloud</strong> <span class="step-arrow">→</span> <strong>Register</strong></div>
+                </div>
+                <div class="step-check"></div>
+            </div>
+
+            <div class="onboarding-step" id="onboard-step-2" data-step="name">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <div class="step-title">Name your character</div>
+                    <div class="step-desc">Go to <strong>Character</strong> tab <span class="step-arrow">→</span> Fill in <strong>Character Name</strong></div>
+                </div>
+                <div class="step-check"></div>
+            </div>
+
+            <div class="onboarding-step" id="onboard-step-3" data-step="save">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <div class="step-title">Save to cloud</div>
+                    <div class="step-desc">Click <strong>Cloud</strong> <span class="step-arrow">→</span> <strong>Save to Cloud</strong></div>
+                </div>
+                <div class="step-check"></div>
+            </div>
+
+            <div class="onboarding-step" id="onboard-step-4" data-step="race-class">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <div class="step-title">Choose race, class & religion</div>
+                    <div class="step-desc">Select from dropdowns in <strong>Character</strong> tab</div>
+                </div>
+                <div class="step-check"></div>
+            </div>
+
+            <div class="onboarding-step" id="onboard-step-5" data-step="lock-rc">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <div class="step-title">Lock race & class</div>
+                    <div class="step-desc">Click the <strong>Lock</strong> button next to your selections</div>
+                </div>
+                <div class="step-check"></div>
+            </div>
+
+            <div class="onboarding-step" id="onboard-step-6" data-step="attributes">
+                <div class="step-number">6</div>
+                <div class="step-content">
+                    <div class="step-title">Distribute attribute points</div>
+                    <div class="step-desc">Go to <strong>Stats</strong> tab <span class="step-arrow">→</span> Spend your <strong>10 points</strong></div>
+                </div>
+                <div class="step-check"></div>
+            </div>
+
+            <div class="onboarding-step" id="onboard-step-7" data-step="lock-attr">
+                <div class="step-number">7</div>
+                <div class="step-content">
+                    <div class="step-title">Lock attributes</div>
+                    <div class="step-desc">Click <strong>Lock Attributes</strong> button</div>
+                </div>
+                <div class="step-check"></div>
+            </div>
+
+            <div class="onboarding-step" id="onboard-step-8" data-step="campaign">
+                <div class="step-number">8</div>
+                <div class="step-content">
+                    <div class="step-title">Join a campaign</div>
+                    <div class="step-desc"><strong>Character</strong> tab <span class="step-arrow">→</span> Campaign section <span class="step-arrow">→</span> <strong>Link to Campaign</strong></div>
+                </div>
+                <div class="step-check"></div>
+            </div>
+
+            <div class="onboarding-step" id="onboard-step-9" data-step="overview">
+                <div class="step-number">9</div>
+                <div class="step-content">
+                    <div class="step-title">Go to Overview and enjoy your game!</div>
+                    <div class="step-desc">Click the <strong>Overview</strong> tab to see your character summary</div>
+                </div>
+                <div class="step-check"></div>
+            </div>
+        </div>
+
+        <div class="onboarding-tip">
+            <strong>Tip:</strong> Explore the other tabs to discover where everything is!
+        </div>
+
+        <div class="onboarding-footer">
+            <button class="onboarding-hide-btn" onclick="hideOnboardingPermanent()">Don't show again</button>
+        </div>
+    </div>
+
+    <!-- Onboarding Mobile Panel -->
+    <div id="onboarding-mobile" class="onboarding-mobile">
+        <button class="onboarding-mobile-toggle" onclick="toggleOnboardingMobile()">
+            <span class="toggle-icon">?</span>
+            <span class="toggle-text">Getting Started Guide</span>
+            <svg class="toggle-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="onboarding-mobile-content" id="onboarding-mobile-content">
+            <!-- Content cloned from sidebar via JS -->
+        </div>
+    </div>
+
     <div class="app-wrapper">
         <!-- Sidebar Toggle Button -->
         <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">
@@ -422,6 +534,11 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Help/Guide Button -->
+            <button class="onboarding-help-btn" id="onboarding-help-btn" onclick="showOnboarding()" title="Getting Started Guide">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </button>
         </div>
 
         <header class="header-compact">

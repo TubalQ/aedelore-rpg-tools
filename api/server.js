@@ -373,9 +373,9 @@ app.get('/api/me', authenticate, async (req, res) => {
         // Get campaigns count and list
         const campaignsResult = await db.query(`
             SELECT c.id, c.name, c.description, c.created_at,
-                   (SELECT COUNT(*) FROM sessions WHERE campaign_id = c.id) as session_count
+                   (SELECT COUNT(*) FROM sessions WHERE campaign_id = c.id AND deleted_at IS NULL) as session_count
             FROM campaigns c
-            WHERE c.user_id = $1
+            WHERE c.user_id = $1 AND c.deleted_at IS NULL
             ORDER BY c.updated_at DESC
         `, [userId]);
 
@@ -383,7 +383,7 @@ app.get('/api/me', authenticate, async (req, res) => {
         const charactersResult = await db.query(`
             SELECT id, name, updated_at
             FROM characters
-            WHERE user_id = $1
+            WHERE user_id = $1 AND deleted_at IS NULL
             ORDER BY updated_at DESC
         `, [userId]);
 
@@ -392,7 +392,7 @@ app.get('/api/me', authenticate, async (req, res) => {
             SELECT COUNT(*) as total
             FROM sessions s
             JOIN campaigns c ON s.campaign_id = c.id
-            WHERE c.user_id = $1
+            WHERE c.user_id = $1 AND s.deleted_at IS NULL AND c.deleted_at IS NULL
         `, [userId]);
 
         res.json({
@@ -457,7 +457,7 @@ app.put('/api/account/password', authenticate, async (req, res) => {
 app.get('/api/characters', authenticate, async (req, res) => {
     try {
         const characters = await db.all(
-            'SELECT id, name, system, updated_at FROM characters WHERE user_id = $1 ORDER BY updated_at DESC',
+            'SELECT id, name, system, updated_at FROM characters WHERE user_id = $1 AND deleted_at IS NULL ORDER BY updated_at DESC',
             [req.userId]
         );
         res.json(characters);
@@ -471,7 +471,7 @@ app.get('/api/characters', authenticate, async (req, res) => {
 app.get('/api/characters/:id', authenticate, async (req, res) => {
     try {
         const character = await db.get(
-            'SELECT * FROM characters WHERE id = $1 AND user_id = $2',
+            'SELECT * FROM characters WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [req.params.id, req.userId]
         );
 
@@ -542,7 +542,7 @@ app.put('/api/characters/:id', authenticate, async (req, res) => {
 
     try {
         const existing = await db.get(
-            'SELECT id FROM characters WHERE id = $1 AND user_id = $2',
+            'SELECT id FROM characters WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [req.params.id, req.userId]
         );
 
@@ -568,8 +568,9 @@ app.put('/api/characters/:id', authenticate, async (req, res) => {
 
 app.delete('/api/characters/:id', authenticate, async (req, res) => {
     try {
+        // Soft delete - set deleted_at timestamp instead of removing
         const result = await db.query(
-            'DELETE FROM characters WHERE id = $1 AND user_id = $2',
+            'UPDATE characters SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [req.params.id, req.userId]
         );
 
@@ -599,7 +600,7 @@ app.post('/api/characters/:id/link-campaign', authenticate, async (req, res) => 
     try {
         // Check if character exists and belongs to user
         const character = await db.get(
-            'SELECT id, campaign_id FROM characters WHERE id = $1 AND user_id = $2',
+            'SELECT id, campaign_id FROM characters WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [req.params.id, req.userId]
         );
 
@@ -609,7 +610,7 @@ app.post('/api/characters/:id/link-campaign', authenticate, async (req, res) => 
 
         // Find campaign by share code
         const campaign = await db.get(
-            'SELECT id, name, user_id FROM campaigns WHERE share_code = $1',
+            'SELECT id, name, user_id FROM campaigns WHERE share_code = $1 AND deleted_at IS NULL',
             [share_code.toUpperCase()]
         );
 
@@ -648,7 +649,7 @@ app.post('/api/characters/:id/link-campaign', authenticate, async (req, res) => 
 app.delete('/api/characters/:id/link-campaign', authenticate, async (req, res) => {
     try {
         const character = await db.get(
-            'SELECT id FROM characters WHERE id = $1 AND user_id = $2',
+            'SELECT id FROM characters WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [req.params.id, req.userId]
         );
 
@@ -674,7 +675,7 @@ app.get('/api/characters/:id/party', authenticate, async (req, res) => {
     try {
         // Get character and its campaign
         const character = await db.get(
-            'SELECT id, campaign_id FROM characters WHERE id = $1 AND user_id = $2',
+            'SELECT id, campaign_id FROM characters WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [req.params.id, req.userId]
         );
 
@@ -691,7 +692,7 @@ app.get('/api/characters/:id/party', authenticate, async (req, res) => {
             SELECT c.id, c.name, c.system, u.username as player_name
             FROM characters c
             JOIN users u ON c.user_id = u.id
-            WHERE c.campaign_id = $1 AND c.id != $2
+            WHERE c.campaign_id = $1 AND c.id != $2 AND c.deleted_at IS NULL
             ORDER BY c.name
         `, [character.campaign_id, req.params.id]);
 
@@ -711,7 +712,7 @@ app.get('/api/characters/:id/party', authenticate, async (req, res) => {
 app.post('/api/characters/:id/lock-race-class', authenticate, async (req, res) => {
     try {
         const character = await db.get(
-            'SELECT id, race_class_locked FROM characters WHERE id = $1 AND user_id = $2',
+            'SELECT id, race_class_locked FROM characters WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [req.params.id, req.userId]
         );
 
@@ -739,7 +740,7 @@ app.post('/api/characters/:id/lock-race-class', authenticate, async (req, res) =
 app.post('/api/characters/:id/lock-attributes', authenticate, async (req, res) => {
     try {
         const character = await db.get(
-            'SELECT id, race_class_locked, attributes_locked FROM characters WHERE id = $1 AND user_id = $2',
+            'SELECT id, race_class_locked, attributes_locked FROM characters WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [req.params.id, req.userId]
         );
 
@@ -771,7 +772,7 @@ app.post('/api/characters/:id/lock-attributes', authenticate, async (req, res) =
 app.post('/api/characters/:id/lock-abilities', authenticate, async (req, res) => {
     try {
         const character = await db.get(
-            'SELECT id, race_class_locked, attributes_locked, abilities_locked FROM characters WHERE id = $1 AND user_id = $2',
+            'SELECT id, race_class_locked, attributes_locked, abilities_locked FROM characters WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [req.params.id, req.userId]
         );
 
@@ -814,7 +815,7 @@ app.post('/api/characters/:id/spend-attribute-points', authenticate, async (req,
         }
 
         const character = await db.get(
-            'SELECT id, xp, xp_spent, attributes_locked FROM characters WHERE id = $1 AND user_id = $2',
+            'SELECT id, xp, xp_spent, attributes_locked FROM characters WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [req.params.id, req.userId]
         );
 
@@ -864,7 +865,7 @@ app.post('/api/dm/characters/:id/give-xp', authenticate, async (req, res) => {
             SELECT c.id, c.xp, c.campaign_id, camp.user_id as dm_id
             FROM characters c
             LEFT JOIN campaigns camp ON c.campaign_id = camp.id
-            WHERE c.id = $1
+            WHERE c.id = $1 AND c.deleted_at IS NULL
         `, [req.params.id]);
 
         if (!character) {
@@ -907,7 +908,7 @@ app.post('/api/dm/characters/:id/unlock', authenticate, async (req, res) => {
             SELECT c.id, c.campaign_id, camp.user_id as dm_id
             FROM characters c
             LEFT JOIN campaigns camp ON c.campaign_id = camp.id
-            WHERE c.id = $1
+            WHERE c.id = $1 AND c.deleted_at IS NULL
         `, [req.params.id]);
 
         if (!character) {
@@ -967,7 +968,7 @@ app.post('/api/dm/characters/:id/give-item', authenticate, async (req, res) => {
     try {
         // Get the character and verify DM owns the campaign
         const character = await db.get(
-            'SELECT c.id, c.data, c.campaign_id FROM characters c WHERE c.id = $1',
+            'SELECT c.id, c.data, c.campaign_id FROM characters c WHERE c.id = $1 AND c.deleted_at IS NULL',
             [req.params.id]
         );
 
@@ -984,7 +985,7 @@ app.post('/api/dm/characters/:id/give-item', authenticate, async (req, res) => {
 
         // Verify user is DM of this campaign
         const campaign = await db.get(
-            'SELECT id FROM campaigns WHERE id = $1 AND user_id = $2',
+            'SELECT id FROM campaigns WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [targetCampaignId, req.userId]
         );
 
@@ -1028,7 +1029,7 @@ app.get('/api/dm/campaigns/:id/characters', authenticate, async (req, res) => {
     try {
         // Verify user is DM of this campaign
         const campaign = await db.get(
-            'SELECT id FROM campaigns WHERE id = $1 AND user_id = $2',
+            'SELECT id FROM campaigns WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [req.params.id, req.userId]
         );
 
@@ -1041,7 +1042,7 @@ app.get('/api/dm/campaigns/:id/characters', authenticate, async (req, res) => {
                    u.username as player_name
             FROM characters c
             JOIN users u ON c.user_id = u.id
-            WHERE c.campaign_id = $1
+            WHERE c.campaign_id = $1 AND c.deleted_at IS NULL
             ORDER BY c.name
         `, [req.params.id]);
 
@@ -1076,10 +1077,11 @@ app.delete('/api/account', authenticate, async (req, res) => {
             return res.status(401).json({ error: 'Invalid password' });
         }
 
-        // Delete all user data (auth_tokens will be cascade deleted with user)
-        await db.query('DELETE FROM characters WHERE user_id = $1', [req.userId]);
-        await db.query('DELETE FROM sessions WHERE user_id = $1', [req.userId]);
-        await db.query('DELETE FROM campaigns WHERE user_id = $1', [req.userId]);
+        // Soft delete all user data (mark as deleted instead of removing)
+        await db.query('UPDATE characters SET deleted_at = CURRENT_TIMESTAMP WHERE user_id = $1 AND deleted_at IS NULL', [req.userId]);
+        await db.query('UPDATE sessions SET deleted_at = CURRENT_TIMESTAMP WHERE user_id = $1 AND deleted_at IS NULL', [req.userId]);
+        await db.query('UPDATE campaigns SET deleted_at = CURRENT_TIMESTAMP WHERE user_id = $1 AND deleted_at IS NULL', [req.userId]);
+        // Actually delete tokens and user (no need to soft delete these)
         await db.query('DELETE FROM auth_tokens WHERE user_id = $1', [req.userId]);
         await db.query('DELETE FROM users WHERE id = $1', [req.userId]);
 
@@ -1102,9 +1104,9 @@ app.get('/api/campaigns', authenticate, async (req, res) => {
     try {
         const campaigns = await db.all(`
             SELECT c.*,
-                   (SELECT COUNT(*) FROM sessions WHERE campaign_id = c.id) as session_count
+                   (SELECT COUNT(*) FROM sessions WHERE campaign_id = c.id AND deleted_at IS NULL) as session_count
             FROM campaigns c
-            WHERE c.user_id = $1
+            WHERE c.user_id = $1 AND c.deleted_at IS NULL
             ORDER BY c.updated_at DESC
         `, [req.userId]);
         res.json(campaigns);
@@ -1118,7 +1120,7 @@ app.get('/api/campaigns', authenticate, async (req, res) => {
 app.get('/api/campaigns/:id', authenticate, async (req, res) => {
     try {
         const campaign = await db.get(
-            'SELECT * FROM campaigns WHERE id = $1 AND user_id = $2',
+            'SELECT * FROM campaigns WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [req.params.id, req.userId]
         );
 
@@ -1127,7 +1129,7 @@ app.get('/api/campaigns/:id', authenticate, async (req, res) => {
         }
 
         const sessions = await db.all(
-            'SELECT id, session_number, date, location, status, updated_at FROM sessions WHERE campaign_id = $1 ORDER BY session_number DESC',
+            'SELECT id, session_number, date, location, status, updated_at FROM sessions WHERE campaign_id = $1 AND deleted_at IS NULL ORDER BY session_number DESC',
             [campaign.id]
         );
 
@@ -1169,7 +1171,7 @@ app.put('/api/campaigns/:id', authenticate, async (req, res) => {
 
     try {
         const existing = await db.get(
-            'SELECT id FROM campaigns WHERE id = $1 AND user_id = $2',
+            'SELECT id FROM campaigns WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [req.params.id, req.userId]
         );
 
@@ -1192,14 +1194,21 @@ app.put('/api/campaigns/:id', authenticate, async (req, res) => {
 
 app.delete('/api/campaigns/:id', authenticate, async (req, res) => {
     try {
+        // Soft delete - set deleted_at timestamp instead of removing
         const result = await db.query(
-            'DELETE FROM campaigns WHERE id = $1 AND user_id = $2',
+            'UPDATE campaigns SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [req.params.id, req.userId]
         );
 
         if (result.rowCount === 0) {
             return res.status(404).json({ error: 'Campaign not found' });
         }
+
+        // Also soft delete all sessions in this campaign
+        await db.query(
+            'UPDATE sessions SET deleted_at = CURRENT_TIMESTAMP WHERE campaign_id = $1 AND deleted_at IS NULL',
+            [req.params.id]
+        );
 
         res.json({ success: true });
     } catch (error) {
@@ -1218,7 +1227,7 @@ app.post('/api/campaigns/:id/share', authenticate, async (req, res) => {
     try {
         // Check ownership
         const campaign = await db.get(
-            'SELECT id, share_code FROM campaigns WHERE id = $1 AND user_id = $2',
+            'SELECT id, share_code FROM campaigns WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [req.params.id, req.userId]
         );
 
@@ -1275,7 +1284,7 @@ app.post('/api/campaigns/join', authenticate, async (req, res) => {
 
     try {
         const campaign = await db.get(
-            'SELECT id, name, user_id FROM campaigns WHERE share_code = $1',
+            'SELECT id, name, user_id FROM campaigns WHERE share_code = $1 AND deleted_at IS NULL',
             [share_code.toUpperCase()]
         );
 
@@ -1335,11 +1344,11 @@ app.get('/api/player/campaigns', authenticate, async (req, res) => {
     try {
         const campaigns = await db.all(`
             SELECT c.id, c.name, c.description, u.username as dm_name,
-                   (SELECT COUNT(*) FROM sessions WHERE campaign_id = c.id AND status = 'locked') as session_count
+                   (SELECT COUNT(*) FROM sessions WHERE campaign_id = c.id AND status = 'locked' AND deleted_at IS NULL) as session_count
             FROM campaigns c
             JOIN campaign_players cp ON c.id = cp.campaign_id
             JOIN users u ON c.user_id = u.id
-            WHERE cp.user_id = $1
+            WHERE cp.user_id = $1 AND c.deleted_at IS NULL
             ORDER BY cp.joined_at DESC
         `, [req.userId]);
 
@@ -1368,7 +1377,7 @@ app.get('/api/player/campaigns/:id', authenticate, async (req, res) => {
             SELECT c.id, c.name, c.description, u.username as dm_name
             FROM campaigns c
             JOIN users u ON c.user_id = u.id
-            WHERE c.id = $1
+            WHERE c.id = $1 AND c.deleted_at IS NULL
         `, [req.params.id]);
 
         if (!campaign) {
@@ -1379,7 +1388,7 @@ app.get('/api/player/campaigns/:id', authenticate, async (req, res) => {
         const lockedSessionsRaw = await db.all(`
             SELECT id, session_number, date, location, status, data
             FROM sessions
-            WHERE campaign_id = $1 AND status = 'locked'
+            WHERE campaign_id = $1 AND status = 'locked' AND deleted_at IS NULL
             ORDER BY session_number DESC
         `, [req.params.id]);
 
@@ -1397,7 +1406,7 @@ app.get('/api/player/campaigns/:id', authenticate, async (req, res) => {
         const latestSession = await db.get(`
             SELECT id, session_number, date, location, status, data
             FROM sessions
-            WHERE campaign_id = $1
+            WHERE campaign_id = $1 AND deleted_at IS NULL
             ORDER BY session_number DESC
             LIMIT 1
         `, [req.params.id]);
@@ -1470,7 +1479,7 @@ app.get('/api/campaigns/:id/players', authenticate, async (req, res) => {
     try {
         // Check if user is DM (owner) or a campaign member
         const campaign = await db.get(
-            'SELECT id, user_id FROM campaigns WHERE id = $1',
+            'SELECT id, user_id FROM campaigns WHERE id = $1 AND deleted_at IS NULL',
             [req.params.id]
         );
 
@@ -1507,7 +1516,7 @@ app.get('/api/campaigns/:id/players', authenticate, async (req, res) => {
                 c.abilities_locked as character_abilities_locked
             FROM users u
             JOIN campaign_players cp ON u.id = cp.user_id
-            LEFT JOIN characters c ON c.user_id = u.id AND c.campaign_id = $1
+            LEFT JOIN characters c ON c.user_id = u.id AND c.campaign_id = $1 AND c.deleted_at IS NULL
             WHERE cp.campaign_id = $1
             ORDER BY cp.joined_at
         `, [req.params.id]);
@@ -1553,7 +1562,7 @@ app.delete('/api/campaigns/:id/players/:playerId', authenticate, async (req, res
     try {
         // Check ownership
         const campaign = await db.get(
-            'SELECT id FROM campaigns WHERE id = $1 AND user_id = $2',
+            'SELECT id FROM campaigns WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [req.params.id, req.userId]
         );
 
@@ -1590,7 +1599,7 @@ app.delete('/api/campaigns/:id/players/:playerId', authenticate, async (req, res
 app.get('/api/campaigns/:campaignId/sessions', authenticate, async (req, res) => {
     try {
         const campaign = await db.get(
-            'SELECT id FROM campaigns WHERE id = $1 AND user_id = $2',
+            'SELECT id FROM campaigns WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [req.params.campaignId, req.userId]
         );
 
@@ -1599,7 +1608,7 @@ app.get('/api/campaigns/:campaignId/sessions', authenticate, async (req, res) =>
         }
 
         const sessions = await db.all(
-            'SELECT id, session_number, date, location, status, updated_at FROM sessions WHERE campaign_id = $1 ORDER BY session_number DESC',
+            'SELECT id, session_number, date, location, status, updated_at FROM sessions WHERE campaign_id = $1 AND deleted_at IS NULL ORDER BY session_number DESC',
             [req.params.campaignId]
         );
 
@@ -1614,7 +1623,7 @@ app.get('/api/campaigns/:campaignId/sessions', authenticate, async (req, res) =>
 app.get('/api/sessions/:id', authenticate, async (req, res) => {
     try {
         const session = await db.get(
-            'SELECT * FROM sessions WHERE id = $1 AND user_id = $2',
+            'SELECT * FROM sessions WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [req.params.id, req.userId]
         );
 
@@ -1653,7 +1662,7 @@ app.post('/api/campaigns/:campaignId/sessions', authenticate, async (req, res) =
         let sessionNum = session_number;
         if (!sessionNum) {
             const lastSession = await db.get(
-                'SELECT MAX(session_number) as max_num FROM sessions WHERE campaign_id = $1',
+                'SELECT MAX(session_number) as max_num FROM sessions WHERE campaign_id = $1 AND deleted_at IS NULL',
                 [req.params.campaignId]
             );
             sessionNum = (lastSession?.max_num || 0) + 1;
@@ -1686,7 +1695,7 @@ app.put('/api/sessions/:id', authenticate, async (req, res) => {
 
     try {
         const existing = await db.get(
-            'SELECT id, campaign_id, status, session_number FROM sessions WHERE id = $1 AND user_id = $2',
+            'SELECT id, campaign_id, status, session_number FROM sessions WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [req.params.id, req.userId]
         );
 
@@ -1719,7 +1728,7 @@ app.put('/api/sessions/:id', authenticate, async (req, res) => {
 app.put('/api/sessions/:id/lock', authenticate, async (req, res) => {
     try {
         const existing = await db.get(
-            'SELECT id FROM sessions WHERE id = $1 AND user_id = $2',
+            'SELECT id FROM sessions WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [req.params.id, req.userId]
         );
 
@@ -1746,7 +1755,7 @@ app.put('/api/sessions/:id/lock', authenticate, async (req, res) => {
 app.put('/api/sessions/:id/unlock', authenticate, async (req, res) => {
     try {
         const existing = await db.get(
-            'SELECT id FROM sessions WHERE id = $1 AND user_id = $2',
+            'SELECT id FROM sessions WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [req.params.id, req.userId]
         );
 
@@ -1770,7 +1779,7 @@ app.put('/api/sessions/:id/unlock', authenticate, async (req, res) => {
 app.delete('/api/sessions/:id', authenticate, async (req, res) => {
     try {
         const existing = await db.get(
-            'SELECT campaign_id FROM sessions WHERE id = $1 AND user_id = $2',
+            'SELECT campaign_id FROM sessions WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [req.params.id, req.userId]
         );
 
@@ -1778,7 +1787,8 @@ app.delete('/api/sessions/:id', authenticate, async (req, res) => {
             return res.status(404).json({ error: 'Session not found' });
         }
 
-        await db.query('DELETE FROM sessions WHERE id = $1', [req.params.id]);
+        // Soft delete - set deleted_at timestamp instead of removing
+        await db.query('UPDATE sessions SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1', [req.params.id]);
         await db.query('UPDATE campaigns SET updated_at = CURRENT_TIMESTAMP WHERE id = $1', [existing.campaign_id]);
 
         metrics.sessions.deletes++;
@@ -1788,6 +1798,198 @@ app.delete('/api/sessions/:id', authenticate, async (req, res) => {
     } catch (error) {
         console.error('Delete session error:', error);
         metrics.errors++;
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// ============================================
+// Trash / Restore Endpoints
+// ============================================
+
+// Get deleted characters (trash)
+app.get('/api/trash/characters', authenticate, async (req, res) => {
+    try {
+        const characters = await db.all(
+            'SELECT id, name, system, deleted_at FROM characters WHERE user_id = $1 AND deleted_at IS NOT NULL ORDER BY deleted_at DESC',
+            [req.userId]
+        );
+        res.json(characters);
+    } catch (error) {
+        console.error('Get deleted characters error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Get deleted campaigns (trash)
+app.get('/api/trash/campaigns', authenticate, async (req, res) => {
+    try {
+        const campaigns = await db.all(
+            'SELECT id, name, description, deleted_at FROM campaigns WHERE user_id = $1 AND deleted_at IS NOT NULL ORDER BY deleted_at DESC',
+            [req.userId]
+        );
+        res.json(campaigns);
+    } catch (error) {
+        console.error('Get deleted campaigns error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Get deleted sessions (trash) - for a specific campaign
+app.get('/api/trash/campaigns/:campaignId/sessions', authenticate, async (req, res) => {
+    try {
+        // Verify user owns the campaign (even if deleted)
+        const campaign = await db.get(
+            'SELECT id FROM campaigns WHERE id = $1 AND user_id = $2',
+            [req.params.campaignId, req.userId]
+        );
+
+        if (!campaign) {
+            return res.status(404).json({ error: 'Campaign not found' });
+        }
+
+        const sessions = await db.all(
+            'SELECT id, session_number, date, location, deleted_at FROM sessions WHERE campaign_id = $1 AND deleted_at IS NOT NULL ORDER BY deleted_at DESC',
+            [req.params.campaignId]
+        );
+        res.json(sessions);
+    } catch (error) {
+        console.error('Get deleted sessions error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Restore a deleted character
+app.post('/api/trash/characters/:id/restore', authenticate, async (req, res) => {
+    try {
+        const result = await db.query(
+            'UPDATE characters SET deleted_at = NULL WHERE id = $1 AND user_id = $2 AND deleted_at IS NOT NULL',
+            [req.params.id, req.userId]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Deleted character not found' });
+        }
+
+        res.json({ success: true, message: 'Character restored' });
+    } catch (error) {
+        console.error('Restore character error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Restore a deleted campaign (and its sessions)
+app.post('/api/trash/campaigns/:id/restore', authenticate, async (req, res) => {
+    try {
+        const result = await db.query(
+            'UPDATE campaigns SET deleted_at = NULL WHERE id = $1 AND user_id = $2 AND deleted_at IS NOT NULL',
+            [req.params.id, req.userId]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Deleted campaign not found' });
+        }
+
+        // Also restore all sessions that were deleted at the same time as the campaign
+        await db.query(
+            'UPDATE sessions SET deleted_at = NULL WHERE campaign_id = $1 AND deleted_at IS NOT NULL',
+            [req.params.id]
+        );
+
+        res.json({ success: true, message: 'Campaign and sessions restored' });
+    } catch (error) {
+        console.error('Restore campaign error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Restore a deleted session
+app.post('/api/trash/sessions/:id/restore', authenticate, async (req, res) => {
+    try {
+        // First check if parent campaign exists and is not deleted
+        const session = await db.get(
+            'SELECT s.id, s.campaign_id, c.deleted_at as campaign_deleted FROM sessions s JOIN campaigns c ON s.campaign_id = c.id WHERE s.id = $1 AND s.user_id = $2 AND s.deleted_at IS NOT NULL',
+            [req.params.id, req.userId]
+        );
+
+        if (!session) {
+            return res.status(404).json({ error: 'Deleted session not found' });
+        }
+
+        if (session.campaign_deleted) {
+            return res.status(400).json({ error: 'Cannot restore session - parent campaign is deleted. Restore the campaign first.' });
+        }
+
+        await db.query(
+            'UPDATE sessions SET deleted_at = NULL WHERE id = $1',
+            [req.params.id]
+        );
+
+        res.json({ success: true, message: 'Session restored' });
+    } catch (error) {
+        console.error('Restore session error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Permanently delete a character (from trash)
+app.delete('/api/trash/characters/:id', authenticate, async (req, res) => {
+    try {
+        const result = await db.query(
+            'DELETE FROM characters WHERE id = $1 AND user_id = $2 AND deleted_at IS NOT NULL',
+            [req.params.id, req.userId]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Deleted character not found' });
+        }
+
+        res.json({ success: true, message: 'Character permanently deleted' });
+    } catch (error) {
+        console.error('Permanent delete character error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Permanently delete a campaign (from trash)
+app.delete('/api/trash/campaigns/:id', authenticate, async (req, res) => {
+    try {
+        // First delete all sessions
+        await db.query(
+            'DELETE FROM sessions WHERE campaign_id = $1',
+            [req.params.id]
+        );
+
+        const result = await db.query(
+            'DELETE FROM campaigns WHERE id = $1 AND user_id = $2 AND deleted_at IS NOT NULL',
+            [req.params.id, req.userId]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Deleted campaign not found' });
+        }
+
+        res.json({ success: true, message: 'Campaign permanently deleted' });
+    } catch (error) {
+        console.error('Permanent delete campaign error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Permanently delete a session (from trash)
+app.delete('/api/trash/sessions/:id', authenticate, async (req, res) => {
+    try {
+        const result = await db.query(
+            'DELETE FROM sessions WHERE id = $1 AND user_id = $2 AND deleted_at IS NOT NULL',
+            [req.params.id, req.userId]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Deleted session not found' });
+        }
+
+        res.json({ success: true, message: 'Session permanently deleted' });
+    } catch (error) {
+        console.error('Permanent delete session error:', error);
         res.status(500).json({ error: 'Server error' });
     }
 });
