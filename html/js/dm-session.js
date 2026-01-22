@@ -273,12 +273,14 @@ function updateAuthUI() {
     const sidebarToggle = document.getElementById('sidebar-toggle');
 
     const myDataBtn = document.getElementById('my-data-btn');
+    const trashBtn = document.getElementById('trash-btn');
 
     if (authToken) {
         if (loginBtn) loginBtn.style.display = 'none';
         if (logoutBtn) logoutBtn.style.display = 'inline-flex';
         if (passwordBtn) passwordBtn.style.display = 'inline-flex';
         if (myDataBtn) myDataBtn.style.display = 'inline-flex';
+        if (trashBtn) trashBtn.style.display = 'inline-flex';
         if (saveBtn) saveBtn.style.display = 'inline-flex';
         if (loginRequired) loginRequired.style.display = 'none';
         // Show sidebar when logged in
@@ -290,6 +292,7 @@ function updateAuthUI() {
         if (logoutBtn) logoutBtn.style.display = 'none';
         if (passwordBtn) passwordBtn.style.display = 'none';
         if (myDataBtn) myDataBtn.style.display = 'none';
+        if (trashBtn) trashBtn.style.display = 'none';
         if (saveBtn) saveBtn.style.display = 'none';
         if (loginRequired) loginRequired.style.display = 'block';
         if (dashboard) dashboard.style.display = 'none';
@@ -615,6 +618,199 @@ function toggleMyDataAnalytics() {
 
 function hideMyDataModal() {
     document.getElementById('mydata-modal').style.display = 'none';
+}
+
+// ============================================
+// Trash Modal Functions
+// ============================================
+
+async function showDMTrashModal() {
+    const modal = document.getElementById('dm-trash-modal');
+    modal.style.display = 'flex';
+    await Promise.all([loadTrashCampaigns(), loadTrashSessions()]);
+}
+
+function hideDMTrashModal() {
+    document.getElementById('dm-trash-modal').style.display = 'none';
+}
+
+async function loadTrashCampaigns() {
+    const list = document.getElementById('trash-campaigns-list');
+    list.innerHTML = '<p class="trash-loading">Loading...</p>';
+
+    try {
+        const res = await fetch('/api/trash/campaigns', {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (!res.ok) throw new Error('Failed to load trash');
+
+        const campaigns = await res.json();
+
+        if (campaigns.length === 0) {
+            list.innerHTML = '<p class="trash-empty">No deleted campaigns</p>';
+            return;
+        }
+
+        list.innerHTML = campaigns.map(camp => {
+            const deletedDate = new Date(camp.deleted_at).toLocaleDateString();
+            return `
+                <div class="trash-item">
+                    <div class="trash-item-info">
+                        <span class="trash-item-name">${escapeHtml(camp.name)}</span>
+                        <span class="trash-item-date">Deleted: ${deletedDate}</span>
+                    </div>
+                    <div class="trash-item-actions">
+                        <button class="trash-btn trash-btn-restore" onclick="restoreCampaign(${camp.id})" title="Restore">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                            Restore
+                        </button>
+                        <button class="trash-btn trash-btn-delete" onclick="permanentDeleteCampaign(${camp.id}, '${escapeHtml(camp.name).replace(/'/g, "\\'")}')" title="Delete permanently">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error('Error loading trash campaigns:', err);
+        list.innerHTML = '<p class="trash-error">Failed to load deleted campaigns</p>';
+    }
+}
+
+async function loadTrashSessions() {
+    const list = document.getElementById('trash-sessions-list');
+    list.innerHTML = '<p class="trash-loading">Loading...</p>';
+
+    try {
+        const res = await fetch('/api/trash/sessions', {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (!res.ok) throw new Error('Failed to load trash');
+
+        const sessions = await res.json();
+
+        if (sessions.length === 0) {
+            list.innerHTML = '<p class="trash-empty">No deleted sessions</p>';
+            return;
+        }
+
+        list.innerHTML = sessions.map(sess => {
+            const deletedDate = new Date(sess.deleted_at).toLocaleDateString();
+            const sessionName = `Session ${sess.session_number}` + (sess.campaign_name ? ` (${sess.campaign_name})` : '');
+            return `
+                <div class="trash-item">
+                    <div class="trash-item-info">
+                        <span class="trash-item-name">${escapeHtml(sessionName)}</span>
+                        <span class="trash-item-date">Deleted: ${deletedDate}</span>
+                    </div>
+                    <div class="trash-item-actions">
+                        <button class="trash-btn trash-btn-restore" onclick="restoreSession(${sess.id})" title="Restore">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                            Restore
+                        </button>
+                        <button class="trash-btn trash-btn-delete" onclick="permanentDeleteSession(${sess.id}, '${escapeHtml(sessionName).replace(/'/g, "\\'")}')" title="Delete permanently">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error('Error loading trash sessions:', err);
+        list.innerHTML = '<p class="trash-error">Failed to load deleted sessions</p>';
+    }
+}
+
+async function restoreCampaign(id) {
+    try {
+        const res = await fetch(`/api/trash/campaigns/${id}/restore`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (!res.ok) throw new Error('Failed to restore');
+
+        alert('Campaign restored successfully!');
+        await loadTrashCampaigns();
+        await loadCampaigns(); // Refresh campaign list
+    } catch (err) {
+        console.error('Error restoring campaign:', err);
+        alert('Failed to restore campaign');
+    }
+}
+
+async function permanentDeleteCampaign(id, name) {
+    if (!confirm(`Are you sure you want to PERMANENTLY delete "${name}"?\n\nThis will also delete all sessions in this campaign!\n\nThis cannot be undone!`)) {
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/trash/campaigns/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (!res.ok) throw new Error('Failed to delete');
+
+        alert('Campaign permanently deleted.');
+        await loadTrashCampaigns();
+    } catch (err) {
+        console.error('Error deleting campaign:', err);
+        alert('Failed to delete campaign');
+    }
+}
+
+async function restoreSession(id) {
+    try {
+        const res = await fetch(`/api/trash/sessions/${id}/restore`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (!res.ok) throw new Error('Failed to restore');
+
+        alert('Session restored successfully!');
+        await loadTrashSessions();
+        // If we're viewing a campaign, refresh the session list
+        if (currentCampaign) {
+            await loadCampaignSessions(currentCampaign.id);
+        }
+    } catch (err) {
+        console.error('Error restoring session:', err);
+        alert('Failed to restore session');
+    }
+}
+
+async function permanentDeleteSession(id, name) {
+    if (!confirm(`Are you sure you want to PERMANENTLY delete "${name}"?\n\nThis cannot be undone!`)) {
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/trash/sessions/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (!res.ok) throw new Error('Failed to delete');
+
+        alert('Session permanently deleted.');
+        await loadTrashSessions();
+    } catch (err) {
+        console.error('Error deleting session:', err);
+        alert('Failed to delete session');
+    }
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // ============================================

@@ -3095,6 +3095,130 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* ===========================================
+   Trash Modal
+   =========================================== */
+.modal-content-wide {
+    max-width: 600px;
+    width: 95%;
+}
+
+.trash-section {
+    margin-bottom: var(--space-4);
+}
+
+.trash-section-title {
+    font-size: var(--font-size-sm);
+    color: var(--text-subdued);
+    margin-bottom: var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.trash-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.trash-empty,
+.trash-loading,
+.trash-error {
+    color: var(--text-muted);
+    font-style: italic;
+    padding: var(--space-4);
+    text-align: center;
+}
+
+.trash-error {
+    color: var(--accent-red);
+}
+
+.trash-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3) var(--space-4);
+    margin-bottom: var(--space-2);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    gap: var(--space-3);
+}
+
+.trash-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    flex: 1;
+    min-width: 0;
+}
+
+.trash-item-name {
+    font-weight: 600;
+    color: var(--text-base);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.trash-item-date {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
+
+.trash-item-actions {
+    display: flex;
+    gap: var(--space-2);
+    flex-shrink: 0;
+}
+
+.trash-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-xs);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.trash-btn-restore {
+    background: var(--accent-green-20);
+    color: var(--accent-green);
+}
+
+.trash-btn-restore:hover {
+    background: var(--accent-green-30);
+}
+
+.trash-btn-delete {
+    background: rgba(229, 77, 77, 0.1);
+    color: var(--accent-red);
+}
+
+.trash-btn-delete:hover {
+    background: rgba(229, 77, 77, 0.2);
+}
+
+@media (max-width: 500px) {
+    .trash-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .trash-item-actions {
+        width: 100%;
+        margin-top: var(--space-2);
+    }
+
+    .trash-btn {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+/* ===========================================
    Print Styles
    =========================================== */
 @media print {

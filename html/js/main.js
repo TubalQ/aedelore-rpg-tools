@@ -1144,6 +1144,110 @@ function hideCharacterListModal() {
     document.getElementById('character-list-modal').style.display = 'none';
 }
 
+// ==========================================
+// Trash Modal Functions
+// ==========================================
+
+async function showTrashModal() {
+    const modal = document.getElementById('trash-modal');
+    modal.style.display = 'flex';
+    await loadTrashCharacters();
+}
+
+function hideTrashModal() {
+    document.getElementById('trash-modal').style.display = 'none';
+}
+
+async function loadTrashCharacters() {
+    const list = document.getElementById('trash-characters-list');
+    list.innerHTML = '<p class="trash-loading">Loading...</p>';
+
+    try {
+        const res = await fetch('/api/trash/characters', {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (!res.ok) throw new Error('Failed to load trash');
+
+        const characters = await res.json();
+
+        if (characters.length === 0) {
+            list.innerHTML = '<p class="trash-empty">No deleted characters</p>';
+            return;
+        }
+
+        list.innerHTML = characters.map(char => {
+            const deletedDate = new Date(char.deleted_at).toLocaleDateString();
+            const charName = char.char_data?.character_name || char.char_data?.name || 'Unnamed';
+            return `
+                <div class="trash-item">
+                    <div class="trash-item-info">
+                        <span class="trash-item-name">${escapeHtml(charName)}</span>
+                        <span class="trash-item-date">Deleted: ${deletedDate}</span>
+                    </div>
+                    <div class="trash-item-actions">
+                        <button class="trash-btn trash-btn-restore" onclick="restoreCharacter(${char.id})" title="Restore">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                            Restore
+                        </button>
+                        <button class="trash-btn trash-btn-delete" onclick="permanentDeleteCharacter(${char.id}, '${escapeHtml(charName).replace(/'/g, "\\'")}')" title="Delete permanently">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error('Error loading trash:', err);
+        list.innerHTML = '<p class="trash-error">Failed to load deleted characters</p>';
+    }
+}
+
+async function restoreCharacter(id) {
+    try {
+        const res = await fetch(`/api/trash/characters/${id}/restore`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (!res.ok) throw new Error('Failed to restore');
+
+        alert('Character restored successfully!');
+        await loadTrashCharacters();
+    } catch (err) {
+        console.error('Error restoring character:', err);
+        alert('Failed to restore character');
+    }
+}
+
+async function permanentDeleteCharacter(id, name) {
+    if (!confirm(`Are you sure you want to PERMANENTLY delete "${name}"?\n\nThis cannot be undone!`)) {
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/trash/characters/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (!res.ok) throw new Error('Failed to delete');
+
+        alert('Character permanently deleted.');
+        await loadTrashCharacters();
+    } catch (err) {
+        console.error('Error deleting character:', err);
+        alert('Failed to delete character');
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 async function loadCharacterById(id) {
     try {
         const res = await fetch(`/api/characters/${id}`, {
