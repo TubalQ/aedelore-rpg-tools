@@ -2997,7 +2997,7 @@
             // Reset all equipment fields first
             const fieldsToReset = [
                 'weapon_1_type', 'weapon_2_type',
-                'armor_2_type', 'armor_3_type', 'armor_5_type',
+                'armor_1_type', 'armor_2_type', 'armor_3_type', 'armor_5_type',
                 'shield_type'
             ];
             fieldsToReset.forEach(fieldId => {
@@ -3047,13 +3047,13 @@
                         armor3Field.dispatchEvent(new Event('change'));
                     }
                 } else if (typeof armorData === 'object') {
-                    // New format: object with chest, shoulders, legs
-                    // Chest (armor_3)
-                    if (armorData.chest) {
-                        const chestField = document.getElementById('armor_3_type');
-                        if (chestField) {
-                            chestField.value = armorData.chest;
-                            chestField.dispatchEvent(new Event('change'));
+                    // New format: object with head, shoulders, chest, legs
+                    // Head (armor_1)
+                    if (armorData.head) {
+                        const headField = document.getElementById('armor_1_type');
+                        if (headField) {
+                            headField.value = armorData.head;
+                            headField.dispatchEvent(new Event('change'));
                         }
                     }
                     // Shoulders (armor_2)
@@ -3062,6 +3062,14 @@
                         if (shouldersField) {
                             shouldersField.value = armorData.shoulders;
                             shouldersField.dispatchEvent(new Event('change'));
+                        }
+                    }
+                    // Chest (armor_3)
+                    if (armorData.chest) {
+                        const chestField = document.getElementById('armor_3_type');
+                        if (chestField) {
+                            chestField.value = armorData.chest;
+                            chestField.dispatchEvent(new Event('change'));
                         }
                     }
                     // Legs (armor_5)

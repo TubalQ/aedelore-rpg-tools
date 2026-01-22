@@ -44,7 +44,7 @@ const CLASSES = {
             "+1 Acrobatics",
             "+1 Perception",
             "+1 Deception",
-            "Starting Armor: Leather (chest, legs), Cloth (shoulders)",
+            "Starting Armor: Leather (chest, legs), Cloth (head, shoulders)",
             "Starting Weapon: Dagger",
             "Starting Gold: 7",
             "Starting Worthiness: -4",
@@ -54,6 +54,7 @@ const CLASSES = {
         ],
         startingEquipment: {
             armor: {
+                head: "Cloth Hood",
                 chest: "Leather",
                 shoulders: "Cloth Mantle",
                 legs: "Leather Greaves"
