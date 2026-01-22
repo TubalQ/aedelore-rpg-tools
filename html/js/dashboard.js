@@ -1,45 +1,6 @@
 // Dashboard and Status Bar functionality
 
 // ===========================================
-// FIRST TIME WELCOME BOX
-// ===========================================
-
-function initFirstTimeBox() {
-    const dismissed = localStorage.getItem('aedelore_first_time_dismissed');
-    if (!dismissed) {
-        const box = document.getElementById('first-time-box');
-        if (box) {
-            box.style.display = 'block';
-        }
-    }
-}
-
-function dismissFirstTimeBox() {
-    const box = document.getElementById('first-time-box');
-    if (box) {
-        box.style.display = 'none';
-    }
-    localStorage.setItem('aedelore_first_time_dismissed', 'true');
-}
-
-function showFirstTimeGuide() {
-    dismissFirstTimeBox();
-    switchTab('page-tools');
-    setTimeout(() => {
-        // Switch to Help tab within Tools
-        document.querySelectorAll('.tools-tab').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('.tools-content').forEach(content => content.classList.remove('active'));
-        const helpTab = document.querySelector('.tools-tab:last-child');
-        const helpContent = document.getElementById('tools-help');
-        if (helpTab) helpTab.classList.add('active');
-        if (helpContent) helpContent.classList.add('active');
-    }, 100);
-}
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', initFirstTimeBox);
-
-// ===========================================
 // STATUS BAR SYNC
 // ===========================================
 
