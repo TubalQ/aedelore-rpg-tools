@@ -118,11 +118,22 @@
             if (container) {
                 container.style.display = '';
             }
+            // Show sidebar for Aedelore (it's designed for this system)
+            const sidebar = document.getElementById('desktop-sidebar');
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            if (sidebar) sidebar.style.display = '';
+            if (sidebarToggle) sidebarToggle.style.display = '';
             return;
         }
 
         // For other systems, render the custom sheet
         renderSystemSheet(systemId, config);
+
+        // Hide sidebar for non-Aedelore systems (not compatible)
+        const sidebar = document.getElementById('desktop-sidebar');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        if (sidebar) sidebar.style.display = 'none';
+        if (sidebarToggle) sidebarToggle.style.display = 'none';
     }
 
     // Render a custom character sheet for non-Aedelore systems
