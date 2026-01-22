@@ -7411,8 +7411,8 @@ async function loadCampaignPlayers(campaignId) {
         });
 
         if (res.ok) {
-            const players = await res.json();
-            renderSharePlayersList(players);
+            const data = await res.json();
+            renderSharePlayersList(data.players || []);
         } else {
             renderSharePlayersList([]);
         }
