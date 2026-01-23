@@ -3311,7 +3311,7 @@ function renderPlayersList() {
             ? '<span style="background: var(--accent-green-20); color: var(--accent-green); padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; margin-left: 8px;">MEMBER</span>'
             : '';
         const removeBtn = isCampaignMember
-            ? ''
+            ? `<button class="remove-btn" onclick="removeSessionPlayer(${i}, true)" title="Force remove">&times;</button>`
             : `<button class="remove-btn" onclick="removeSessionPlayer(${i})">&times;</button>`;
         const playerInputReadonly = isCampaignMember ? 'readonly style="background: var(--bg-highlight);"' : '';
 
@@ -3413,7 +3413,12 @@ function addPlayer() {
     triggerAutoSave();
 }
 
-function removeSessionPlayer(index) {
+function removeSessionPlayer(index, isMember = false) {
+    if (isMember) {
+        if (!confirm('This player is a campaign member. Remove from this session?')) {
+            return;
+        }
+    }
     sessionData.players.splice(index, 1);
     renderPlayersList();
     triggerAutoSave();
@@ -3486,6 +3491,15 @@ async function syncCampaignPlayers() {
                 };
                 sessionData.players.push(newPlayer);
             }
+        });
+
+        // Remove campaign members who are no longer in the campaign
+        const campaignUserIds = new Set(campaignPlayers.map(cp => cp.id));
+        sessionData.players = sessionData.players.filter(p => {
+            if (p.isCampaignMember && p.userId && !campaignUserIds.has(p.userId)) {
+                return false;
+            }
+            return true;
         });
 
         renderPlayersList();
