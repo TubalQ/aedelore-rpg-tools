@@ -2463,6 +2463,9 @@ function checkStepLockRaceClass() {
 }
 
 function checkStepAttributes() {
+    // Must have locked race/class first (otherwise baseAttributeValues is empty)
+    if (!raceClassLocked) return false;
+
     // Check if user has distributed all 10 free points
     const pointsUsed = getFreePointsUsed();
     return pointsUsed >= FREE_POINTS_TOTAL;

@@ -105,8 +105,8 @@ function initializeSliders() {
         if (value >= 7) return "People respect you and listen to what you have to say";
         if (value >= 5) return "Nobody has anything against you, you are an ordinary citizen";
         if (value >= 3) return "People accept you but keep an eye on you";
-        if (value >= 1) return "You are unknown and people are cautious around you";
-        if (value === 0) return "People don't care about you, you are a nobody";
+        if (value >= 1) return "You are a stranger, people are cautious around you";
+        if (value === 0) return "You are unremarkable, people barely notice you";
         if (value >= -2) return "Distrust follows you, people keep their distance";
         if (value >= -5) return "Bad reputation, guards are keeping tabs on you";
         if (value >= -8) return "You are notorious, many cities don't want you here";

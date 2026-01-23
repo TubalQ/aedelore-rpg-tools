@@ -8583,6 +8583,20 @@ input.locked:disabled {
     color: var(--accent-purple);
 }
 
+.onboarding-note {
+    padding: var(--space-2) var(--space-4);
+    margin: var(--space-2) var(--space-4);
+    background: rgba(251, 191, 36, 0.1);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    border-left: 2px solid #f59e0b;
+}
+
+.onboarding-note strong {
+    color: #f59e0b;
+}
+
 .onboarding-footer {
     padding: var(--space-3) var(--space-4);
     border-top: 1px solid var(--border-subtle);
