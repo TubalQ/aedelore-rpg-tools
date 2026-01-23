@@ -3401,6 +3401,7 @@ function renderPlayersList() {
                         <div style="display: flex; gap: 6px;">
                             <button class="btn-small btn-gold" onclick="showGiveXPModal(${p.characterId}, '${escapeHtml(p.character || p.player)}')" title="Give XP">✨ XP</button>
                             <button class="btn-small btn-secondary" onclick="unlockCharacter(${p.characterId}, '${escapeHtml(p.character || p.player)}')" title="Unlock">🔓</button>
+                            <button class="btn-small" onclick="showPlayerBuild(${p.characterId}, '${escapeHtml(p.character || p.player)}')" title="View Build" style="background: var(--accent-cyan);">📊</button>
                         </div>
                     </div>
                 </div>
@@ -5006,6 +5007,190 @@ function hideConfirmModal() {
 }
 
 // ============================================
+// View Player Build (DM Function)
+// ============================================
+
+async function showPlayerBuild(characterId, characterName) {
+    if (!authToken) return;
+
+    const modal = document.getElementById('player-build-modal');
+    const title = document.getElementById('player-build-title');
+    const content = document.getElementById('player-build-content');
+
+    title.textContent = `${characterName}'s Build`;
+    content.innerHTML = '<p style="color: var(--text-secondary);">Loading...</p>';
+    modal.style.display = 'flex';
+
+    try {
+        const res = await fetch(`/api/dm/characters/${characterId}/build`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (!res.ok) {
+            const data = await res.json();
+            content.innerHTML = `<p style="color: var(--accent-red);">Error: ${data.error || 'Could not load build'}</p>`;
+            return;
+        }
+
+        const { data } = await res.json();
+        content.innerHTML = renderPlayerBuildContent(data);
+
+    } catch (error) {
+        console.error('Error fetching player build:', error);
+        content.innerHTML = '<p style="color: var(--accent-red);">Error loading character build</p>';
+    }
+}
+
+function hidePlayerBuildModal() {
+    document.getElementById('player-build-modal').style.display = 'none';
+}
+
+function renderPlayerBuildContent(data) {
+    if (!data) {
+        return '<p style="color: var(--text-secondary);">No character data available</p>';
+    }
+
+    let html = '';
+
+    // Helper function to get value
+    const getVal = (key) => {
+        const raw = data[key];
+        return (raw !== undefined && raw !== '' && !isNaN(parseInt(raw))) ? parseInt(raw) : 0;
+    };
+
+    // Attributes with their skills
+    const attributeGroups = [
+        {
+            name: 'STRENGTH',
+            key: 'strength_value',
+            skills: [
+                { key: 'strength_athletics', label: 'Athletics' },
+                { key: 'strength_raw_power', label: 'Raw Power' },
+                { key: 'strength_unarmed', label: 'Unarmed' }
+            ]
+        },
+        {
+            name: 'DEXTERITY',
+            key: 'dexterity_value',
+            skills: [
+                { key: 'dexterity_endurance', label: 'Endurance' },
+                { key: 'dexterity_acrobatics', label: 'Acrobatics' },
+                { key: 'dexterity_sleight_of_hand', label: 'Sleight of Hand' },
+                { key: 'dexterity_stealth', label: 'Stealth' }
+            ]
+        },
+        {
+            name: 'TOUGHNESS',
+            key: 'toughness_value',
+            skills: [
+                { key: 'toughness_bonus_while_injured', label: 'Bonus Injured' },
+                { key: 'toughness_resistance', label: 'Resistance' }
+            ]
+        },
+        {
+            name: 'INTELLIGENCE',
+            key: 'intelligence_value',
+            skills: [
+                { key: 'intelligence_arcana', label: 'Arcana' },
+                { key: 'intelligence_history', label: 'History' },
+                { key: 'intelligence_investigation', label: 'Investigation' },
+                { key: 'intelligence_nature', label: 'Nature' },
+                { key: 'intelligence_religion', label: 'Religion' }
+            ]
+        },
+        {
+            name: 'WISDOM',
+            key: 'wisdom_value',
+            skills: [
+                { key: 'wisdom_luck', label: 'Luck' },
+                { key: 'wisdom_animal_handling', label: 'Animal Handling' },
+                { key: 'wisdom_insight', label: 'Insight' },
+                { key: 'wisdom_medicine', label: 'Medicine' },
+                { key: 'wisdom_perception', label: 'Perception' },
+                { key: 'wisdom_survival', label: 'Survival' }
+            ]
+        },
+        {
+            name: 'FORCE OF WILL',
+            key: 'force_of_will_value',
+            skills: [
+                { key: 'force_of_will_deception', label: 'Deception' },
+                { key: 'force_of_will_intimidation', label: 'Intimidation' },
+                { key: 'force_of_will_performance', label: 'Performance' },
+                { key: 'force_of_will_persuasion', label: 'Persuasion' }
+            ]
+        },
+        {
+            name: 'THIRD EYE',
+            key: 'third_eye_value',
+            skills: []
+        }
+    ];
+
+    // Render attributes section
+    html += `<div style="margin-bottom: var(--space-4);">
+        <div style="font-size: 0.75rem; color: var(--accent-purple); font-weight: 600; margin-bottom: 8px; text-transform: uppercase; border-bottom: 1px solid var(--border-subtle); padding-bottom: 4px;">Attributes & Skills</div>`;
+
+    attributeGroups.forEach(group => {
+        const mainVal = getVal(group.key);
+        if (mainVal === 0 && group.skills.every(s => getVal(s.key) === 0)) {
+            return; // Skip empty attributes
+        }
+
+        html += `<div style="background: var(--bg-surface); padding: 10px; border-radius: 6px; border: 1px solid var(--border-subtle); margin-bottom: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: ${group.skills.length > 0 ? '6px' : '0'};">
+                <span style="font-weight: 600; color: var(--text-base); font-size: 0.85rem;">${group.name}</span>
+                <span style="background: var(--accent-purple-20); color: var(--accent-purple); padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 0.85rem;">${mainVal}</span>
+            </div>`;
+
+        // Render skills for this attribute
+        const nonZeroSkills = group.skills.filter(s => getVal(s.key) > 0);
+        if (nonZeroSkills.length > 0) {
+            html += '<div style="display: flex; flex-wrap: wrap; gap: 4px;">';
+            nonZeroSkills.forEach(skill => {
+                const val = getVal(skill.key);
+                html += `<span style="font-size: 0.75rem; color: var(--text-secondary); background: var(--bg-elevated); padding: 2px 6px; border-radius: 3px;">
+                    ${skill.label}: <strong style="color: var(--accent-green);">${val}</strong>
+                </span>`;
+            });
+            html += '</div>';
+        }
+
+        html += '</div>';
+    });
+
+    html += '</div>';
+
+    // Abilities section
+    const abilities = [];
+    for (let i = 1; i <= 10; i++) {
+        const ability = data[`spell_${i}_type`];
+        if (ability && ability.trim()) {
+            abilities.push(ability);
+        }
+    }
+
+    html += `<div>
+        <div style="font-size: 0.75rem; color: var(--accent-cyan); font-weight: 600; margin-bottom: 8px; text-transform: uppercase; border-bottom: 1px solid var(--border-subtle); padding-bottom: 4px;">Abilities (${abilities.length})</div>`;
+
+    if (abilities.length > 0) {
+        html += '<div style="display: flex; flex-direction: column; gap: 4px;">';
+        abilities.forEach(ability => {
+            html += `<div style="background: var(--bg-surface); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); font-size: 0.85rem; color: var(--text-base);">
+                ${escapeHtml(ability)}
+            </div>`;
+        });
+        html += '</div>';
+    } else {
+        html += '<p style="color: var(--text-secondary); font-style: italic; font-size: 0.85rem;">No abilities selected yet</p>';
+    }
+
+    html += '</div>';
+
+    return html;
+}
+
+// ============================================
 // Give XP & Unlock Character (DM Functions)
 // ============================================
 
@@ -5104,73 +5289,116 @@ async function giveItemToPlayer(itemIndex, playerName) {
     }
 }
 
-let pendingUnlockCharacterId = null;
+let pendingLockCharacterId = null;
+let pendingLockStates = { rc: false, attr: false, abil: false };
 
-function unlockCharacter(characterId, characterName) {
+function manageLocks(characterId, characterName, rcLocked, attrLocked, abilLocked) {
     if (!authToken) return;
 
-    pendingUnlockCharacterId = characterId;
+    pendingLockCharacterId = characterId;
+    pendingLockStates = { rc: rcLocked, attr: attrLocked, abil: abilLocked };
 
-    // Show custom unlock modal
     const modal = document.getElementById('confirm-modal');
-    document.getElementById('confirm-title').textContent = 'Unlock Character';
-    document.getElementById('confirm-message').textContent = `What do you want to unlock for ${characterName}?`;
+    document.getElementById('confirm-title').textContent = 'Manage Locks';
+    document.getElementById('confirm-message').innerHTML = `<strong>${characterName}</strong><br><span style="font-size: 0.85rem; color: var(--text-secondary);">Click to toggle lock state:</span>`;
 
     const btnContainer = modal.querySelector('div[style*="flex"]');
     btnContainer.style.flexWrap = 'wrap';
-    btnContainer.innerHTML = `
-        <button onclick="doUnlock('race_class')" style="background: var(--accent-blue); flex: 1; min-width: 80px;">Race/Class</button>
-        <button onclick="doUnlock('attributes')" style="background: var(--accent-green); flex: 1; min-width: 80px;">Attributes</button>
-        <button onclick="doUnlock('abilities')" style="background: var(--primary-purple); flex: 1; min-width: 80px;">Abilities</button>
-        <button onclick="doUnlock('all')" class="modal-submit" style="flex: 1; min-width: 80px;">All</button>
-        <button onclick="hideConfirmModal(); pendingUnlockCharacterId = null;" style="background: var(--bg-elevated); width: 100%; margin-top: 8px;">Cancel</button>
-    `;
 
+    updateLockModalButtons();
     modal.style.display = 'flex';
 }
 
-async function doUnlock(unlockChoice) {
+function updateLockModalButtons() {
+    const modal = document.getElementById('confirm-modal');
+    const btnContainer = modal.querySelector('div[style*="flex"]');
+
+    const rcIcon = pendingLockStates.rc ? '🔒' : '🔓';
+    const rcColor = pendingLockStates.rc ? 'var(--accent-green)' : 'var(--accent-red)';
+    const rcText = pendingLockStates.rc ? 'Locked' : 'Unlocked';
+
+    const attrIcon = pendingLockStates.attr ? '🔒' : '🔓';
+    const attrColor = pendingLockStates.attr ? 'var(--accent-green)' : 'var(--accent-red)';
+    const attrText = pendingLockStates.attr ? 'Locked' : 'Unlocked';
+
+    const abilIcon = pendingLockStates.abil ? '🔒' : '🔓';
+    const abilColor = pendingLockStates.abil ? 'var(--accent-green)' : 'var(--accent-red)';
+    const abilText = pendingLockStates.abil ? 'Locked' : 'Unlocked';
+
+    btnContainer.innerHTML = `
+        <button onclick="toggleLockState('rc')" style="background: ${rcColor}; flex: 1; min-width: 100px; display: flex; flex-direction: column; align-items: center; padding: 10px;">
+            <span style="font-size: 1.2rem;">${rcIcon}</span>
+            <span style="font-size: 0.75rem; font-weight: 600;">Race/Class</span>
+            <span style="font-size: 0.65rem; opacity: 0.8;">${rcText}</span>
+        </button>
+        <button onclick="toggleLockState('attr')" style="background: ${attrColor}; flex: 1; min-width: 100px; display: flex; flex-direction: column; align-items: center; padding: 10px;">
+            <span style="font-size: 1.2rem;">${attrIcon}</span>
+            <span style="font-size: 0.75rem; font-weight: 600;">Attributes</span>
+            <span style="font-size: 0.65rem; opacity: 0.8;">${attrText}</span>
+        </button>
+        <button onclick="toggleLockState('abil')" style="background: ${abilColor}; flex: 1; min-width: 100px; display: flex; flex-direction: column; align-items: center; padding: 10px;">
+            <span style="font-size: 1.2rem;">${abilIcon}</span>
+            <span style="font-size: 0.75rem; font-weight: 600;">Abilities</span>
+            <span style="font-size: 0.65rem; opacity: 0.8;">${abilText}</span>
+        </button>
+        <div style="width: 100%; display: flex; gap: 8px; margin-top: 12px;">
+            <button onclick="saveLockStates()" class="modal-submit" style="flex: 1;">Save Changes</button>
+            <button onclick="hideConfirmModal(); pendingLockCharacterId = null;" style="background: var(--bg-elevated); flex: 1;">Cancel</button>
+        </div>
+    `;
+}
+
+function toggleLockState(type) {
+    if (type === 'rc') pendingLockStates.rc = !pendingLockStates.rc;
+    if (type === 'attr') pendingLockStates.attr = !pendingLockStates.attr;
+    if (type === 'abil') pendingLockStates.abil = !pendingLockStates.abil;
+    updateLockModalButtons();
+}
+
+async function saveLockStates() {
     hideConfirmModal();
 
-    if (!pendingUnlockCharacterId || !authToken) return;
+    if (!pendingLockCharacterId || !authToken) return;
 
-    const characterId = pendingUnlockCharacterId;
-    pendingUnlockCharacterId = null;
+    const characterId = pendingLockCharacterId;
+    pendingLockCharacterId = null;
 
     try {
-        const body = {};
-        if (unlockChoice === 'race_class' || unlockChoice === 'all') {
-            body.unlock_race_class = true;
-        }
-        if (unlockChoice === 'attributes' || unlockChoice === 'all') {
-            body.unlock_attributes = true;
-        }
-        if (unlockChoice === 'abilities' || unlockChoice === 'all') {
-            body.unlock_abilities = true;
-        }
-
-        const res = await fetch(`/api/dm/characters/${characterId}/unlock`, {
+        const res = await fetch(`/api/dm/characters/${characterId}/set-locks`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${authToken}`
             },
-            body: JSON.stringify(body)
+            body: JSON.stringify({
+                race_class_locked: pendingLockStates.rc,
+                attributes_locked: pendingLockStates.attr,
+                abilities_locked: pendingLockStates.abil
+            })
         });
 
         if (!res.ok) {
             const data = await res.json();
-            alert(`Error: ${data.error || 'Could not unlock'}`);
+            alert(`Error: ${data.error || 'Could not update locks'}`);
             return;
         }
-
-        alert('Character has been unlocked!');
 
         // Refresh player list to show updated lock status
         await syncCampaignPlayers();
     } catch (error) {
         alert('Connection error. Try again.');
     }
+}
+
+// Legacy function for backwards compatibility
+function unlockCharacter(characterId, characterName) {
+    // Find player to get current lock states
+    const player = (sessionData.players || []).find(p => p.characterId === characterId);
+    const rcLocked = player ? player.race_class_locked : false;
+    const attrLocked = player ? player.attributes_locked : false;
+    const abilLocked = player ? player.abilities_locked : false;
+
+    manageLocks(characterId, characterName, rcLocked, attrLocked, abilLocked);
 }
 
 // ============================================

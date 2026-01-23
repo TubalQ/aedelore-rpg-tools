@@ -931,7 +931,113 @@ app.post('/api/dm/characters/:id/give-xp', authenticate, async (req, res) => {
     }
 });
 
-// DM unlocks a character (must be in DM's campaign)
+// DM views a character's build (abilities and stats)
+app.get('/api/dm/characters/:id/build', authenticate, async (req, res) => {
+    try {
+        // Get character and verify DM owns the campaign
+        const character = await db.get(`
+            SELECT c.id, c.name, c.data, c.campaign_id, camp.user_id as dm_id
+            FROM characters c
+            LEFT JOIN campaigns camp ON c.campaign_id = camp.id
+            WHERE c.id = $1 AND c.deleted_at IS NULL
+        `, [req.params.id]);
+
+        if (!character) {
+            return res.status(404).json({ error: 'Character not found' });
+        }
+
+        if (!character.campaign_id) {
+            return res.status(400).json({ error: 'Character is not linked to a campaign' });
+        }
+
+        if (character.dm_id !== req.userId) {
+            return res.status(403).json({ error: 'Only the campaign DM can view character builds' });
+        }
+
+        // Parse character data
+        let charData = {};
+        try {
+            charData = typeof character.data === 'string' ? JSON.parse(character.data) : character.data;
+        } catch (e) {
+            charData = {};
+        }
+
+        res.json({
+            id: character.id,
+            name: character.name,
+            data: charData
+        });
+    } catch (error) {
+        console.error('Get character build error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// DM sets lock state for a character (must be in DM's campaign)
+app.post('/api/dm/characters/:id/set-locks', authenticate, async (req, res) => {
+    const { race_class_locked, attributes_locked, abilities_locked } = req.body;
+
+    try {
+        // Get character and verify DM owns the campaign
+        const character = await db.get(`
+            SELECT c.id, c.campaign_id, camp.user_id as dm_id
+            FROM characters c
+            LEFT JOIN campaigns camp ON c.campaign_id = camp.id
+            WHERE c.id = $1 AND c.deleted_at IS NULL
+        `, [req.params.id]);
+
+        if (!character) {
+            return res.status(404).json({ error: 'Character not found' });
+        }
+
+        if (!character.campaign_id) {
+            return res.status(400).json({ error: 'Character is not linked to a campaign' });
+        }
+
+        if (character.dm_id !== req.userId) {
+            return res.status(403).json({ error: 'Only the campaign DM can change lock states' });
+        }
+
+        // Build update query for provided values only
+        const updates = [];
+        const values = [req.params.id];
+        let paramIndex = 2;
+
+        if (typeof race_class_locked === 'boolean') {
+            updates.push(`race_class_locked = $${paramIndex++}`);
+            values.push(race_class_locked);
+        }
+        if (typeof attributes_locked === 'boolean') {
+            updates.push(`attributes_locked = $${paramIndex++}`);
+            values.push(attributes_locked);
+        }
+        if (typeof abilities_locked === 'boolean') {
+            updates.push(`abilities_locked = $${paramIndex++}`);
+            values.push(abilities_locked);
+        }
+
+        if (updates.length === 0) {
+            return res.status(400).json({ error: 'Specify at least one lock state to change' });
+        }
+
+        updates.push('updated_at = CURRENT_TIMESTAMP');
+
+        await db.query(
+            `UPDATE characters SET ${updates.join(', ')} WHERE id = $1`,
+            values
+        );
+
+        res.json({
+            success: true,
+            message: 'Lock states updated'
+        });
+    } catch (error) {
+        console.error('Set locks error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// DM unlocks a character (legacy endpoint, kept for compatibility)
 app.post('/api/dm/characters/:id/unlock', authenticate, async (req, res) => {
     const { unlock_race_class, unlock_attributes, unlock_abilities } = req.body;
 
