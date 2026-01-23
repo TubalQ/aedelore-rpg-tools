@@ -1,6 +1,23 @@
 // Dashboard and Status Bar functionality
 
 // ===========================================
+// SIMPLIFIED WORTHINESS DESCRIPTIONS
+// ===========================================
+
+function getSimpleWorthiness(value) {
+    if (value >= 9) return "Trustworthy";
+    if (value >= 7) return "Respected";
+    if (value >= 5) return "Ordinary";
+    if (value >= 3) return "Watched";
+    if (value >= 1) return "Unknown";
+    if (value === 0) return "Nobody";
+    if (value >= -2) return "Distrusted";
+    if (value >= -5) return "Bad Rep";
+    if (value >= -8) return "Notorious";
+    return "Hunted";
+}
+
+// ===========================================
 // STATUS BAR SYNC
 // ===========================================
 
@@ -75,6 +92,8 @@ function updateStatusBar() {
     const worthSlider = document.getElementById('worthiness_slider');
     const worthCurrent = worthSlider ? parseInt(worthSlider.value) : 0;
     const worthValueEl = document.getElementById('status-worthiness-value');
+    const worthDescEl = document.getElementById('status-worthiness-desc');
+    const simpleWorth = getSimpleWorthiness(worthCurrent);
 
     if (worthValueEl) {
         const sign = worthCurrent >= 0 ? '+' : '';
@@ -86,6 +105,18 @@ function updateStatusBar() {
             worthValueEl.style.color = '#ef4444';
         } else {
             worthValueEl.style.color = 'var(--accent-primary)';
+        }
+    }
+
+    // Desktop worthiness description
+    if (worthDescEl) {
+        worthDescEl.textContent = `(${simpleWorth})`;
+        if (worthCurrent > 0) {
+            worthDescEl.style.color = 'var(--accent-green)';
+        } else if (worthCurrent < 0) {
+            worthDescEl.style.color = '#ef4444';
+        } else {
+            worthDescEl.style.color = '';
         }
     }
 
@@ -105,6 +136,12 @@ function updateStatusBar() {
     if (quickWorthValue) {
         const worthSign = worthCurrent >= 0 ? '+' : '';
         quickWorthValue.textContent = `${worthSign}${worthCurrent}`;
+    }
+
+    // Update quick-worth-desc (desktop Quick Actions)
+    const quickWorthDesc = document.getElementById('quick-worth-desc');
+    if (quickWorthDesc) {
+        quickWorthDesc.textContent = `(${simpleWorth})`;
     }
 
     // Update equipment damage display
@@ -209,6 +246,39 @@ function updateDesktopSidebar() {
     if (sidebarWeak) sidebarWeak.style.display = weakCurrent > 0 ? 'inline' : 'none';
     if (sidebarWeakVal) sidebarWeakVal.textContent = weakCurrent;
     if (sidebarStatusOk) sidebarStatusOk.style.display = (bleedCurrent === 0 && weakCurrent === 0) ? 'inline' : 'none';
+
+    // Update quick-status in Quick Actions (mobile/tablet)
+    const quickStatus = document.getElementById('quick-status');
+    if (quickStatus) {
+        const hasConditions = bleedCurrent > 0 || weakCurrent > 0;
+        quickStatus.classList.toggle('has-conditions', hasConditions);
+
+        if (hasConditions) {
+            let statusText = 'Status:';
+            if (bleedCurrent > 0) statusText += ` 🩸${bleedCurrent}`;
+            if (weakCurrent > 0) statusText += ` 😫${weakCurrent}`;
+            quickStatus.innerHTML = `<span>${statusText}</span>`;
+        } else {
+            quickStatus.innerHTML = '<span>Status: ✓ OK</span>';
+        }
+    }
+
+    // Update quick-worthiness in Quick Actions (mobile/tablet)
+    const quickWorthiness = document.getElementById('quick-worthiness');
+    if (quickWorthiness) {
+        const worthSliderMobile = document.getElementById('worthiness_slider');
+        const worthVal = worthSliderMobile ? parseInt(worthSliderMobile.value) : 0;
+        const simpleWorthMobile = getSimpleWorthiness(worthVal);
+
+        quickWorthiness.classList.remove('worth-positive', 'worth-negative');
+        if (worthVal > 0) {
+            quickWorthiness.classList.add('worth-positive');
+        } else if (worthVal < 0) {
+            quickWorthiness.classList.add('worth-negative');
+        }
+
+        quickWorthiness.innerHTML = `<span>Worth: ${simpleWorthMobile}</span>`;
+    }
 
     // Attribute bars (max 12 for percentage calculation)
     const attributes = [

@@ -220,43 +220,6 @@
                 </div>
             </div>
 
-            <!-- Resources -->
-            <div class="sidebar-section">
-                <div class="sidebar-section-title">Resources</div>
-                <div class="sidebar-resource">
-                    <span class="sidebar-resource-icon">❤️</span>
-                    <span class="sidebar-resource-label">HP</span>
-                    <div class="sidebar-resource-bar">
-                        <div class="sidebar-resource-fill hp" id="sidebar-hp-bar" style="width: 0%"></div>
-                    </div>
-                    <span class="sidebar-resource-value" id="sidebar-hp-value">0/0</span>
-                </div>
-                <div class="sidebar-resource" id="sidebar-arcana-row">
-                    <span class="sidebar-resource-icon">⚡</span>
-                    <span class="sidebar-resource-label">Arcana</span>
-                    <div class="sidebar-resource-bar">
-                        <div class="sidebar-resource-fill arcana" id="sidebar-arcana-bar" style="width: 0%"></div>
-                    </div>
-                    <span class="sidebar-resource-value" id="sidebar-arcana-value">0/0</span>
-                </div>
-                <div class="sidebar-resource">
-                    <span class="sidebar-resource-icon">🔷</span>
-                    <span class="sidebar-resource-label">Willpower</span>
-                    <div class="sidebar-resource-bar">
-                        <div class="sidebar-resource-fill willpower" id="sidebar-will-bar" style="width: 0%"></div>
-                    </div>
-                    <span class="sidebar-resource-value" id="sidebar-will-value">0/3</span>
-                </div>
-                <div class="sidebar-resource">
-                    <span class="sidebar-resource-icon">⭐</span>
-                    <span class="sidebar-resource-label">Worthiness</span>
-                    <div class="sidebar-resource-bar">
-                        <div class="sidebar-resource-fill worthiness" id="sidebar-worth-bar" style="width: 50%"></div>
-                    </div>
-                    <span class="sidebar-resource-value" id="sidebar-worth-value">0</span>
-                </div>
-            </div>
-
             <!-- Status Effects -->
             <div class="sidebar-section">
                 <div class="sidebar-section-title">Status</div>
@@ -371,33 +334,6 @@
                         <div class="sidebar-skill"><span>Bonus Injured</span><span id="sidebar-tgh-bonus_injured">0</span></div>
                         <div class="sidebar-skill"><span>Resistance</span><span id="sidebar-tgh-resistance">0</span></div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="sidebar-section">
-                <div class="sidebar-section-title">Quick Actions</div>
-                <div class="sidebar-actions">
-                    <button class="sidebar-action-btn" onclick="quickRest()">
-                        <span class="sidebar-action-icon">💤</span>
-                        <span class="sidebar-action-label">Rest</span>
-                    </button>
-                    <button class="sidebar-action-btn" onclick="quickHalfRest()">
-                        <span class="sidebar-action-icon">😴</span>
-                        <span class="sidebar-action-label">Half Rest</span>
-                    </button>
-                    <button class="sidebar-action-btn" onclick="showPotionPopup()">
-                        <span class="sidebar-action-icon">🧪</span>
-                        <span class="sidebar-action-label">Potion</span>
-                    </button>
-                    <button class="sidebar-action-btn" onclick="switchTab('page-tools')">
-                        <span class="sidebar-action-icon">🎲</span>
-                        <span class="sidebar-action-label">Roll Dice</span>
-                    </button>
-                    <button class="sidebar-action-btn" onclick="quickHeal()">
-                        <span class="sidebar-action-icon">💚</span>
-                        <span class="sidebar-action-label">Heal +1</span>
-                    </button>
                 </div>
             </div>
         </aside>
@@ -597,6 +533,7 @@
                 <span class="status-icon">⭐</span>
                 <span class="status-label">Worth</span>
                 <span class="status-value status-value-gold" id="status-worthiness-value">0</span>
+                <span class="status-desc" id="status-worthiness-desc">Nobody</span>
             </div>
         </div>
 
@@ -651,6 +588,14 @@
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="12" height="12" x="2" y="10" rx="2"/><path d="M6 18h.01"/><path d="M10 14h.01"/></svg>
                         <span>Dice</span>
                     </button>
+                    <!-- Status (mobile/tablet only) -->
+                    <div class="action-btn action-status mobile-only" id="quick-status">
+                        <span>Status: ✓ OK</span>
+                    </div>
+                    <!-- Worthiness (mobile/tablet only) -->
+                    <div class="action-btn action-worth mobile-only" id="quick-worthiness">
+                        <span>Worth: Nobody</span>
+                    </div>
                 </div>
 
                 <!-- Resource Adjustments -->
@@ -697,7 +642,7 @@
                     </div>
                     <!-- Worthiness Row -->
                     <div class="stat-adjust-row stat-worth">
-                        <span class="stat-adjust-label">⭐ Worth <span class="stat-adjust-value" id="quick-worth-value">0</span></span>
+                        <span class="stat-adjust-label">⭐ Worth <span class="stat-adjust-value" id="quick-worth-value">0</span> <span class="stat-adjust-desc" id="quick-worth-desc">(Nobody)</span></span>
                         <div class="stat-adjust-buttons">
                             <button class="stat-btn stat-btn-minus" onclick="adjustWorthiness(-1)">−1</button>
                             <button class="stat-btn stat-btn-plus" onclick="adjustWorthiness(1)">+1</button>
@@ -3762,5 +3707,87 @@
     </div>
 
     <script src="js/privacy.js"></script>
+
+    <!-- Mobile Tab Toggle (floating side menu) -->
+    <div id="mobile-tab-toggle" class="mobile-tab-toggle" onclick="toggleMobileTabMenu()">
+        <span class="mobile-tab-toggle-arrow">◀</span>
+    </div>
+    <div id="mobile-tab-panel" class="mobile-tab-panel">
+        <div class="mobile-tab-panel-item active" onclick="switchTabMobile('page-dashboard')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+            <span>Overview</span>
+        </div>
+        <div class="mobile-tab-panel-item" onclick="switchTabMobile('page-info')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>Character</span>
+        </div>
+        <div class="mobile-tab-panel-item" onclick="switchTabMobile('page-attributes')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+            <span>Stats</span>
+        </div>
+        <div class="mobile-tab-panel-item" onclick="switchTabMobile('page-combat')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg>
+            <span>Combat</span>
+        </div>
+        <div class="mobile-tab-panel-item" onclick="switchTabMobile('page-spells')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+            <span>Abilities</span>
+        </div>
+        <div class="mobile-tab-panel-item" onclick="switchTabMobile('page-gear')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            <span>Gear</span>
+        </div>
+        <div class="mobile-tab-panel-item" onclick="switchTabMobile('page-tools')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/></svg>
+            <span>Tools</span>
+        </div>
+    </div>
+    <div id="mobile-tab-overlay" class="mobile-tab-overlay" onclick="closeMobileTabMenu()"></div>
+
+    <script>
+        // Mobile tab menu functions
+        let mobileTabMenuOpen = false;
+
+        function toggleMobileTabMenu() {
+            mobileTabMenuOpen = !mobileTabMenuOpen;
+            const toggle = document.getElementById('mobile-tab-toggle');
+            const panel = document.getElementById('mobile-tab-panel');
+            const overlay = document.getElementById('mobile-tab-overlay');
+
+            if (mobileTabMenuOpen) {
+                toggle.classList.add('open');
+                panel.classList.add('open');
+                overlay.classList.add('open');
+            } else {
+                toggle.classList.remove('open');
+                panel.classList.remove('open');
+                overlay.classList.remove('open');
+            }
+        }
+
+        function closeMobileTabMenu() {
+            if (mobileTabMenuOpen) {
+                toggleMobileTabMenu();
+            }
+        }
+
+        function switchTabMobile(tabId) {
+            switchTab(tabId);
+            closeMobileTabMenu();
+        }
+
+        // Update active state in mobile panel
+        const originalSwitchTab = switchTab;
+        switchTab = function(tabId) {
+            originalSwitchTab(tabId);
+            // Update mobile panel active state
+            document.querySelectorAll('.mobile-tab-panel-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('onclick')?.includes(tabId)) {
+                    item.classList.add('active');
+                }
+            });
+        };
+    </script>
 </body>
 </html>

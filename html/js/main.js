@@ -2463,14 +2463,9 @@ function checkStepLockRaceClass() {
 }
 
 function checkStepAttributes() {
-    // Check if user has distributed some points
-    // They start with 10 free points, so check if any talents have been increased
-    const talents = document.querySelectorAll('[id$="_talent"]');
-    let totalTalent = 0;
-    talents.forEach(t => {
-        totalTalent += parseInt(t.value) || 0;
-    });
-    return totalTalent > 0;
+    // Check if user has distributed all 10 free points
+    const pointsUsed = getFreePointsUsed();
+    return pointsUsed >= FREE_POINTS_TOTAL;
 }
 
 function checkStepLockAttributes() {
