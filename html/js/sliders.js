@@ -100,6 +100,7 @@ function initializeSliders() {
 
     // Function to get description based on worthiness value
     function getWorthinessDescription(value) {
+        if (value === 10) return "You are highly esteemed and treated with great respect everywhere";
         if (value >= 9) return "You seem trustworthy and are welcomed in most cities";
         if (value >= 7) return "People respect you and listen to what you have to say";
         if (value >= 5) return "Nobody has anything against you, you are an ordinary citizen";
@@ -109,6 +110,7 @@ function initializeSliders() {
         if (value >= -2) return "Distrust follows you, people keep their distance";
         if (value >= -5) return "Bad reputation, guards are keeping tabs on you";
         if (value >= -8) return "You are notorious, many cities don't want you here";
+        if (value === -10) return "You are a public enemy, actively hunted with a bounty on your head";
         return "You are hunted from cities and have wanted posters up";
     }
 

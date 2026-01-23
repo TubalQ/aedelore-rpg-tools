@@ -5,6 +5,7 @@
 // ===========================================
 
 function getSimpleWorthiness(value) {
+    if (value === 10) return "Esteemed";
     if (value >= 9) return "Trustworthy";
     if (value >= 7) return "Respected";
     if (value >= 5) return "Ordinary";
@@ -14,6 +15,7 @@ function getSimpleWorthiness(value) {
     if (value >= -2) return "Distrusted";
     if (value >= -5) return "Bad Rep";
     if (value >= -8) return "Notorious";
+    if (value === -10) return "Public Enemy";
     return "Hunted";
 }
 
