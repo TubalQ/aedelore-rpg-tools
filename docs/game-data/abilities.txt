@@ -13,7 +13,7 @@ Name                 Weakened   Gain   Check                              Effect
 -------------------------------------------------------------------------------------
 Last Stand           2          2D10   Armor, min 1 success               Take focus from enemy
 Hero                 Worthiness 0      Passive                            Hero of the people
-Me First             +1 Init    3D10   Initiative, min 2 success          Ignore turns of initiative, 1 round
+Me First             3          3D10   Initiative, min 2 success          Ignore turns of initiative, 1 round
 Ultimate Sacrifice   2          3D10   Strength, min 1 success            You get full of adrenaline, you take 2 dmg
 Paladin's Sacrifice  4          3D10   Strength, min 2 success            Ignore Pain, you faint after
 Crusader             2          3D10   Armor, min 1 success               Use armor, 1 round
