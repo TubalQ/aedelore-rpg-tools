@@ -416,6 +416,32 @@
         });
     }
 
+    // Safe math expression evaluator (no eval())
+    function safeMathEval(expr) {
+        // Only allow: numbers, operators, parentheses, decimal points, spaces
+        const sanitized = expr.replace(/\s+/g, '');
+        if (!/^[\d+\-*/%().]+$/.test(sanitized)) {
+            console.error('Invalid math expression:', expr);
+            return 0;
+        }
+
+        // Use Function with strict number-only parsing
+        try {
+            // Tokenize and validate each part
+            const tokens = sanitized.match(/(\d+\.?\d*|[+\-*/%()])/g);
+            if (!tokens) return 0;
+
+            // Rebuild expression from validated tokens
+            const safeExpr = tokens.join('');
+
+            // Use Function constructor (safer than eval, still sandboxed to expression)
+            const result = new Function('return ' + safeExpr)();
+            return typeof result === 'number' && isFinite(result) ? result : 0;
+        } catch (e) {
+            return 0;
+        }
+    }
+
     // Evaluate a formula like "resolve + composure"
     function evaluateFormula(formula, systemId) {
         const container = document.getElementById('system-content');
@@ -423,6 +449,27 @@
 
         // Replace attribute names with values
         let expression = formula;
+
+        // Handle floor() function
+        const floorMatch = expression.match(/floor\(([^)]+)\)/);
+        if (floorMatch) {
+            const innerResult = evaluateFormula(floorMatch[1], systemId);
+            expression = expression.replace(floorMatch[0], Math.floor(innerResult));
+        }
+
+        // Handle ceil() function
+        const ceilMatch = expression.match(/ceil\(([^)]+)\)/);
+        if (ceilMatch) {
+            const innerResult = evaluateFormula(ceilMatch[1], systemId);
+            expression = expression.replace(ceilMatch[0], Math.ceil(innerResult));
+        }
+
+        // Handle round() function
+        const roundMatch = expression.match(/round\(([^)]+)\)/);
+        if (roundMatch) {
+            const innerResult = evaluateFormula(roundMatch[1], systemId);
+            expression = expression.replace(roundMatch[0], Math.round(innerResult));
+        }
 
         // Handle min() function
         const minMatch = expression.match(/min\((\w+),\s*(\w+)\)/);
@@ -432,16 +479,24 @@
             expression = expression.replace(minMatch[0], Math.min(val1, val2));
         }
 
-        // Replace remaining attribute names
+        // Handle max() function
+        const maxMatch = expression.match(/max\((\w+),\s*(\w+)\)/);
+        if (maxMatch) {
+            const val1 = getFieldValue(maxMatch[1], container);
+            const val2 = getFieldValue(maxMatch[2], container);
+            expression = expression.replace(maxMatch[0], Math.max(val1, val2));
+        }
+
+        // Replace remaining attribute names with values
         const words = expression.match(/[a-z_]+/g) || [];
         words.forEach(word => {
             const value = getFieldValue(word, container);
             expression = expression.replace(new RegExp(`\\b${word}\\b`), value);
         });
 
-        // Evaluate the expression
+        // Use safe math evaluator instead of eval()
         try {
-            return eval(expression);
+            return safeMathEval(expression);
         } catch (e) {
             console.error('Formula evaluation error:', formula, e);
             return 0;

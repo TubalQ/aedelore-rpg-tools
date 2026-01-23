@@ -660,6 +660,7 @@ async function loadTrashCampaigns() {
             return;
         }
 
+        // Use data attributes instead of inline onclick with escaped strings
         list.innerHTML = campaigns.map(camp => {
             const deletedDate = new Date(camp.deleted_at).toLocaleDateString();
             return `
@@ -669,11 +670,11 @@ async function loadTrashCampaigns() {
                         <span class="trash-item-date">Deleted: ${deletedDate}</span>
                     </div>
                     <div class="trash-item-actions">
-                        <button class="trash-btn trash-btn-restore" onclick="restoreCampaign(${camp.id})" title="Restore">
+                        <button class="trash-btn trash-btn-restore" data-action="restore-campaign" data-id="${parseInt(camp.id, 10)}" title="Restore">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                             Restore
                         </button>
-                        <button class="trash-btn trash-btn-delete" onclick="permanentDeleteCampaign(${camp.id}, '${escapeHtml(camp.name).replace(/'/g, "\\'")}')" title="Delete permanently">
+                        <button class="trash-btn trash-btn-delete" data-action="delete-campaign" data-id="${parseInt(camp.id, 10)}" data-name="${escapeHtml(camp.name)}" title="Delete permanently">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                             Delete
                         </button>
@@ -681,6 +682,19 @@ async function loadTrashCampaigns() {
                 </div>
             `;
         }).join('');
+
+        // Use event delegation for button clicks
+        list.querySelectorAll('button[data-action]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.dataset.action;
+                const id = parseInt(btn.dataset.id, 10);
+                if (action === 'restore-campaign') {
+                    restoreCampaign(id);
+                } else if (action === 'delete-campaign') {
+                    permanentDeleteCampaign(id, btn.dataset.name);
+                }
+            });
+        });
     } catch (err) {
         console.error('Error loading trash campaigns:', err);
         list.innerHTML = '<p class="trash-error">Failed to load deleted campaigns</p>';
@@ -705,6 +719,7 @@ async function loadTrashSessions() {
             return;
         }
 
+        // Use data attributes instead of inline onclick with escaped strings
         list.innerHTML = sessions.map(sess => {
             const deletedDate = new Date(sess.deleted_at).toLocaleDateString();
             const sessionName = `Session ${sess.session_number}` + (sess.campaign_name ? ` (${sess.campaign_name})` : '');
@@ -715,11 +730,11 @@ async function loadTrashSessions() {
                         <span class="trash-item-date">Deleted: ${deletedDate}</span>
                     </div>
                     <div class="trash-item-actions">
-                        <button class="trash-btn trash-btn-restore" onclick="restoreSession(${sess.id})" title="Restore">
+                        <button class="trash-btn trash-btn-restore" data-action="restore-session" data-id="${parseInt(sess.id, 10)}" title="Restore">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                             Restore
                         </button>
-                        <button class="trash-btn trash-btn-delete" onclick="permanentDeleteSession(${sess.id}, '${escapeHtml(sessionName).replace(/'/g, "\\'")}')" title="Delete permanently">
+                        <button class="trash-btn trash-btn-delete" data-action="delete-session" data-id="${parseInt(sess.id, 10)}" data-name="${escapeHtml(sessionName)}" title="Delete permanently">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                             Delete
                         </button>
@@ -727,6 +742,19 @@ async function loadTrashSessions() {
                 </div>
             `;
         }).join('');
+
+        // Use event delegation for button clicks
+        list.querySelectorAll('button[data-action]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.dataset.action;
+                const id = parseInt(btn.dataset.id, 10);
+                if (action === 'restore-session') {
+                    restoreSession(id);
+                } else if (action === 'delete-session') {
+                    permanentDeleteSession(id, btn.dataset.name);
+                }
+            });
+        });
     } catch (err) {
         console.error('Error loading trash sessions:', err);
         list.innerHTML = '<p class="trash-error">Failed to load deleted sessions</p>';

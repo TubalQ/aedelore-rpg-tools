@@ -355,11 +355,21 @@ function applyAvatar() {
     if (!avatarDisplay) return;
 
     if (!currentAvatar) {
-        avatarDisplay.innerHTML = '?';
+        avatarDisplay.textContent = '?';
     } else if (currentAvatar.type === 'emoji') {
-        avatarDisplay.innerHTML = currentAvatar.value;
+        avatarDisplay.textContent = currentAvatar.value;
     } else if (currentAvatar.type === 'image') {
-        avatarDisplay.innerHTML = `<img src="${currentAvatar.value}" alt="Avatar">`;
+        // Sanitize image URL - only allow http(s) and data URLs
+        const url = currentAvatar.value;
+        if (url && (url.startsWith('https://') || url.startsWith('http://') || url.startsWith('data:image/'))) {
+            avatarDisplay.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = 'Avatar';
+            avatarDisplay.appendChild(img);
+        } else {
+            avatarDisplay.textContent = '?';
+        }
     }
 
     // Also update sidebar avatar if it exists
@@ -376,11 +386,21 @@ function updateAvatarCurrentPreview() {
     if (!preview) return;
 
     if (!currentAvatar) {
-        preview.innerHTML = '?';
+        preview.textContent = '?';
     } else if (currentAvatar.type === 'emoji') {
-        preview.innerHTML = currentAvatar.value;
+        preview.textContent = currentAvatar.value;
     } else if (currentAvatar.type === 'image') {
-        preview.innerHTML = `<img src="${currentAvatar.value}" alt="Avatar">`;
+        // Sanitize image URL - only allow http(s) and data URLs
+        const url = currentAvatar.value;
+        if (url && (url.startsWith('https://') || url.startsWith('http://') || url.startsWith('data:image/'))) {
+            preview.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = 'Avatar';
+            preview.appendChild(img);
+        } else {
+            preview.textContent = '?';
+        }
     }
 }
 
@@ -1184,6 +1204,7 @@ async function loadTrashCharacters() {
             return;
         }
 
+        // Use data attributes instead of inline onclick with escaped strings
         list.innerHTML = characters.map(char => {
             const deletedDate = new Date(char.deleted_at).toLocaleDateString();
             const charName = char.char_data?.character_name || char.char_data?.name || 'Unnamed';
@@ -1194,11 +1215,11 @@ async function loadTrashCharacters() {
                         <span class="trash-item-date">Deleted: ${deletedDate}</span>
                     </div>
                     <div class="trash-item-actions">
-                        <button class="trash-btn trash-btn-restore" onclick="restoreCharacter(${char.id})" title="Restore">
+                        <button class="trash-btn trash-btn-restore" data-action="restore" data-id="${parseInt(char.id, 10)}" title="Restore">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                             Restore
                         </button>
-                        <button class="trash-btn trash-btn-delete" onclick="permanentDeleteCharacter(${char.id}, '${escapeHtml(charName).replace(/'/g, "\\'")}')" title="Delete permanently">
+                        <button class="trash-btn trash-btn-delete" data-action="delete" data-id="${parseInt(char.id, 10)}" data-name="${escapeHtml(charName)}" title="Delete permanently">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                             Delete
                         </button>
@@ -1206,6 +1227,20 @@ async function loadTrashCharacters() {
                 </div>
             `;
         }).join('');
+
+        // Use event delegation for button clicks
+        list.querySelectorAll('button[data-action]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const action = btn.dataset.action;
+                const id = parseInt(btn.dataset.id, 10);
+                if (action === 'restore') {
+                    restoreCharacter(id);
+                } else if (action === 'delete') {
+                    const name = btn.dataset.name;
+                    permanentDeleteCharacter(id, name);
+                }
+            });
+        });
     } catch (err) {
         console.error('Error loading trash:', err);
         list.innerHTML = '<p class="trash-error">Failed to load deleted characters</p>';

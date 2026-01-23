@@ -509,17 +509,33 @@ app.get('/api/characters/:id', authenticate, async (req, res) => {
     }
 });
 
+// Valid game systems whitelist
+const VALID_SYSTEMS = ['aedelore', 'dnd5e', 'pathfinder2e', 'storyteller', 'cod'];
+
 app.post('/api/characters', authenticate, async (req, res) => {
     const { name, data, system } = req.body;
 
-    if (!name || !data) {
-        return res.status(400).json({ error: 'Name and data required' });
+    // Validate name
+    if (!name || typeof name !== 'string') {
+        return res.status(400).json({ error: 'Name is required' });
     }
+    const trimmedName = name.trim();
+    if (trimmedName.length === 0 || trimmedName.length > 100) {
+        return res.status(400).json({ error: 'Name must be 1-100 characters' });
+    }
+
+    // Validate data exists
+    if (!data) {
+        return res.status(400).json({ error: 'Character data is required' });
+    }
+
+    // Validate system
+    const validSystem = VALID_SYSTEMS.includes(system) ? system : 'aedelore';
 
     try {
         const result = await db.get(
             'INSERT INTO characters (user_id, name, data, system) VALUES ($1, $2, $3, $4) RETURNING id',
-            [req.userId, name, data, system || 'aedelore']
+            [req.userId, trimmedName, data, validSystem]
         );
 
         metrics.characters.saves++;
@@ -536,9 +552,22 @@ app.post('/api/characters', authenticate, async (req, res) => {
 app.put('/api/characters/:id', authenticate, async (req, res) => {
     const { name, data, system } = req.body;
 
-    if (!name || !data) {
-        return res.status(400).json({ error: 'Name and data required' });
+    // Validate name
+    if (!name || typeof name !== 'string') {
+        return res.status(400).json({ error: 'Name is required' });
     }
+    const trimmedName = name.trim();
+    if (trimmedName.length === 0 || trimmedName.length > 100) {
+        return res.status(400).json({ error: 'Name must be 1-100 characters' });
+    }
+
+    // Validate data exists
+    if (!data) {
+        return res.status(400).json({ error: 'Character data is required' });
+    }
+
+    // Validate system
+    const validSystem = VALID_SYSTEMS.includes(system) ? system : 'aedelore';
 
     try {
         const existing = await db.get(
@@ -550,9 +579,10 @@ app.put('/api/characters/:id', authenticate, async (req, res) => {
             return res.status(404).json({ error: 'Character not found' });
         }
 
+        // Include user_id in WHERE clause as additional safeguard
         await db.query(
-            'UPDATE characters SET name = $1, data = $2, system = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $4',
-            [name, data, system || 'aedelore', req.params.id]
+            'UPDATE characters SET name = $1, data = $2, system = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $4 AND user_id = $5',
+            [trimmedName, data, validSystem, req.params.id, req.userId]
         );
 
         metrics.characters.saves++;
@@ -808,10 +838,11 @@ app.post('/api/characters/:id/lock-abilities', authenticate, async (req, res) =>
 app.post('/api/characters/:id/spend-attribute-points', authenticate, async (req, res) => {
     try {
         const { count } = req.body;
-        const pointsToSpend = parseInt(count) || 1;
+        const pointsToSpend = parseInt(count, 10);
 
-        if (pointsToSpend < 1) {
-            return res.status(400).json({ error: 'Invalid count' });
+        // Validate count is a positive integer within reasonable bounds
+        if (!Number.isInteger(pointsToSpend) || pointsToSpend < 1 || pointsToSpend > 100) {
+            return res.status(400).json({ error: 'Count must be between 1 and 100' });
         }
 
         const character = await db.get(
@@ -855,8 +886,10 @@ app.post('/api/characters/:id/spend-attribute-points', authenticate, async (req,
 app.post('/api/dm/characters/:id/give-xp', authenticate, async (req, res) => {
     const { amount } = req.body;
 
-    if (!amount || amount < 1) {
-        return res.status(400).json({ error: 'Amount must be at least 1' });
+    // Validate amount is a positive integer within reasonable bounds
+    const parsedAmount = parseInt(amount, 10);
+    if (!Number.isInteger(parsedAmount) || parsedAmount < 1 || parsedAmount > 10000) {
+        return res.status(400).json({ error: 'Amount must be between 1 and 10000' });
     }
 
     try {
@@ -880,7 +913,7 @@ app.post('/api/dm/characters/:id/give-xp', authenticate, async (req, res) => {
             return res.status(403).json({ error: 'Only the campaign DM can give XP' });
         }
 
-        const newXp = character.xp + amount;
+        const newXp = (character.xp || 0) + parsedAmount;
 
         await db.query(
             'UPDATE characters SET xp = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
@@ -890,7 +923,7 @@ app.post('/api/dm/characters/:id/give-xp', authenticate, async (req, res) => {
         res.json({
             success: true,
             xp: newXp,
-            message: `Gave ${amount} XP to character`
+            message: `Gave ${parsedAmount} XP to character`
         });
     } catch (error) {
         console.error('Give XP error:', error);
@@ -923,28 +956,24 @@ app.post('/api/dm/characters/:id/unlock', authenticate, async (req, res) => {
             return res.status(403).json({ error: 'Only the campaign DM can unlock characters' });
         }
 
-        // Build update query based on what to unlock
-        const updates = [];
+        // Validate boolean inputs explicitly
+        const doUnlockRaceClass = unlock_race_class === true;
+        const doUnlockAttributes = unlock_attributes === true;
+        const doUnlockAbilities = unlock_abilities === true;
 
-        if (unlock_race_class) {
-            updates.push(`race_class_locked = FALSE`);
-        }
-        if (unlock_attributes) {
-            updates.push(`attributes_locked = FALSE`);
-        }
-        if (unlock_abilities) {
-            updates.push(`abilities_locked = FALSE`);
-        }
-
-        if (updates.length === 0) {
+        if (!doUnlockRaceClass && !doUnlockAttributes && !doUnlockAbilities) {
             return res.status(400).json({ error: 'Specify what to unlock' });
         }
 
-        updates.push('updated_at = CURRENT_TIMESTAMP');
-
-        await db.query(
-            `UPDATE characters SET ${updates.join(', ')} WHERE id = $1`,
-            [req.params.id]
+        // Use parameterized query with CASE statements instead of dynamic SQL
+        await db.query(`
+            UPDATE characters SET
+                race_class_locked = CASE WHEN $2 THEN FALSE ELSE race_class_locked END,
+                attributes_locked = CASE WHEN $3 THEN FALSE ELSE attributes_locked END,
+                abilities_locked = CASE WHEN $4 THEN FALSE ELSE abilities_locked END,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = $1`,
+            [req.params.id, doUnlockRaceClass, doUnlockAttributes, doUnlockAbilities]
         );
 
         res.json({
@@ -961,14 +990,24 @@ app.post('/api/dm/characters/:id/unlock', authenticate, async (req, res) => {
 app.post('/api/dm/characters/:id/give-item', authenticate, async (req, res) => {
     const { name, description, campaign_id } = req.body;
 
-    if (!name) {
+    // Validate inputs with length limits
+    if (!name || typeof name !== 'string') {
         return res.status(400).json({ error: 'Item name is required' });
+    }
+    if (name.trim().length === 0 || name.length > 200) {
+        return res.status(400).json({ error: 'Item name must be 1-200 characters' });
+    }
+    if (description && (typeof description !== 'string' || description.length > 2000)) {
+        return res.status(400).json({ error: 'Description must be max 2000 characters' });
     }
 
     try {
-        // Get the character and verify DM owns the campaign
-        const character = await db.get(
-            'SELECT c.id, c.data, c.campaign_id FROM characters c WHERE c.id = $1 AND c.deleted_at IS NULL',
+        // Get character AND verify it belongs to a campaign the DM owns (single query for IDOR protection)
+        const character = await db.get(`
+            SELECT c.id, c.data, c.campaign_id, camp.user_id as dm_id
+            FROM characters c
+            LEFT JOIN campaigns camp ON c.campaign_id = camp.id AND camp.deleted_at IS NULL
+            WHERE c.id = $1 AND c.deleted_at IS NULL`,
             [req.params.id]
         );
 
@@ -983,27 +1022,39 @@ app.post('/api/dm/characters/:id/give-item', authenticate, async (req, res) => {
             return res.status(400).json({ error: 'Character is not linked to a campaign' });
         }
 
-        // Verify user is DM of this campaign
-        const campaign = await db.get(
-            'SELECT id FROM campaigns WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
-            [targetCampaignId, req.userId]
-        );
-
-        if (!campaign) {
-            return res.status(403).json({ error: 'Only the campaign DM can give items' });
+        // If using character's linked campaign, verify DM owns it
+        if (targetCampaignId === character.campaign_id) {
+            if (character.dm_id !== req.userId) {
+                return res.status(403).json({ error: 'Only the campaign DM can give items' });
+            }
+        } else {
+            // If different campaign_id provided, verify user is DM of that campaign
+            const campaign = await db.get(
+                'SELECT id FROM campaigns WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
+                [targetCampaignId, req.userId]
+            );
+            if (!campaign) {
+                return res.status(403).json({ error: 'Only the campaign DM can give items' });
+            }
         }
 
-        // Parse character data and add quest item
-        let charData = typeof character.data === 'string' ? JSON.parse(character.data) : (character.data || {});
+        // Parse character data and add quest item (with error handling)
+        let charData;
+        try {
+            charData = typeof character.data === 'string' ? JSON.parse(character.data) : (character.data || {});
+        } catch (parseErr) {
+            console.error('Failed to parse character data:', parseErr);
+            return res.status(500).json({ error: 'Character data is corrupted' });
+        }
 
         if (!charData.quest_items) {
             charData.quest_items = [];
         }
 
-        // Add the new quest item
+        // Add the new quest item (trimmed and sanitized)
         charData.quest_items.push({
-            name: name,
-            description: description || '',
+            name: name.trim(),
+            description: (description || '').trim(),
             givenAt: new Date().toLocaleDateString('sv-SE')
         });
 
@@ -1144,14 +1195,25 @@ app.get('/api/campaigns/:id', authenticate, async (req, res) => {
 app.post('/api/campaigns', authenticate, async (req, res) => {
     const { name, description } = req.body;
 
-    if (!name) {
+    // Validate name
+    if (!name || typeof name !== 'string') {
         return res.status(400).json({ error: 'Campaign name required' });
+    }
+    const trimmedName = name.trim();
+    if (trimmedName.length === 0 || trimmedName.length > 100) {
+        return res.status(400).json({ error: 'Campaign name must be 1-100 characters' });
+    }
+
+    // Validate description
+    const trimmedDesc = (description || '').trim();
+    if (trimmedDesc.length > 2000) {
+        return res.status(400).json({ error: 'Description must be max 2000 characters' });
     }
 
     try {
         const result = await db.get(
             'INSERT INTO campaigns (user_id, name, description) VALUES ($1, $2, $3) RETURNING id',
-            [req.userId, name, description || '']
+            [req.userId, trimmedName, trimmedDesc]
         );
 
         res.json({ success: true, id: result.id });
@@ -1165,8 +1227,19 @@ app.post('/api/campaigns', authenticate, async (req, res) => {
 app.put('/api/campaigns/:id', authenticate, async (req, res) => {
     const { name, description } = req.body;
 
-    if (!name) {
+    // Validate name
+    if (!name || typeof name !== 'string') {
         return res.status(400).json({ error: 'Campaign name required' });
+    }
+    const trimmedName = name.trim();
+    if (trimmedName.length === 0 || trimmedName.length > 100) {
+        return res.status(400).json({ error: 'Campaign name must be 1-100 characters' });
+    }
+
+    // Validate description
+    const trimmedDesc = (description || '').trim();
+    if (trimmedDesc.length > 2000) {
+        return res.status(400).json({ error: 'Description must be max 2000 characters' });
     }
 
     try {
@@ -1179,9 +1252,10 @@ app.put('/api/campaigns/:id', authenticate, async (req, res) => {
             return res.status(404).json({ error: 'Campaign not found' });
         }
 
+        // Include user_id in WHERE clause as additional safeguard
         await db.query(
-            'UPDATE campaigns SET name = $1, description = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3',
-            [name, description || '', req.params.id]
+            'UPDATE campaigns SET name = $1, description = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3 AND user_id = $4',
+            [trimmedName, trimmedDesc, req.params.id, req.userId]
         );
 
         res.json({ success: true });
