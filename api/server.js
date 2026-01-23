@@ -2084,9 +2084,15 @@ async function start() {
 
         await writeMetricsFile();
 
-        app.listen(PORT, '0.0.0.0', () => {
+        const server = app.listen(PORT, '0.0.0.0', () => {
             console.log(`Aedelore API running on port ${PORT}`);
         });
+
+        // Security: Set server timeouts to prevent slowloris/slow POST attacks
+        server.headersTimeout = 60000;    // 60 seconds for headers
+        server.requestTimeout = 30000;    // 30 seconds for full request
+        server.keepAliveTimeout = 65000;  // 65 seconds keep-alive (slightly longer than nginx)
+        server.timeout = 120000;          // 2 minutes overall timeout
     } catch (error) {
         console.error('Failed to start server:', error);
         process.exit(1);
