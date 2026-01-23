@@ -72,12 +72,20 @@ async function restoreViewState() {
 // ============================================
 // Theme Functions
 // ============================================
-const THEMES = ['aedelore', 'dark-glass', 'midnight', 'ember'];
+const THEMES = ['aedelore', 'dark-glass', 'midnight', 'ember', 'forest', 'frost', 'void', 'pure-darkness', 'blood', 'necro', 'royal', 'crimson'];
 const THEME_COLORS = {
     'aedelore': '#8b5cf6',
     'dark-glass': '#1a1a1f',
     'midnight': '#0a1628',
-    'ember': '#1a0c08'
+    'ember': '#1a0c08',
+    'forest': '#0a1208',
+    'frost': '#0a1018',
+    'void': '#050510',
+    'pure-darkness': '#000000',
+    'blood': '#080404',
+    'necro': '#050805',
+    'royal': '#0a0610',
+    'crimson': '#0c0506'
 };
 let currentTheme = 'aedelore';
 
