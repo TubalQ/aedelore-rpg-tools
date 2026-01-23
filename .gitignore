@@ -3,6 +3,13 @@
 *.env.local
 *.env.production
 
+# Rules document (contains full game rules)
+AEDELORE-RULES-COMPLETE.md
+docs/rules/AEDELORE-RULES-COMPLETE.md
+
+# Security documents (internal audits)
+docs/security/
+
 # Claude Code files (all Claude-related folders and files)
 .claude/
 claude/
