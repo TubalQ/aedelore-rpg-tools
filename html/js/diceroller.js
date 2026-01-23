@@ -97,7 +97,7 @@ function updateModeUI() {
     if (!modeDesc) return;
 
     const descriptions = {
-        'successes': 'Roll D10/D12/D20 per ability point. D10: 10=critical (reroll), 8-9=success, 6-7=barely, 1-5=fail',
+        'successes': 'Roll D10/D12/D20 per ability point. D10: 10=critical (reroll), 7-9=success, 5-6=barely, 1-4=fail',
         'initiative': 'Roll D6 (≤6 players) or D10 (>6 players). Highest roll goes first.',
         'food-water': 'Roll one die for food and one for water. 6-10 = keep at 1D10, 1-5 = reduce to 1D6.',
         'arrows': 'Roll after battle to determine arrow losses or gains.'
@@ -166,24 +166,26 @@ function getSuccessLevel(diceType, result) {
     // All dice scaled to match D10 percentages: 50% fail, 20% barely, 20% success, 7% critical
 
     if (diceType === 'd10') {
-        // D10: 1-5 fail, 6-7 barely, 8-9 success, 10 ALWAYS critical (but 10 is rare - 2% chance)
+        // D10: 1-4 fail, 5-6 barely, 7-9 success, 10 critical (reroll)
         if (result >= 10) return { success: true, type: 'critical', label: 'Critical!' };
-        if (result >= 8) return { success: true, type: 'success', label: 'Success' };
-        if (result >= 6) return { success: true, type: 'barely', label: 'Barely' };
+        if (result >= 7) return { success: true, type: 'success', label: 'Success' };
+        if (result >= 5) return { success: true, type: 'barely', label: 'Barely' };
         return { success: false, type: 'failure', label: 'Fail' };
     }
 
     if (diceType === 'd12') {
-        // D12: 1-6 fail (50%), 7-8 barely (16.7%), 9-12 success (33.3%) - NO CRITICALS
-        if (result >= 9) return { success: true, type: 'success', label: 'Success' };
-        if (result >= 7) return { success: true, type: 'barely', label: 'Barely' };
+        // D12: 1-4 fail (33%), 5-7 barely (25%), 8-11 success (33%), 12 critical (8%)
+        if (result >= 12) return { success: true, type: 'critical', label: 'Critical!' };
+        if (result >= 8) return { success: true, type: 'success', label: 'Success' };
+        if (result >= 5) return { success: true, type: 'barely', label: 'Barely' };
         return { success: false, type: 'failure', label: 'Fail' };
     }
 
     if (diceType === 'd20') {
-        // D20: 1-10 fail (50%), 11-14 barely (20%), 15-20 success (30%) - NO CRITICALS
-        if (result >= 15) return { success: true, type: 'success', label: 'Success' };
-        if (result >= 11) return { success: true, type: 'barely', label: 'Barely' };
+        // D20: 1-8 fail (40%), 9-12 barely (20%), 13-19 success (35%), 20 critical (5%)
+        if (result >= 20) return { success: true, type: 'critical', label: 'Critical!' };
+        if (result >= 13) return { success: true, type: 'success', label: 'Success' };
+        if (result >= 9) return { success: true, type: 'barely', label: 'Barely' };
         return { success: false, type: 'failure', label: 'Fail' };
     }
 

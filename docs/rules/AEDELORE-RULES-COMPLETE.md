@@ -42,9 +42,9 @@ Varje tärning utvärderas individuellt:
 
 | Slag | Resultat | Beskrivning |
 |------|----------|-------------|
-| 1-5 | **Failure** | Misslyckas helt |
-| 6-7 | **Barely** | Minimal framgång, kan ha konsekvenser |
-| 8-9 | **Success** | Full framgång |
+| 1-4 | **Failure** | Misslyckas helt |
+| 5-6 | **Barely** | Minimal framgång, kan ha konsekvenser |
+| 7-9 | **Success** | Full framgång |
 | 10 | **Critical** | Exceptionell framgång + slå om tärningen |
 
 ### Kritiska slag (10)
@@ -738,9 +738,9 @@ Om en situation inte täcks av reglerna:
 ## Resultatnivåer
 | Slag | Resultat |
 |------|----------|
-| 1-5 | Failure |
-| 6-7 | Barely |
-| 8-9 | Success |
+| 1-4 | Failure |
+| 5-6 | Barely |
+| 7-9 | Success |
 | 10 | Critical |
 
 ## Attack-resultat

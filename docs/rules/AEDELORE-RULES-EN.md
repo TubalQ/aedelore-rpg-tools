@@ -42,9 +42,9 @@ Each die is evaluated individually:
 
 | Roll | Result | Description |
 |------|--------|-------------|
-| 1-5 | **Failure** | Complete failure |
-| 6-7 | **Barely** | Minimal success, may have consequences |
-| 8-9 | **Success** | Full success |
+| 1-4 | **Failure** | Complete failure |
+| 5-6 | **Barely** | Minimal success, may have consequences |
+| 7-9 | **Success** | Full success |
 | 10 | **Critical** | Exceptional success + reroll the die |
 
 ### Critical Rolls (10)
@@ -738,9 +738,9 @@ If a situation isn't covered by the rules:
 ## Result Levels
 | Roll | Result |
 |------|--------|
-| 1-5 | Failure |
-| 6-7 | Barely |
-| 8-9 | Success |
+| 1-4 | Failure |
+| 5-6 | Barely |
+| 7-9 | Success |
 | 10 | Critical |
 
 ## Attack Results

@@ -34,9 +34,9 @@ Varje poäng i ability/skill/spell = 1D10
 ### Resultatnivåer
 | Slag | Resultat |
 |------|----------|
-| 1-5 | Failure (misslyckat) |
-| 6-7 | Barely a success (minimal effekt) |
-| 8-9 | Success (lyckas med målet) |
+| 1-4 | Failure (misslyckat) |
+| 5-6 | Barely a success (minimal effekt) |
+| 7-9 | Success (lyckas med målet) |
 | 10 | Critical success (extra bra + slå om för bonus) |
 
 ---
