@@ -747,6 +747,33 @@ function startAutoSave() {
     autoSaveInterval = setInterval(checkAndSaveToCloud, 5000); // Every 5 seconds
 }
 
+// Refresh character data from server (used for auto-reload on tab switch)
+// This fetches latest data like quest items given by DM
+async function refreshCharacterData() {
+    if (!authToken || !currentCharacterId) return;
+
+    try {
+        // Small delay to ensure any pending input events are processed
+        await new Promise(resolve => setTimeout(resolve, 150));
+
+        // Save any pending changes first
+        await checkAndSaveToCloud();
+
+        // Then reload from server to get latest data (e.g., quest items from DM)
+        await loadCharacterById(currentCharacterId);
+        console.log('Character data refreshed from server');
+    } catch (error) {
+        console.error('Error refreshing character data:', error);
+    }
+}
+
+// Auto-refresh when page becomes visible again (e.g., user switches back from DM Session)
+document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+        refreshCharacterData();
+    }
+});
+
 function stopAutoSave() {
     if (autoSaveInterval) {
         clearInterval(autoSaveInterval);
@@ -908,11 +935,18 @@ function showAuthModal(mode = 'login') {
     const title = document.getElementById('auth-modal-title');
     const submitBtn = document.getElementById('auth-submit-btn');
     const toggleText = document.getElementById('auth-toggle-text');
+    const forgotText = document.getElementById('auth-forgot-text');
     const usernameInput = document.getElementById('auth-username');
+    const emailInput = document.getElementById('auth-email');
+    const emailGroup = document.getElementById('auth-email-group');
     const passwordInput = document.getElementById('auth-password');
+    const confirmInput = document.getElementById('auth-confirm-password');
+    const confirmGroup = document.getElementById('auth-confirm-group');
 
     usernameInput.value = '';
+    if (emailInput) emailInput.value = '';
     passwordInput.value = '';
+    if (confirmInput) confirmInput.value = '';
     document.getElementById('auth-error').textContent = '';
 
     // Handle Enter key on inputs
@@ -922,17 +956,25 @@ function showAuthModal(mode = 'login') {
         }
     };
     usernameInput.onkeydown = handleEnter;
+    if (emailInput) emailInput.onkeydown = handleEnter;
     passwordInput.onkeydown = handleEnter;
+    if (confirmInput) confirmInput.onkeydown = handleEnter;
 
     if (mode === 'login') {
         title.textContent = 'Login';
         submitBtn.textContent = 'Login';
         toggleText.innerHTML = 'No account? <a href="#" onclick="showAuthModal(\'register\'); return false;">Register here</a>';
+        if (emailGroup) emailGroup.style.display = 'none';
+        if (confirmGroup) confirmGroup.style.display = 'none';
+        if (forgotText) forgotText.style.display = '';
         submitBtn.onclick = doLogin;
     } else {
         title.textContent = 'Register';
         submitBtn.textContent = 'Register';
         toggleText.innerHTML = 'Have an account? <a href="#" onclick="showAuthModal(\'login\'); return false;">Login here</a>';
+        if (emailGroup) emailGroup.style.display = '';
+        if (confirmGroup) confirmGroup.style.display = '';
+        if (forgotText) forgotText.style.display = 'none';
         submitBtn.onclick = doRegister;
     }
 
@@ -942,6 +984,67 @@ function showAuthModal(mode = 'login') {
 
 function hideAuthModal() {
     document.getElementById('auth-modal').style.display = 'none';
+}
+
+function showForgotPasswordModal() {
+    hideAuthModal();
+    const modal = document.getElementById('forgot-password-modal');
+    const emailInput = document.getElementById('forgot-email');
+    const errorEl = document.getElementById('forgot-error');
+    const successEl = document.getElementById('forgot-success');
+    const submitBtn = document.getElementById('forgot-submit-btn');
+
+    if (emailInput) emailInput.value = '';
+    if (errorEl) errorEl.textContent = '';
+    if (successEl) successEl.textContent = '';
+    if (submitBtn) submitBtn.disabled = false;
+
+    modal.style.display = 'flex';
+    if (emailInput) emailInput.focus();
+}
+
+function hideForgotPasswordModal() {
+    document.getElementById('forgot-password-modal').style.display = 'none';
+}
+
+async function requestPasswordReset() {
+    const emailInput = document.getElementById('forgot-email');
+    const errorEl = document.getElementById('forgot-error');
+    const successEl = document.getElementById('forgot-success');
+    const submitBtn = document.getElementById('forgot-submit-btn');
+
+    const email = emailInput.value.trim();
+
+    if (!email) {
+        errorEl.textContent = 'Please enter your email address';
+        return;
+    }
+
+    submitBtn.disabled = true;
+    errorEl.textContent = '';
+    successEl.textContent = '';
+
+    try {
+        const res = await fetch('/api/forgot-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            errorEl.textContent = data.error || 'Request failed';
+            submitBtn.disabled = false;
+            return;
+        }
+
+        successEl.textContent = data.message || 'If an account with this email exists, a reset link has been sent.';
+        emailInput.value = '';
+    } catch (error) {
+        errorEl.textContent = 'Connection error. Please try again.';
+        submitBtn.disabled = false;
+    }
 }
 
 async function doLogin() {
@@ -978,11 +1081,20 @@ async function doLogin() {
 
 async function doRegister() {
     const username = document.getElementById('auth-username').value.trim();
+    const emailInput = document.getElementById('auth-email');
+    const email = emailInput ? emailInput.value.trim() : '';
     const password = document.getElementById('auth-password').value;
+    const confirmInput = document.getElementById('auth-confirm-password');
+    const confirmPassword = confirmInput ? confirmInput.value : '';
     const errorEl = document.getElementById('auth-error');
 
-    if (!username || !password) {
-        errorEl.textContent = 'Please enter username and password';
+    if (!username || !password || !email) {
+        errorEl.textContent = 'Please enter username, email, and password';
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        errorEl.textContent = 'Passwords do not match';
         return;
     }
 
@@ -990,7 +1102,7 @@ async function doRegister() {
         const res = await fetch('/api/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ username, email, password })
         });
 
         const data = await res.json();

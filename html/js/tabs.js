@@ -30,4 +30,9 @@ function switchTab(tabId) {
         updateDashboard();
         updateStatusBar();
     }
+
+    // Auto-refresh character data on read-only tabs (to get quest items, etc.)
+    if ((tabId === 'page-gear' || tabId === 'page-dashboard') && typeof refreshCharacterData === 'function') {
+        refreshCharacterData();
+    }
 }

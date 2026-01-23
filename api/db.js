@@ -106,6 +106,29 @@ async function initializeDatabase() {
             );
 
             CREATE INDEX IF NOT EXISTS idx_auth_tokens_user_id ON auth_tokens(user_id);
+
+            -- Add email column to users (migration for password reset feature)
+            DO $$
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                               WHERE table_name = 'users' AND column_name = 'email') THEN
+                    ALTER TABLE users ADD COLUMN email TEXT UNIQUE;
+                END IF;
+            END $$;
+
+            CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+
+            -- Password reset tokens table
+            CREATE TABLE IF NOT EXISTS password_reset_tokens (
+                token TEXT PRIMARY KEY,
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                expires_at TIMESTAMP NOT NULL,
+                used BOOLEAN DEFAULT FALSE
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user_id ON password_reset_tokens(user_id);
+            CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_expires_at ON password_reset_tokens(expires_at);
         `);
         console.log('Database schema initialized');
     } finally {

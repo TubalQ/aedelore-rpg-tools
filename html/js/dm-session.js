@@ -316,11 +316,18 @@ function showAuthModal(mode = 'login') {
     const title = document.getElementById('auth-modal-title');
     const submitBtn = document.getElementById('auth-submit-btn');
     const toggleText = document.getElementById('auth-toggle-text');
+    const forgotText = document.getElementById('auth-forgot-text');
     const usernameInput = document.getElementById('auth-username');
+    const emailInput = document.getElementById('auth-email');
+    const emailGroup = document.getElementById('auth-email-group');
     const passwordInput = document.getElementById('auth-password');
+    const confirmInput = document.getElementById('auth-confirm-password');
+    const confirmGroup = document.getElementById('auth-confirm-group');
 
     usernameInput.value = '';
+    if (emailInput) emailInput.value = '';
     passwordInput.value = '';
+    if (confirmInput) confirmInput.value = '';
     document.getElementById('auth-error').textContent = '';
 
     // Handle Enter key on inputs
@@ -330,18 +337,26 @@ function showAuthModal(mode = 'login') {
         }
     };
     usernameInput.onkeydown = handleEnter;
+    if (emailInput) emailInput.onkeydown = handleEnter;
     passwordInput.onkeydown = handleEnter;
+    if (confirmInput) confirmInput.onkeydown = handleEnter;
 
     if (mode === 'login') {
         title.textContent = 'Login';
         submitBtn.textContent = 'Login';
         submitBtn.onclick = doLogin;
         toggleText.innerHTML = 'No account? <a href="#" onclick="showAuthModal(\'register\'); return false;">Register here</a>';
+        if (emailGroup) emailGroup.style.display = 'none';
+        if (confirmGroup) confirmGroup.style.display = 'none';
+        if (forgotText) forgotText.style.display = '';
     } else {
         title.textContent = 'Register';
         submitBtn.textContent = 'Register';
         submitBtn.onclick = doRegister;
         toggleText.innerHTML = 'Have an account? <a href="#" onclick="showAuthModal(\'login\'); return false;">Login here</a>';
+        if (emailGroup) emailGroup.style.display = '';
+        if (confirmGroup) confirmGroup.style.display = '';
+        if (forgotText) forgotText.style.display = 'none';
     }
 
     modal.style.display = 'flex';
@@ -350,6 +365,67 @@ function showAuthModal(mode = 'login') {
 
 function hideAuthModal() {
     document.getElementById('auth-modal').style.display = 'none';
+}
+
+function showForgotPasswordModal() {
+    hideAuthModal();
+    const modal = document.getElementById('forgot-password-modal');
+    const emailInput = document.getElementById('forgot-email');
+    const errorEl = document.getElementById('forgot-error');
+    const successEl = document.getElementById('forgot-success');
+    const submitBtn = document.getElementById('forgot-submit-btn');
+
+    if (emailInput) emailInput.value = '';
+    if (errorEl) errorEl.textContent = '';
+    if (successEl) successEl.textContent = '';
+    if (submitBtn) submitBtn.disabled = false;
+
+    modal.style.display = 'flex';
+    if (emailInput) emailInput.focus();
+}
+
+function hideForgotPasswordModal() {
+    document.getElementById('forgot-password-modal').style.display = 'none';
+}
+
+async function requestPasswordReset() {
+    const emailInput = document.getElementById('forgot-email');
+    const errorEl = document.getElementById('forgot-error');
+    const successEl = document.getElementById('forgot-success');
+    const submitBtn = document.getElementById('forgot-submit-btn');
+
+    const email = emailInput.value.trim();
+
+    if (!email) {
+        errorEl.textContent = 'Please enter your email address';
+        return;
+    }
+
+    submitBtn.disabled = true;
+    errorEl.textContent = '';
+    successEl.textContent = '';
+
+    try {
+        const res = await fetch('/api/forgot-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            errorEl.textContent = data.error || 'Request failed';
+            submitBtn.disabled = false;
+            return;
+        }
+
+        successEl.textContent = data.message || 'If an account with this email exists, a reset link has been sent.';
+        emailInput.value = '';
+    } catch (error) {
+        errorEl.textContent = 'Connection error. Please try again.';
+        submitBtn.disabled = false;
+    }
 }
 
 async function doLogin() {
@@ -387,11 +463,20 @@ async function doLogin() {
 
 async function doRegister() {
     const username = document.getElementById('auth-username').value.trim();
+    const emailInput = document.getElementById('auth-email');
+    const email = emailInput ? emailInput.value.trim() : '';
     const password = document.getElementById('auth-password').value;
+    const confirmInput = document.getElementById('auth-confirm-password');
+    const confirmPassword = confirmInput ? confirmInput.value : '';
     const errorEl = document.getElementById('auth-error');
 
-    if (!username || !password) {
-        errorEl.textContent = 'Please enter username and password';
+    if (!username || !password || !email) {
+        errorEl.textContent = 'Please enter username, email, and password';
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        errorEl.textContent = 'Passwords do not match';
         return;
     }
 
@@ -399,7 +484,7 @@ async function doRegister() {
         const res = await fetch('/api/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ username, email, password })
         });
 
         const data = await res.json();
@@ -548,6 +633,22 @@ async function showMyDataModal() {
                         <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Member since ${createdDate}</p>
                     </div>
                 </div>
+
+                <!-- Email Section -->
+                <div style="background: var(--bg-elevated); border-radius: var(--radius-lg); padding: var(--space-4); margin-bottom: var(--space-4);">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <div style="color: var(--text-subdued); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Email</div>
+                            <div style="color: ${data.email ? 'var(--text-base)' : 'var(--text-muted)'}; font-weight: 500;">
+                                ${data.email ? escapeHtml(data.email) : 'Not set'}
+                            </div>
+                        </div>
+                        <button onclick="showEmailModal('${data.email ? 'change' : 'add'}')" style="padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.2s; border: none; background: var(--bg-surface); color: var(--text-base); border: 1px solid var(--border-default);">
+                            ${data.email ? 'Change' : 'Add Email'}
+                        </button>
+                    </div>
+                    ${!data.email ? '<p style="color: var(--accent-gold); font-size: 0.8rem; margin-top: 8px; margin-bottom: 0;">Add an email to enable password recovery</p>' : ''}
+                </div>
             </div>
 
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); margin-bottom: var(--space-6);">
@@ -626,6 +727,76 @@ function toggleMyDataAnalytics() {
 
 function hideMyDataModal() {
     document.getElementById('mydata-modal').style.display = 'none';
+}
+
+// ============================================
+// Email Management Functions
+// ============================================
+
+function showEmailModal(mode = 'add') {
+    const modal = document.getElementById('email-modal');
+    const title = document.getElementById('email-modal-title');
+    const emailInput = document.getElementById('new-email');
+    const passwordInput = document.getElementById('email-confirm-password');
+    const errorEl = document.getElementById('email-error');
+
+    if (emailInput) emailInput.value = '';
+    if (passwordInput) passwordInput.value = '';
+    if (errorEl) errorEl.textContent = '';
+
+    if (title) {
+        title.textContent = mode === 'change' ? 'Change Email' : 'Add Email';
+    }
+
+    modal.style.display = 'flex';
+    if (emailInput) emailInput.focus();
+}
+
+function hideEmailModal() {
+    document.getElementById('email-modal').style.display = 'none';
+}
+
+async function saveEmail() {
+    const emailInput = document.getElementById('new-email');
+    const passwordInput = document.getElementById('email-confirm-password');
+    const errorEl = document.getElementById('email-error');
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+
+    if (!email) {
+        errorEl.textContent = 'Please enter an email address';
+        return;
+    }
+
+    if (!password) {
+        errorEl.textContent = 'Please enter your password to confirm';
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/account/email', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            errorEl.textContent = data.error || 'Failed to update email';
+            return;
+        }
+
+        hideEmailModal();
+        // Refresh the My Data modal to show updated email
+        showMyDataModal();
+    } catch (error) {
+        errorEl.textContent = 'Connection error. Please try again.';
+    }
 }
 
 // ============================================

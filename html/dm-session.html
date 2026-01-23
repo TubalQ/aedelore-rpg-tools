@@ -3005,13 +3005,41 @@
                     <label>Username</label>
                     <input type="text" id="auth-username" placeholder="Enter username">
                 </div>
+                <div class="field-group" id="auth-email-group" style="display: none;">
+                    <label>Email</label>
+                    <input type="email" id="auth-email" placeholder="Enter email">
+                </div>
                 <div class="field-group">
                     <label>Password</label>
                     <input type="password" id="auth-password" placeholder="Enter password">
                 </div>
+                <div class="field-group" id="auth-confirm-group" style="display: none;">
+                    <label>Confirm Password</label>
+                    <input type="password" id="auth-confirm-password" placeholder="Confirm password">
+                </div>
                 <p id="auth-error" class="error-text"></p>
                 <button id="auth-submit-btn" class="modal-submit" onclick="doLogin()">Login</button>
                 <p id="auth-toggle-text" class="toggle-text">No account? <a href="#" onclick="showAuthModal('register'); return false;">Register here</a></p>
+                <p id="auth-forgot-text" class="toggle-text"><a href="#" onclick="showForgotPasswordModal(); return false;">Forgot password?</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgot-password-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <button class="modal-close" onclick="hideForgotPasswordModal()">&times;</button>
+            <h2>Reset Password</h2>
+            <div class="modal-form">
+                <p style="color: var(--text-muted); margin-bottom: var(--space-4);">Enter your email address and we'll send you a link to reset your password.</p>
+                <div class="field-group">
+                    <label>Email</label>
+                    <input type="email" id="forgot-email" placeholder="Enter your email">
+                </div>
+                <p id="forgot-error" class="error-text"></p>
+                <p id="forgot-success" class="success-text" style="color: var(--accent-green);"></p>
+                <button id="forgot-submit-btn" class="modal-submit" onclick="requestPasswordReset()">Send Reset Link</button>
+                <p class="toggle-text"><a href="#" onclick="hideForgotPasswordModal(); showAuthModal('login'); return false;">Back to login</a></p>
             </div>
         </div>
     </div>
@@ -3023,6 +3051,27 @@
             <h2>My Data</h2>
             <div id="mydata-content" style="margin-top: var(--space-4);">
                 <p style="color: var(--text-muted);">Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Modal -->
+    <div id="email-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content" style="max-width: 400px;">
+            <button class="modal-close" onclick="hideEmailModal()">&times;</button>
+            <h2 id="email-modal-title">Add Email</h2>
+            <div class="modal-form">
+                <p style="color: var(--text-muted); margin-bottom: var(--space-4);">Your email is used for password recovery.</p>
+                <div class="field-group">
+                    <label>Email</label>
+                    <input type="email" id="new-email" placeholder="Enter email address">
+                </div>
+                <div class="field-group">
+                    <label>Confirm Password</label>
+                    <input type="password" id="email-confirm-password" placeholder="Enter your password">
+                </div>
+                <p id="email-error" class="error-text"></p>
+                <button class="modal-submit" onclick="saveEmail()">Save Email</button>
             </div>
         </div>
     </div>
