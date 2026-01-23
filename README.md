@@ -1,6 +1,14 @@
 # Aedelore RPG Tools
 
-A complete web-based toolkit for the Aedelore fantasy tabletop RPG system, featuring a Progressive Web App (PWA) character sheet and DM session management tools.
+A complete digital toolkit for tabletop RPG players and game masters. Manage your characters, run campaigns, and play sessions - all from your browser or phone.
+
+## What is this?
+
+**For Players:** A digital character sheet that works offline, syncs across devices, and keeps your character safe in the cloud. No more lost paper sheets or forgetting your character at home.
+
+**For Game Masters:** A complete campaign management system with session planning, encounter tracking, NPC management, and tools to share session summaries with your players.
+
+Built for the Aedelore RPG system, but supports other systems like D&D 5e, Pathfinder 2e, and Storyteller.
 
 ## Links
 
@@ -14,25 +22,65 @@ A complete web-based toolkit for the Aedelore fantasy tabletop RPG system, featu
 ## Features
 
 ### Character Sheet (PWA)
-- Full character management with stats, skills, and inventory
-- Works offline - install as an app on mobile or desktop
-- Cloud sync across devices (optional account)
-- Local browser storage for quick saves
+
+**Character Management**
+- Full character creation with stats, skills, abilities, and inventory
+- Lock system for campaign play (DM controls when choices are final)
+- Quest items received from your DM appear automatically
+- Auto-refresh keeps your sheet in sync during play
+
+**Works Everywhere**
+- Install as an app on mobile, tablet, or desktop
+- Works offline - no internet required during sessions
+- Cloud sync across all your devices
+- Local backup to browser storage
+
+**Customization**
+- 12 visual themes (Aedelore, Midnight, Ember, Forest, Void, and more)
+- Custom avatar (emoji or image upload)
+- Multiple game system support
+
+**Tools**
+- Integrated dice roller with success levels
+- Quick actions for Rest, Heal, Potions
 - Export/import characters as JSON
-- Multiple game system support (D&D 5e, Pathfinder 2e, Storyteller, Chronicles of Darkness)
-- Integrated dice roller
-- Quick actions for Rest, Half Rest, Heal, and Potions
-- Customizable avatar (emoji or image upload)
-- Multiple themes (Aedelore, Midnight Blue, Dark Glass, Ember)
 - Print-friendly layout
 
+**Account Features**
+- Cloud save with automatic sync
+- Password reset via email
+- Trash bin with restore option
+
 ### DM Session Tools
-- Campaign and session management
-- AI-assisted content generation (works with Claude and ChatGPT)
-- Encounter builder with loot generation
-- Session type configuration (Combat/Roleplay/Mixed)
-- Session length planning (1-5 hours)
-- Quick reference for game rules and data
+
+**Campaign Management**
+- Create and manage multiple campaigns
+- Invite players via shareable links
+- Track all characters in your campaign
+- Give XP and items directly to player inventories
+
+**Session Planning**
+- Day/time-based session timeline
+- Places, encounters, NPCs, and items
+- Read-aloud text sections
+- Session prolog for recaps
+
+**During Play**
+- Live encounter tracking with HP management
+- Mark NPCs as met, places as visited
+- Give loot items to specific players
+- Event log and turning points
+
+**AI Assistant**
+- Works with Claude and ChatGPT
+- Generate NPCs, encounters, locations
+- Import AI-generated content directly
+- Session recap generation
+
+**Player View**
+- Share session summaries with players
+- Lock sessions to control what players see
+- Players see their quest items, visited places, met NPCs
 
 ## Tech Stack
 
@@ -42,6 +90,7 @@ A complete web-based toolkit for the Aedelore fantasy tabletop RPG system, featu
 | Backend API | Node.js + Express |
 | Database | PostgreSQL 16 |
 | Web Server | nginx |
+| Email | Nodemailer (SMTP) |
 | Container | Docker Compose |
 
 ## Quick Start
@@ -62,48 +111,42 @@ cd aedelore-rpg-tools
 cp .env.example .env
 ```
 
-3. Edit `.env` and set your own values:
+3. Edit `.env` and set your values:
 ```bash
 # Generate secure passwords with:
 openssl rand -base64 32 | tr -d '/+=' | head -c 40
 
-# Required changes in .env:
-POSTGRES_PASSWORD=your_secure_password_here
-DATABASE_URL=postgres://aedelore:your_secure_password_here@aedelore-proffs-db:5432/aedelore
-CORS_ORIGIN=http://localhost:9020   # Change to your domain in production
+# Required:
+POSTGRES_PASSWORD=your_secure_password
+DATABASE_URL=postgres://aedelore:your_secure_password@aedelore-proffs-db:5432/aedelore
+CORS_ORIGIN=http://localhost:9020  # Your domain in production
+
+# For password reset (optional but recommended):
+SMTP_HOST=smtp.your-provider.com
+SMTP_PORT=587
+SMTP_USER=your-email@example.com
+SMTP_PASS=your-app-password
+SMTP_FROM=YourApp <your-email@example.com>
+APP_URL=http://localhost:9020  # Your domain in production
 ```
 
-4. (Optional) Remove Umami analytics if not needed:
-
-Comment out or delete the `aedelore-umami-db` and `aedelore-umami` services in `compose.yml` if you don't need analytics.
-
-5. Start the services:
+4. Start the services:
 ```bash
 docker compose up -d
 ```
 
-6. Access the app at `http://localhost:9020`
+5. Access the app at `http://localhost:9020`
 
 ### Configuration for Production
 
-If deploying to your own domain:
-
 | File | What to change |
 |------|----------------|
-| `.env` | Set `CORS_ORIGIN` to your domain (e.g., `https://yourdomain.com`) |
+| `.env` | Set `CORS_ORIGIN` and `APP_URL` to your domain |
+| `.env` | Configure SMTP for password reset emails |
 | `html/manifest.json` | Update `name`, `short_name`, and `start_url` |
 | `html/robots.txt` | Update sitemap URL |
 | `html/sitemap.xml` | Update all URLs to your domain |
-| `nginx.conf` | Adjust if needed for your setup |
-
-### Verify Installation
-
-After starting, check that all services are running:
-```bash
-docker compose ps
-```
-
-The database tables are created automatically when the API starts.
+| `nginx.conf` | Set `set_real_ip_from` to your reverse proxy IP |
 
 ## Project Structure
 
@@ -115,13 +158,13 @@ aedelore-rpg-tools/
 │   ├── data/              # Game data (weapons, spells, etc.)
 │   ├── character-sheet.html
 │   ├── dm-session.html
+│   ├── reset-password.html
 │   ├── manifest.json      # PWA manifest
 │   └── service-worker.js  # Offline support
 ├── api/                    # Backend API
 │   ├── server.js          # Express server
-│   └── db.js              # Database connection
-├── db/                     # Database
-│   └── schema.sql         # PostgreSQL schema
+│   ├── db.js              # Database connection
+│   └── email.js           # Email sending (password reset)
 ├── docs/                   # Documentation
 ├── compose.yml            # Docker Compose config
 ├── nginx.conf             # Web server config
@@ -130,15 +173,39 @@ aedelore-rpg-tools/
 
 ## API Endpoints
 
+### Authentication
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/api/register` | POST | Create new account |
+| `/api/register` | POST | Create account (requires email) |
 | `/api/login` | POST | Authenticate user |
 | `/api/logout` | POST | End session |
+| `/api/forgot-password` | POST | Request password reset email |
+| `/api/reset-password` | POST | Reset password with token |
+| `/api/account/email` | PUT | Update account email |
+
+### Characters
+| Endpoint | Method | Description |
+|----------|--------|-------------|
 | `/api/characters` | GET | List user's characters |
-| `/api/characters` | POST | Save character |
+| `/api/characters` | POST | Create character |
 | `/api/characters/:id` | GET | Load character |
-| `/api/characters/:id` | DELETE | Delete character |
+| `/api/characters/:id` | PUT | Update character |
+| `/api/characters/:id` | DELETE | Soft delete character |
+
+### Campaigns & Sessions
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/campaigns` | GET/POST | List/create campaigns |
+| `/api/campaigns/:id` | GET/PUT/DELETE | Manage campaign |
+| `/api/campaigns/:id/sessions` | GET/POST | List/create sessions |
+| `/api/sessions/:id` | GET/PUT/DELETE | Manage session |
+
+### DM Tools
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/dm/characters/:id/give-xp` | POST | Award XP to player |
+| `/api/dm/characters/:id/give-item` | POST | Give item to player |
+| `/api/dm/characters/:id/unlock` | POST | Unlock character sections |
 
 ## Contributing
 
