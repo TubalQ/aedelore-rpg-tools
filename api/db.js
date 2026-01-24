@@ -129,6 +129,20 @@ async function initializeDatabase() {
 
             CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user_id ON password_reset_tokens(user_id);
             CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_expires_at ON password_reset_tokens(expires_at);
+
+            -- Frontend error logging table
+            CREATE TABLE IF NOT EXISTS frontend_errors (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+                error_type VARCHAR(50),
+                message TEXT,
+                stack TEXT,
+                url TEXT,
+                user_agent TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_frontend_errors_created ON frontend_errors(created_at DESC);
         `);
         console.log('Database schema initialized');
     } finally {
