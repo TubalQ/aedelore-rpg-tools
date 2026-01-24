@@ -2,6 +2,8 @@
 
 A complete digital toolkit for tabletop RPG players and game masters. Manage your characters, run campaigns, and play sessions - all from your browser or phone.
 
+![Aedelore Character Sheet](aedelore.png)
+
 ## What is this?
 
 **For Players:** A digital character sheet that works offline, syncs across devices, and keeps your character safe in the cloud. No more lost paper sheets or forgetting your character at home.
