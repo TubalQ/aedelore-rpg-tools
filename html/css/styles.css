@@ -9763,6 +9763,11 @@ input.locked:disabled {
     transition: all 0.2s ease;
 }
 
+.onboarding-step.hidden-step,
+.onboarding-note.hidden-step {
+    display: none !important;
+}
+
 .onboarding-step.completed {
     background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.02) 100%);
     border-color: var(--accent-green);

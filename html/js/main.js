@@ -2478,6 +2478,11 @@ function spendAttributePoint() {
 // ONBOARDING GUIDE
 // ============================================
 
+function isAedeloreSystem() {
+    const currentSystem = localStorage.getItem('aedelore_selected_system') || 'aedelore';
+    return currentSystem === 'aedelore';
+}
+
 function initOnboarding() {
     // Check if user has dismissed the guide permanently
     const dismissed = localStorage.getItem('onboarding_dismissed');
@@ -2489,6 +2494,9 @@ function initOnboarding() {
     const hasCharacter = localStorage.getItem('characterName') ||
                          document.getElementById('character_name')?.value;
     const isLoggedIn = !!authToken;
+
+    // Adjust steps based on game system
+    adjustOnboardingForSystem();
 
     // Show guide for new users or those who haven't completed setup
     if (!dismissed) {
@@ -2502,17 +2510,119 @@ function initOnboarding() {
     cloneOnboardingForMobile();
 }
 
+function adjustOnboardingForSystem() {
+    const isAedelore = isAedeloreSystem();
+    const aedeloreOnlyStepIds = ['onboard-step-4', 'onboard-step-5', 'onboard-step-6', 'onboard-step-7'];
+
+    // Steps to renumber for non-Aedelore: 8→4, 9→5, 10→6
+    const renumberMap = {
+        'onboard-step-8': '4',
+        'onboard-step-9': '5',
+        'onboard-step-10': '6'
+    };
+
+    // For non-Aedelore: completely remove steps 4-7 from DOM
+    if (!isAedelore) {
+        aedeloreOnlyStepIds.forEach(stepId => {
+            const step = document.getElementById(stepId);
+            if (step) {
+                step.remove();
+            }
+        });
+
+        // Also remove "No DM?" note (references lock steps 5 & 7)
+        const note = document.querySelector('#onboarding-sidebar .onboarding-note');
+        if (note) {
+            note.remove();
+        }
+    }
+
+    // Renumber steps 8, 9, 10 for non-Aedelore systems
+    if (!isAedelore) {
+        Object.entries(renumberMap).forEach(([stepId, newNumber]) => {
+            const step = document.getElementById(stepId);
+            if (step) {
+                const numberEl = step.querySelector('.step-number');
+                if (numberEl) {
+                    numberEl.textContent = newNumber;
+                }
+            }
+        });
+    }
+
+    // Update subtitle for non-Aedelore systems
+    const subtitle = document.querySelector('.onboarding-subtitle');
+    if (subtitle) {
+        subtitle.textContent = isAedelore
+            ? 'Follow these steps to get started and to enable campaign mode:'
+            : 'Follow these steps to get started:';
+    }
+}
+
 function cloneOnboardingForMobile() {
     const mobileContent = document.getElementById('onboarding-mobile-content');
-    const steps = document.querySelector('.onboarding-steps');
-    const footer = document.querySelector('.onboarding-footer');
+    const sidebar = document.getElementById('onboarding-sidebar');
 
-    if (mobileContent && steps && footer) {
-        mobileContent.innerHTML = `
-            <div class="onboarding-steps">${steps.innerHTML}</div>
-            <div class="onboarding-footer">${footer.innerHTML}</div>
-        `;
+    if (mobileContent && sidebar) {
+        // Clone the steps, tip, note, and footer
+        const steps = sidebar.querySelector('.onboarding-steps');
+        const tip = sidebar.querySelector('.onboarding-tip');
+        const note = sidebar.querySelector('.onboarding-note');
+        const footer = sidebar.querySelector('.onboarding-footer');
+
+        let html = '';
+        if (steps) html += `<div class="onboarding-steps">${steps.innerHTML}</div>`;
+        if (tip) html += tip.outerHTML;
+        if (note) html += note.outerHTML;
+        if (footer) html += `<div class="onboarding-footer">${footer.innerHTML}</div>`;
+
+        mobileContent.innerHTML = html;
+
+        // Apply same visibility/numbering adjustments to mobile clone
+        adjustOnboardingForSystemInContainer(mobileContent);
     }
+}
+
+function adjustOnboardingForSystemInContainer(container) {
+    const isAedelore = isAedeloreSystem();
+    const aedeloreOnlySteps = [4, 5, 6, 7];
+    const renumberMap = { 8: '4', 9: '5', 10: '6' };
+
+    // For non-Aedelore: completely remove steps 4-7 from DOM
+    if (!isAedelore) {
+        aedeloreOnlySteps.forEach(num => {
+            const step = container.querySelector(`[data-step="${getStepDataAttr(num)}"]`);
+            if (step) {
+                step.remove();
+            }
+        });
+
+        // Also remove note
+        const note = container.querySelector('.onboarding-note');
+        if (note) {
+            note.remove();
+        }
+
+        // Renumber steps for non-Aedelore
+        Object.entries(renumberMap).forEach(([origNum, newNum]) => {
+            const step = container.querySelector(`[data-step="${getStepDataAttr(origNum)}"]`);
+            if (step) {
+                const numberEl = step.querySelector('.step-number');
+                if (numberEl) {
+                    numberEl.textContent = newNum;
+                }
+            }
+        });
+    }
+}
+
+function getStepDataAttr(stepNum) {
+    const map = {
+        1: 'register', 2: 'name', 3: 'save', 4: 'race-class',
+        5: 'lock-rc', 6: 'attributes', 7: 'lock-attr',
+        8: 'campaign', 9: 'dm-session', 10: 'overview'
+    };
+    return map[stepNum];
 }
 
 function showOnboarding() {
@@ -2549,21 +2659,55 @@ function toggleOnboardingMobile() {
 }
 
 function updateOnboardingProgress() {
+    const isAedelore = isAedeloreSystem();
+
+    // For non-Aedelore systems, skip steps 4-7 (they're auto-complete)
+    const aedeloreOnlySteps = ['race-class', 'lock-rc', 'attributes', 'lock-attr'];
+
+    // Remove Aedelore-only steps if system changed to non-Aedelore
+    if (!isAedelore) {
+        const stepsToRemove = ['onboard-step-4', 'onboard-step-5', 'onboard-step-6', 'onboard-step-7'];
+        stepsToRemove.forEach(stepId => {
+            // Remove from sidebar
+            const step = document.getElementById(stepId);
+            if (step) step.remove();
+            // Remove from mobile
+            const mobileStep = document.querySelector(`#onboarding-mobile-content [data-step="${getStepDataAttr(parseInt(stepId.replace('onboard-step-', '')))}"]`);
+            if (mobileStep) mobileStep.remove();
+        });
+        // Remove note
+        document.querySelectorAll('.onboarding-note').forEach(note => note.remove());
+        // Renumber remaining steps
+        const renumberMap = { 'onboard-step-8': '4', 'onboard-step-9': '5', 'onboard-step-10': '6' };
+        Object.entries(renumberMap).forEach(([stepId, newNum]) => {
+            const step = document.getElementById(stepId);
+            if (step) {
+                const numEl = step.querySelector('.step-number');
+                if (numEl && numEl.textContent !== newNum) numEl.textContent = newNum;
+            }
+        });
+    }
+
+    // Build steps object - dm-session is informational (not tracked) for all systems
     const steps = {
         'register': checkStepRegister(),
         'name': checkStepName(),
         'save': checkStepSave(),
-        'race-class': checkStepRaceClass(),
-        'lock-rc': checkStepLockRaceClass(),
-        'attributes': checkStepAttributes(),
-        'lock-attr': checkStepLockAttributes(),
+        'race-class': isAedelore ? checkStepRaceClass() : true,
+        'lock-rc': isAedelore ? checkStepLockRaceClass() : true,
+        'attributes': isAedelore ? checkStepAttributes() : true,
+        'lock-attr': isAedelore ? checkStepLockAttributes() : true,
         'campaign': checkStepCampaign(),
         'overview': checkStepOverview()
     };
+    // Note: dm-session is not in steps - it's informational only (no checkmark)
 
     let firstIncomplete = null;
 
     Object.keys(steps).forEach((stepId, index) => {
+        // Skip hidden steps when finding first incomplete
+        const isHiddenStep = !isAedelore && aedeloreOnlySteps.includes(stepId);
+
         const stepEl = document.querySelector(`[data-step="${stepId}"]`);
         const mobileStepEl = document.querySelector(`#onboarding-mobile-content [data-step="${stepId}"]`);
 
@@ -2576,15 +2720,22 @@ function updateOnboardingProgress() {
             mobileStepEl.classList.remove('current');
         }
 
-        if (!steps[stepId] && !firstIncomplete) {
+        if (!steps[stepId] && !firstIncomplete && !isHiddenStep) {
             firstIncomplete = stepId;
             stepEl?.classList.add('current');
             mobileStepEl?.classList.add('current');
         }
     });
 
-    // Check if all steps are complete
-    const allComplete = Object.values(steps).every(v => v);
+    // Check if all visible steps are complete
+    const allComplete = Object.entries(steps).every(([stepId, completed]) => {
+        // Skip Aedelore-only steps for non-Aedelore systems
+        if (!isAedelore && aedeloreOnlySteps.includes(stepId)) {
+            return true;
+        }
+        return completed;
+    });
+
     if (allComplete) {
         // Auto-hide after a delay when all complete
         setTimeout(() => {
