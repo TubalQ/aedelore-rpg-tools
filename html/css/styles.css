@@ -8879,25 +8879,65 @@ input.locked:disabled {
     font-weight: 600;
 }
 
-/* Responsive privacy banner */
+/* Responsive privacy banner - Modal style on mobile */
 @media (max-width: 768px) {
     .privacy-banner {
+        /* Convert to centered modal */
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
         padding: var(--space-4);
+        transform: none;
+        opacity: 0;
+        visibility: hidden;
+        border-top: none;
+        box-shadow: none;
+    }
+
+    .privacy-banner.visible {
+        opacity: 1;
+        visibility: visible;
+        transform: none;
     }
 
     .privacy-banner-content {
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-purple);
+        border-radius: var(--radius-lg);
+        padding: var(--space-5);
+        max-width: 320px;
+        width: 100%;
         flex-direction: column;
         text-align: center;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .privacy-banner-title {
+        font-size: var(--font-size-lg);
+        margin-bottom: var(--space-2);
+    }
+
+    .privacy-banner-description {
+        margin-bottom: var(--space-4);
     }
 
     .privacy-banner-actions {
         width: 100%;
-        justify-content: center;
+        flex-direction: column;
+        gap: var(--space-2);
     }
 
     .privacy-btn {
-        flex: 1;
-        max-width: 140px;
+        width: 100%;
+        max-width: none;
+        padding: var(--space-3) var(--space-4);
+        min-height: 44px;
+        font-size: var(--font-size-base);
     }
 }
 

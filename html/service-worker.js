@@ -1,11 +1,12 @@
 // Aedelore Character Sheet Service Worker
-const CACHE_NAME = 'aedelore-v245';
+const CACHE_NAME = 'aedelore-v252';
 
 // Files to cache for offline use
 const STATIC_ASSETS = [
   '/character-sheet',
   '/css/styles.css',
   '/js/main.js',
+  '/js/error-logger.js',
   '/js/dashboard.js',
   '/js/tabs.js',
   '/js/sliders.js',

@@ -542,7 +542,8 @@ function updateDashboard() {
         { id: 'dash-tough', field: 'toughness_value' },
         { id: 'dash-int', field: 'intelligence_value' },
         { id: 'dash-wis', field: 'wisdom_value' },
-        { id: 'dash-fow', field: 'force_of_will_value' }
+        { id: 'dash-fow', field: 'force_of_will_value' },
+        { id: 'dash-thi', field: 'third_eye_value' }
     ];
 
     stats.forEach(stat => {
@@ -1549,9 +1550,24 @@ function initDashboard() {
     }
 
     // Set up dashboard updates when fields change
-    const watchFields = ['character_name', 'race', 'class', 'religion',
-                         'strength_value', 'dexterity_value', 'toughness_value',
-                         'intelligence_value', 'wisdom_value', 'force_of_will_value'];
+    const watchFields = [
+        'character_name', 'race', 'class', 'religion',
+        // Core attributes
+        'strength_value', 'dexterity_value', 'toughness_value',
+        'intelligence_value', 'wisdom_value', 'force_of_will_value', 'third_eye_value',
+        // Strength skills
+        'strength_athletics', 'strength_raw_power', 'strength_unarmed',
+        // Dexterity skills
+        'dexterity_endurance', 'dexterity_acrobatics', 'dexterity_sleight_of_hand', 'dexterity_stealth',
+        // Toughness skills
+        'toughness_bonus_while_injured', 'toughness_resistance',
+        // Intelligence skills
+        'intelligence_arcana', 'intelligence_history', 'intelligence_investigation', 'intelligence_nature', 'intelligence_religion',
+        // Wisdom skills
+        'wisdom_luck', 'wisdom_animal_handling', 'wisdom_insight', 'wisdom_medicine', 'wisdom_perception', 'wisdom_survival',
+        // Force of Will skills
+        'force_of_will_deception', 'force_of_will_intimidation', 'force_of_will_performance', 'force_of_will_persuasion'
+    ];
 
     watchFields.forEach(fieldId => {
         const field = document.getElementById(fieldId);

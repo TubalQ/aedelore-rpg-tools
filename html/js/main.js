@@ -539,6 +539,9 @@ function getAllFields() {
     // Save avatar data
     data._avatar = getAvatarData();
 
+    // Note: quest_items are NOT included here - they are DM-managed
+    // and preserved server-side in PUT /api/characters/:id
+
     return data;
 }
 
@@ -592,6 +595,11 @@ function setAllFields(data) {
         setAvatarData(data._avatar);
     } else {
         setAvatarData(null);
+    }
+
+    // Update Quick Stats to reflect loaded values
+    if (typeof updateDashboard === 'function') {
+        updateDashboard();
     }
 }
 

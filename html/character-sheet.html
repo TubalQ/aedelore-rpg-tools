@@ -843,6 +843,14 @@
                             <div class="skill-item"><span class="skill-name">Persuasion</span><span class="skill-value" id="dash-fow-persuasion">0</span></div>
                         </div>
                     </div>
+                    <div class="stat-card" onclick="toggleStatCard(this, 'third_eye')" data-attr="third_eye">
+                        <span class="stat-card-expand-hint">▼</span>
+                        <span class="stat-label">Third Eye</span>
+                        <span class="stat-value" id="dash-thi">0</span>
+                        <div class="stat-skills">
+                            <p style="color: var(--text-muted); font-size: 0.8rem; font-style: italic; margin: 0;">No sub-skills</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2745,6 +2753,9 @@
         </div><!-- /.app-main -->
     </div><!-- /.app-wrapper -->
 
+    <!-- Error Logger (load first to catch all errors) -->
+    <script src="js/error-logger.js"></script>
+
     <!-- Load Data Files -->
     <script src="data/races.js"></script>
     <script src="data/classes.js"></script>
@@ -3026,6 +3037,11 @@
                 RELIGIONS[religionValue].bonuses.forEach(bonus => {
                     applyBonus(bonus);
                 });
+            }
+
+            // Update Quick Stats to reflect new values
+            if (typeof updateDashboard === 'function') {
+                updateDashboard();
             }
         }
 
@@ -3869,6 +3885,46 @@
                 }
             });
         };
+
+        // Swipe gesture for mobile tab menu
+        (function() {
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let touchEndX = 0;
+            let touchEndY = 0;
+            const edgeThreshold = 40;  // px from right edge to trigger
+            const swipeThreshold = 50; // minimum swipe distance
+
+            document.addEventListener('touchstart', function(e) {
+                touchStartX = e.changedTouches[0].screenX;
+                touchStartY = e.changedTouches[0].screenY;
+            }, { passive: true });
+
+            document.addEventListener('touchend', function(e) {
+                touchEndX = e.changedTouches[0].screenX;
+                touchEndY = e.changedTouches[0].screenY;
+                handleSwipe();
+            }, { passive: true });
+
+            function handleSwipe() {
+                const deltaX = touchEndX - touchStartX;
+                const deltaY = Math.abs(touchEndY - touchStartY);
+                const screenWidth = window.innerWidth;
+                const startedFromRightEdge = touchStartX > screenWidth - edgeThreshold;
+
+                // Ignore if vertical swipe is dominant
+                if (deltaY > Math.abs(deltaX)) return;
+
+                // Swipe left from right edge → open menu
+                if (!mobileTabMenuOpen && startedFromRightEdge && deltaX < -swipeThreshold) {
+                    toggleMobileTabMenu();
+                }
+                // Swipe right when menu is open → close menu
+                else if (mobileTabMenuOpen && deltaX > swipeThreshold) {
+                    closeMobileTabMenu();
+                }
+            }
+        })();
     </script>
 </body>
 </html>

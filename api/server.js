@@ -64,6 +64,15 @@ const passwordResetLimiter = rateLimit({
     legacyHeaders: false
 });
 
+// Rate limiting for error logging (30 errors per minute per IP)
+const errorLogLimiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 30,
+    message: { error: 'Too many error reports' },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
 app.use(generalLimiter);
 
 // Token storage: Now using PostgreSQL auth_tokens table for persistence
@@ -91,6 +100,7 @@ const metrics = {
     auth: { logins: 0, registrations: 0, logouts: 0, deletedAccounts: 0 },
     characters: { saves: 0, loads: 0, deletes: 0 },
     sessions: { saves: 0, loads: 0, deletes: 0, locks: 0 },
+    frontendErrors: { total: 0, byType: {}, byPage: {} },
     errors: 0
 };
 
@@ -100,6 +110,7 @@ try {
         Object.assign(metrics.requests, saved.requests || {});
         Object.assign(metrics.auth, saved.auth || {});
         Object.assign(metrics.characters, saved.characters || {});
+        Object.assign(metrics.frontendErrors, saved.frontendErrors || { total: 0, byType: {}, byPage: {} });
         metrics.errors = saved.errors || 0;
     }
 } catch (e) {
@@ -186,7 +197,17 @@ async function writeMetricsFile() {
 │  POST Requests:        ${String(metrics.requests.byMethod.POST || 0).padEnd(36)}│
 │  PUT Requests:         ${String(metrics.requests.byMethod.PUT || 0).padEnd(36)}│
 │  DELETE Requests:      ${String(metrics.requests.byMethod.DELETE || 0).padEnd(36)}│
-│  Errors:               ${String(metrics.errors).padEnd(36)}│
+│  API Errors:           ${String(metrics.errors).padEnd(36)}│
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│  FRONTEND ERRORS                                             │
+├─────────────────────────────────────────────────────────────┤
+│  Total Logged:         ${String(metrics.frontendErrors.total).padEnd(36)}│
+│  - unhandled:          ${String(metrics.frontendErrors.byType.unhandled || 0).padEnd(36)}│
+│  - promise:            ${String(metrics.frontendErrors.byType.promise || 0).padEnd(36)}│
+│  - fetch:              ${String(metrics.frontendErrors.byType.fetch || 0).padEnd(36)}│
+│  - manual:             ${String(metrics.frontendErrors.byType.manual || 0).padEnd(36)}│
 └─────────────────────────────────────────────────────────────┘
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -780,8 +801,9 @@ app.put('/api/characters/:id', authenticate, async (req, res) => {
     const validSystem = VALID_SYSTEMS.includes(system) ? system : 'aedelore';
 
     try {
+        // Fetch existing character data to preserve DM-managed fields (quest_items)
         const existing = await db.get(
-            'SELECT id FROM characters WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
+            'SELECT id, data FROM characters WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
             [req.params.id, req.userId]
         );
 
@@ -789,10 +811,24 @@ app.put('/api/characters/:id', authenticate, async (req, res) => {
             return res.status(404).json({ error: 'Character not found' });
         }
 
+        // Parse existing data to preserve quest_items (DM-managed, not client-managed)
+        let existingData = {};
+        try {
+            existingData = typeof existing.data === 'string' ? JSON.parse(existing.data) : (existing.data || {});
+        } catch (parseErr) {
+            console.error('Failed to parse existing character data:', parseErr);
+        }
+
+        // Merge: keep quest_items from database (only DM can modify via /give-item endpoint)
+        const mergedData = {
+            ...data,
+            quest_items: existingData.quest_items || []
+        };
+
         // Include user_id in WHERE clause as additional safeguard
         await db.query(
             'UPDATE characters SET name = $1, data = $2, system = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $4 AND user_id = $5',
-            [trimmedName, data, validSystem, req.params.id, req.userId]
+            [trimmedName, mergedData, validSystem, req.params.id, req.userId]
         );
 
         metrics.characters.saves++;
@@ -2380,6 +2416,85 @@ app.delete('/api/trash/sessions/:id', authenticate, async (req, res) => {
         res.json({ success: true, message: 'Session permanently deleted' });
     } catch (error) {
         console.error('Permanent delete session error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// ============================================
+// Frontend Error Logging
+// ============================================
+
+// Log frontend error (auth optional - works for both logged in and anonymous users)
+app.post('/api/errors', errorLogLimiter, async (req, res) => {
+    const { type, message, stack, url } = req.body;
+
+    // Basic validation
+    if (!message || typeof message !== 'string') {
+        return res.status(400).json({ error: 'Message required' });
+    }
+
+    // Sanitize and limit input sizes
+    const safeType = String(type || 'unknown').slice(0, 50);
+    const safeMessage = String(message).slice(0, 2000);
+    const safeStack = stack ? String(stack).slice(0, 5000) : null;
+    const safeUrl = url ? String(url).slice(0, 500) : null;
+    const userAgent = req.headers['user-agent']?.slice(0, 500) || null;
+
+    // Try to get user_id from token (optional)
+    let userId = null;
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (token) {
+        try {
+            const session = await db.get(
+                "SELECT user_id FROM auth_tokens WHERE token = $1 AND created_at > NOW() - INTERVAL '24 hours'",
+                [token]
+            );
+            if (session) {
+                userId = session.user_id;
+            }
+        } catch (e) {
+            // Ignore auth errors for error logging
+        }
+    }
+
+    try {
+        await db.query(
+            `INSERT INTO frontend_errors (user_id, error_type, message, stack, url, user_agent)
+             VALUES ($1, $2, $3, $4, $5, $6)`,
+            [userId, safeType, safeMessage, safeStack, safeUrl, userAgent]
+        );
+
+        // Update metrics
+        metrics.frontendErrors.total++;
+        metrics.frontendErrors.byType[safeType] = (metrics.frontendErrors.byType[safeType] || 0) + 1;
+        if (safeUrl) {
+            const pagePath = safeUrl.split('?')[0].split('#')[0];
+            metrics.frontendErrors.byPage[pagePath] = (metrics.frontendErrors.byPage[pagePath] || 0) + 1;
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error logging frontend error:', error);
+        res.status(500).json({ error: 'Failed to log error' });
+    }
+});
+
+// Get recent frontend errors (requires auth)
+app.get('/api/errors', authenticate, async (req, res) => {
+    const limit = Math.min(parseInt(req.query.limit, 10) || 100, 500);
+
+    try {
+        const errors = await db.all(
+            `SELECT id, user_id, error_type, message, stack, url, user_agent, created_at
+             FROM frontend_errors
+             ORDER BY created_at DESC
+             LIMIT $1`,
+            [limit]
+        );
+
+        res.json({ errors, total: metrics.frontendErrors.total });
+    } catch (error) {
+        console.error('Error fetching frontend errors:', error);
         res.status(500).json({ error: 'Server error' });
     }
 });
