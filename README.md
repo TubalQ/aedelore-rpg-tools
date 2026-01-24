@@ -4,6 +4,8 @@ A complete digital toolkit for tabletop RPG players and game masters. Manage you
 
 ![Aedelore Character Sheet](aedelore.png)
 
+![Aedelore DM Tools](DMtool.png)
+
 ## What is this?
 
 **For Players:** A digital character sheet that works offline, syncs across devices, and keeps your character safe in the cloud. No more lost paper sheets or forgetting your character at home.
