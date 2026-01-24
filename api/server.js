@@ -1340,7 +1340,8 @@ app.post('/api/dm/characters/:id/unlock', authenticate, async (req, res) => {
 
 // DM gives a quest item to a character (adds to quest_items array in character data)
 app.post('/api/dm/characters/:id/give-item', authenticate, async (req, res) => {
-    const { name, description, campaign_id } = req.body;
+    const { name, description } = req.body;
+    // Note: campaign_id from request body is intentionally ignored to prevent authorization bypass
 
     // Validate inputs with length limits
     if (!name || typeof name !== 'string') {
@@ -1353,41 +1354,38 @@ app.post('/api/dm/characters/:id/give-item', authenticate, async (req, res) => {
         return res.status(400).json({ error: 'Description must be max 2000 characters' });
     }
 
+    // Use a database transaction to prevent race conditions during read-modify-write
+    const client = await db.pool.connect();
     try {
-        // Get character AND verify it belongs to a campaign the DM owns (single query for IDOR protection)
-        const character = await db.get(`
+        await client.query('BEGIN');
+
+        // Get character with row lock AND verify it belongs to a campaign the DM owns
+        // Uses FOR UPDATE to lock the row during the transaction
+        const characterResult = await client.query(`
             SELECT c.id, c.data, c.campaign_id, camp.user_id as dm_id
             FROM characters c
             LEFT JOIN campaigns camp ON c.campaign_id = camp.id AND camp.deleted_at IS NULL
-            WHERE c.id = $1 AND c.deleted_at IS NULL`,
+            WHERE c.id = $1 AND c.deleted_at IS NULL
+            FOR UPDATE OF c`,
             [req.params.id]
         );
+        const character = characterResult.rows[0];
 
         if (!character) {
+            await client.query('ROLLBACK');
             return res.status(404).json({ error: 'Character not found' });
         }
 
-        // Use provided campaign_id or character's linked campaign
-        const targetCampaignId = campaign_id || character.campaign_id;
-
-        if (!targetCampaignId) {
-            return res.status(400).json({ error: 'Character is not linked to a campaign' });
+        // Verify the character is linked to a campaign
+        if (!character.campaign_id) {
+            await client.query('ROLLBACK');
+            return res.status(400).json({ error: 'Character is not linked to any campaign' });
         }
 
-        // If using character's linked campaign, verify DM owns it
-        if (targetCampaignId === character.campaign_id) {
-            if (character.dm_id !== req.userId) {
-                return res.status(403).json({ error: 'Only the campaign DM can give items' });
-            }
-        } else {
-            // If different campaign_id provided, verify user is DM of that campaign
-            const campaign = await db.get(
-                'SELECT id FROM campaigns WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
-                [targetCampaignId, req.userId]
-            );
-            if (!campaign) {
-                return res.status(403).json({ error: 'Only the campaign DM can give items' });
-            }
+        // Verify the requesting user is the DM of the character's campaign
+        if (character.dm_id !== req.userId) {
+            await client.query('ROLLBACK');
+            return res.status(403).json({ error: 'Only the DM of the character\'s campaign can give items' });
         }
 
         // Parse character data and add quest item (with error handling)
@@ -1396,6 +1394,7 @@ app.post('/api/dm/characters/:id/give-item', authenticate, async (req, res) => {
             charData = typeof character.data === 'string' ? JSON.parse(character.data) : (character.data || {});
         } catch (parseErr) {
             console.error('Failed to parse character data:', parseErr);
+            await client.query('ROLLBACK');
             return res.status(500).json({ error: 'Character data is corrupted' });
         }
 
@@ -1403,18 +1402,32 @@ app.post('/api/dm/characters/:id/give-item', authenticate, async (req, res) => {
             charData.quest_items = [];
         }
 
-        // Add the new quest item (trimmed and sanitized)
-        charData.quest_items.push({
-            name: name.trim(),
-            description: (description || '').trim(),
-            givenAt: new Date().toLocaleDateString('sv-SE')
-        });
+        // Check for duplicate item (same name already exists)
+        const trimmedName = name.trim();
+        const existingIndex = charData.quest_items.findIndex(
+            qi => qi.name.toLowerCase() === trimmedName.toLowerCase()
+        );
+
+        if (existingIndex >= 0) {
+            // Update existing item instead of adding duplicate
+            charData.quest_items[existingIndex].description = (description || '').trim();
+            charData.quest_items[existingIndex].givenAt = new Date().toLocaleDateString('sv-SE');
+        } else {
+            // Add the new quest item (trimmed and sanitized)
+            charData.quest_items.push({
+                name: trimmedName,
+                description: (description || '').trim(),
+                givenAt: new Date().toLocaleDateString('sv-SE')
+            });
+        }
 
         // Save back to database
-        await db.run(
+        await client.query(
             'UPDATE characters SET data = $1 WHERE id = $2',
             [JSON.stringify(charData), req.params.id]
         );
+
+        await client.query('COMMIT');
 
         res.json({
             success: true,
@@ -1422,8 +1435,106 @@ app.post('/api/dm/characters/:id/give-item', authenticate, async (req, res) => {
             quest_items: charData.quest_items
         });
     } catch (error) {
+        await client.query('ROLLBACK');
         console.error('Give item error:', error);
         res.status(500).json({ error: 'Server error' });
+    } finally {
+        client.release();
+    }
+});
+
+// DM removes a quest item from a character (removes from quest_items array in character data)
+app.post('/api/dm/characters/:id/remove-item', authenticate, async (req, res) => {
+    const { name } = req.body;
+
+    // Validate inputs
+    if (!name || typeof name !== 'string') {
+        return res.status(400).json({ error: 'Item name is required' });
+    }
+    if (name.trim().length === 0 || name.length > 200) {
+        return res.status(400).json({ error: 'Item name must be 1-200 characters' });
+    }
+
+    // Use a database transaction to prevent race conditions during read-modify-write
+    const client = await db.pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        // Get character with row lock AND verify it belongs to a campaign the DM owns
+        // Uses FOR UPDATE to lock the row during the transaction
+        const characterResult = await client.query(`
+            SELECT c.id, c.data, c.campaign_id, camp.user_id as dm_id
+            FROM characters c
+            LEFT JOIN campaigns camp ON c.campaign_id = camp.id AND camp.deleted_at IS NULL
+            WHERE c.id = $1 AND c.deleted_at IS NULL
+            FOR UPDATE OF c`,
+            [req.params.id]
+        );
+        const character = characterResult.rows[0];
+
+        if (!character) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ error: 'Character not found' });
+        }
+
+        // Verify the character is linked to a campaign
+        if (!character.campaign_id) {
+            await client.query('ROLLBACK');
+            return res.status(400).json({ error: 'Character is not linked to any campaign' });
+        }
+
+        // Verify the requesting user is the DM of the character's campaign
+        if (character.dm_id !== req.userId) {
+            await client.query('ROLLBACK');
+            return res.status(403).json({ error: 'Only the DM of the character\'s campaign can remove items' });
+        }
+
+        // Parse character data and remove quest item (with error handling)
+        let charData;
+        try {
+            charData = typeof character.data === 'string' ? JSON.parse(character.data) : (character.data || {});
+        } catch (parseErr) {
+            console.error('Failed to parse character data:', parseErr);
+            await client.query('ROLLBACK');
+            return res.status(500).json({ error: 'Character data is corrupted' });
+        }
+
+        if (!charData.quest_items || charData.quest_items.length === 0) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ error: 'Character has no quest items' });
+        }
+
+        // Find and remove the item by name (case-insensitive)
+        const trimmedName = name.trim().toLowerCase();
+        const originalLength = charData.quest_items.length;
+        charData.quest_items = charData.quest_items.filter(
+            qi => qi.name.toLowerCase() !== trimmedName
+        );
+
+        if (charData.quest_items.length === originalLength) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ error: 'Item not found in character inventory' });
+        }
+
+        // Save back to database
+        await client.query(
+            'UPDATE characters SET data = $1 WHERE id = $2',
+            [JSON.stringify(charData), req.params.id]
+        );
+
+        await client.query('COMMIT');
+
+        res.json({
+            success: true,
+            message: `Item "${name}" removed from character`,
+            quest_items: charData.quest_items
+        });
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Remove item error:', error);
+        res.status(500).json({ error: 'Server error' });
+    } finally {
+        client.release();
     }
 });
 

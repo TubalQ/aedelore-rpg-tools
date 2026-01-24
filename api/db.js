@@ -72,6 +72,24 @@ async function initializeDatabase() {
                 END IF;
             END $$;
 
+            -- Add soft delete column for characters (migration for trash/restore feature)
+            DO $$
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                               WHERE table_name = 'characters' AND column_name = 'deleted_at') THEN
+                    ALTER TABLE characters ADD COLUMN deleted_at TIMESTAMP;
+                END IF;
+            END $$;
+
+            -- Add abilities_locked column for characters (migration for locking abilities after campaign start)
+            DO $$
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                               WHERE table_name = 'characters' AND column_name = 'abilities_locked') THEN
+                    ALTER TABLE characters ADD COLUMN abilities_locked BOOLEAN DEFAULT FALSE;
+                END IF;
+            END $$;
+
             CREATE TABLE IF NOT EXISTS campaigns (
                 id SERIAL PRIMARY KEY,
                 user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -82,6 +100,19 @@ async function initializeDatabase() {
             );
 
             CREATE INDEX IF NOT EXISTS idx_campaigns_user_id ON campaigns(user_id);
+
+            -- Campaign players table for tracking which users are in which campaigns
+            CREATE TABLE IF NOT EXISTS campaign_players (
+                id SERIAL PRIMARY KEY,
+                campaign_id INTEGER NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                character_id INTEGER REFERENCES characters(id) ON DELETE SET NULL,
+                joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(campaign_id, user_id)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_campaign_players_campaign_id ON campaign_players(campaign_id);
+            CREATE INDEX IF NOT EXISTS idx_campaign_players_user_id ON campaign_players(user_id);
 
             CREATE TABLE IF NOT EXISTS sessions (
                 id SERIAL PRIMARY KEY,

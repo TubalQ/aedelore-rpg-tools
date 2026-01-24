@@ -3464,7 +3464,7 @@ function renderPlayItem(item) {
                 ${item.found ? `
                     <div style="display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap;">
                         <span style="font-size: 0.8rem; color: var(--text-muted);">Given to:</span>
-                        <select onchange="sessionData.items[${item._index}].givenTo = this.value; if(this.value) giveItemToPlayer(${item._index}, this.value); renderDayTimeline(); triggerAutoSave();" style="padding: 8px 12px; font-size: 0.85rem; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: 6px; color: var(--text-base); min-width: 120px;">
+                        <select onchange="const oldPlayer = sessionData.items[${item._index}].givenTo; sessionData.items[${item._index}].givenTo = this.value; giveItemToPlayer(${item._index}, this.value, oldPlayer); renderDayTimeline(); triggerAutoSave();" style="padding: 8px 12px; font-size: 0.85rem; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: 6px; color: var(--text-base); min-width: 120px;">
                             <option value="">-- Select --</option>
                             ${players.map(p => {
                                 const playerName = p.character || p.player || 'Unknown';
@@ -3490,7 +3490,7 @@ function renderPlayItemInline(item) {
                 ${item.found ? `
                     <div style="display: flex; align-items: center; gap: var(--space-1); flex-wrap: wrap;">
                         <span style="font-size: 0.8rem; color: var(--text-muted);">Given to:</span>
-                        <select onchange="sessionData.items[${item._index}].givenTo = this.value; if(this.value) giveItemToPlayer(${item._index}, this.value); renderDayTimeline(); triggerAutoSave();" style="padding: 6px 10px; font-size: 0.8rem; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: 4px; color: var(--text-base); min-width: 100px;">
+                        <select onchange="const oldPlayer = sessionData.items[${item._index}].givenTo; sessionData.items[${item._index}].givenTo = this.value; giveItemToPlayer(${item._index}, this.value, oldPlayer); renderDayTimeline(); triggerAutoSave();" style="padding: 6px 10px; font-size: 0.8rem; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: 4px; color: var(--text-base); min-width: 100px;">
                             <option value="">--</option>
                             ${players.map(p => {
                                 const playerName = p.character || p.player || 'Unknown';
@@ -4427,7 +4427,7 @@ function renderPlayItemsList() {
             ${item.found ? `
                 <div style="margin-top: var(--space-2); margin-left: 24px; display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap;">
                     <span style="font-size: 0.85rem; color: var(--text-subdued);">Given to:</span>
-                    <select onchange="sessionData.items[${i}].givenTo = this.value; if(this.value) giveItemToPlayer(${i}, this.value); renderPlayItemsList(); triggerAutoSave();" style="padding: 8px 12px; font-size: 0.85rem; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: var(--radius-sm); color: var(--text-base); min-width: 130px;">
+                    <select onchange="const oldPlayer = sessionData.items[${i}].givenTo; sessionData.items[${i}].givenTo = this.value; giveItemToPlayer(${i}, this.value, oldPlayer); renderPlayItemsList(); triggerAutoSave();" style="padding: 8px 12px; font-size: 0.85rem; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: var(--radius-sm); color: var(--text-base); min-width: 130px;">
                         <option value="">-- Select player --</option>
                         ${(sessionData.players || []).map(p => {
                             const playerName = p.character || p.player || 'Unknown';
@@ -5416,22 +5416,48 @@ async function confirmGiveXP() {
 }
 
 // Give a quest item to a player's character inventory
-async function giveItemToPlayer(itemIndex, playerName) {
-    if (!playerName || !authToken) return;
+// oldPlayerName is optional - if provided, item will be removed from old player first
+async function giveItemToPlayer(itemIndex, playerName, oldPlayerName) {
+    if (!authToken) return;
 
     const item = sessionData.items[itemIndex];
     if (!item) return;
 
-    // Find the player and their characterId
-    const player = (sessionData.players || []).find(p =>
-        (p.character === playerName || p.player === playerName) && p.characterId
-    );
+    // If old player was set and is different from new player, remove from old player first
+    if (oldPlayerName && oldPlayerName !== playerName) {
+        await removeItemFromPlayer(itemIndex, oldPlayerName);
+    }
 
-    if (!player || !player.characterId) {
-        // Player doesn't have a linked character - just save locally
-        console.log('Player has no linked character, saving locally only');
+    // If no new player selected, we're done (just removal)
+    if (!playerName) return;
+
+    // Normalize search term for case-insensitive, whitespace-tolerant matching
+    const searchName = playerName.trim().toLowerCase();
+
+    // Find all matching players with a characterId
+    const matchingPlayers = (sessionData.players || []).filter(p => {
+        if (!p.characterId) return false;
+        const charName = (p.character || '').trim().toLowerCase();
+        const playerNameNorm = (p.player || '').trim().toLowerCase();
+        return charName === searchName || playerNameNorm === searchName;
+    });
+
+    if (matchingPlayers.length === 0) {
+        // No matching player with a linked character
+        console.log('No player with linked character found for:', playerName);
+        showSaveIndicator(`Could not give item: "${playerName}" has no linked character`, true);
         return;
     }
+
+    if (matchingPlayers.length > 1) {
+        // Multiple matches - ambiguous, show error
+        const names = matchingPlayers.map(p => p.character || p.player).join(', ');
+        console.warn('Multiple players match name:', playerName, '- matches:', names);
+        showSaveIndicator(`Could not give item: Multiple players match "${playerName}"`, true);
+        return;
+    }
+
+    const player = matchingPlayers[0];
 
     try {
         const res = await fetch(`/api/dm/characters/${player.characterId}/give-item`, {
@@ -5450,13 +5476,76 @@ async function giveItemToPlayer(itemIndex, playerName) {
         if (!res.ok) {
             const data = await res.json();
             console.error('Give item error:', data.error);
-            // Don't alert, item is still tracked in session
+            showSaveIndicator(`Failed to give item: ${data.error || 'Server error'}`, true);
             return;
         }
 
-        showSaveIndicator(`${item.name} → ${playerName}'s inventory`);
+        showSaveIndicator(`${item.name} -> ${playerName}'s inventory`);
     } catch (error) {
         console.error('Give item connection error:', error);
+        showSaveIndicator('Connection error: Could not give item', true);
+    }
+}
+
+// Remove a quest item from a player's character inventory
+async function removeItemFromPlayer(itemIndex, playerName) {
+    if (!playerName || !authToken) return;
+
+    const item = sessionData.items[itemIndex];
+    if (!item) return;
+
+    // Normalize search term for case-insensitive, whitespace-tolerant matching
+    const searchName = playerName.trim().toLowerCase();
+
+    // Find all matching players with a characterId
+    const matchingPlayers = (sessionData.players || []).filter(p => {
+        if (!p.characterId) return false;
+        const charName = (p.character || '').trim().toLowerCase();
+        const playerNameNorm = (p.player || '').trim().toLowerCase();
+        return charName === searchName || playerNameNorm === searchName;
+    });
+
+    if (matchingPlayers.length === 0) {
+        // No matching player with a linked character - silently skip
+        console.log('No player with linked character found for removal:', playerName);
+        return;
+    }
+
+    if (matchingPlayers.length > 1) {
+        // Multiple matches - ambiguous, show error
+        const names = matchingPlayers.map(p => p.character || p.player).join(', ');
+        console.warn('Multiple players match name for removal:', playerName, '- matches:', names);
+        return;
+    }
+
+    const player = matchingPlayers[0];
+
+    try {
+        const res = await fetch(`/api/dm/characters/${player.characterId}/remove-item`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({
+                name: item.name
+            })
+        });
+
+        if (!res.ok) {
+            const data = await res.json();
+            console.error('Remove item error:', data.error);
+            // Don't show error indicator for "item not found" - it may have already been removed
+            if (data.error !== 'Item not found in character inventory') {
+                showSaveIndicator(`Failed to remove item: ${data.error || 'Server error'}`, true);
+            }
+            return;
+        }
+
+        showSaveIndicator(`${item.name} removed from ${playerName}'s inventory`);
+    } catch (error) {
+        console.error('Remove item connection error:', error);
+        showSaveIndicator('Connection error: Could not remove item', true);
     }
 }
 
