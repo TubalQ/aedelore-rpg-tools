@@ -2503,6 +2503,11 @@ function initOnboarding() {
                          document.getElementById('character_name')?.value;
     const isLoggedIn = !!authToken;
 
+    // Hide guide for logged in users (they can open it manually via help button)
+    if (isLoggedIn) {
+        return;
+    }
+
     // Adjust steps based on game system
     adjustOnboardingForSystem();
 

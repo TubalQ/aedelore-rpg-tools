@@ -7214,10 +7214,10 @@ input[type="range"]::-moz-range-thumb {
 
     /* Weapons table labels */
     #page-combat .section:nth-child(3) table td:nth-child(1)::before { content: "Weapon"; }
-    #page-combat .section:nth-child(3) table td:nth-child(2)::before { content: "Damage"; }
-    #page-combat .section:nth-child(3) table td:nth-child(3)::before { content: "Hands"; }
+    #page-combat .section:nth-child(3) table td:nth-child(2)::before { content: "Atk Bonus"; }
+    #page-combat .section:nth-child(3) table td:nth-child(3)::before { content: "Damage"; }
     #page-combat .section:nth-child(3) table td:nth-child(4)::before { content: "Range"; }
-    #page-combat .section:nth-child(3) table td:nth-child(5)::before { content: "Special"; }
+    #page-combat .section:nth-child(3) table td:nth-child(5)::before { content: "Break"; }
 
     #page-combat table td::before {
         font-weight: 600;
