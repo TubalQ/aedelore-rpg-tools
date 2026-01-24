@@ -8645,10 +8645,375 @@ function handleSidebarResize() {
 }
 
 // ============================================
+// DM CALCULATOR
+// ============================================
+
+// D10 result interpretation
+function interpretD10(value) {
+    if (value <= 4) return 'failure';
+    if (value <= 6) return 'barely';
+    if (value <= 9) return 'success';
+    return 'critical';
+}
+
+// Roll a pool of D10s
+function rollD10Pool(poolSize) {
+    const results = [];
+    for (let i = 0; i < poolSize; i++) {
+        results.push(Math.floor(Math.random() * 10) + 1);
+    }
+    return results;
+}
+
+// Count successes in a pool (7+ = success, 10 = critical counts as success too)
+function countSuccesses(results) {
+    return results.filter(r => r >= 7).length;
+}
+
+// Calculate probability of getting at least N successes from a pool
+function calculateSuccessProbability(poolSize, targetSuccesses) {
+    // P(single die success) = 4/10 (7,8,9,10)
+    const p = 0.4;
+    let probability = 0;
+
+    for (let k = targetSuccesses; k <= poolSize; k++) {
+        // Binomial probability
+        const combinations = factorial(poolSize) / (factorial(k) * factorial(poolSize - k));
+        probability += combinations * Math.pow(p, k) * Math.pow(1 - p, poolSize - k);
+    }
+
+    return probability;
+}
+
+function factorial(n) {
+    if (n <= 1) return 1;
+    let result = 1;
+    for (let i = 2; i <= n; i++) result *= i;
+    return result;
+}
+
+// Update defense odds display
+function updateDefenseOdds() {
+    const poolSize = parseInt(document.getElementById('calc-defense-pool').value) || 0;
+
+    if (poolSize <= 0) {
+        document.getElementById('odds-0-succ').textContent = '--';
+        document.getElementById('odds-1-succ').textContent = '--';
+        document.getElementById('odds-2-succ').textContent = '--';
+        return;
+    }
+
+    // Calculate probabilities
+    const prob0 = (1 - calculateSuccessProbability(poolSize, 1)) * 100;
+    const prob1 = (calculateSuccessProbability(poolSize, 1) - calculateSuccessProbability(poolSize, 2)) * 100;
+    const prob2 = calculateSuccessProbability(poolSize, 2) * 100;
+
+    document.getElementById('odds-0-succ').textContent = prob0.toFixed(0) + '%';
+    document.getElementById('odds-1-succ').textContent = prob1.toFixed(0) + '%';
+    document.getElementById('odds-2-succ').textContent = prob2.toFixed(0) + '%';
+}
+
+// Called when defense type changes (placeholder for future enhancements)
+function updateDefenseInfo() {
+    // Can add defense-specific info here if needed
+}
+
+// Roll defense
+function rollDefense() {
+    const poolSize = parseInt(document.getElementById('calc-defense-pool').value) || 0;
+    const defenseType = document.getElementById('calc-defense-type').value;
+    const resultContainer = document.getElementById('calc-defense-result');
+    const rollsDisplay = document.getElementById('calc-defense-rolls');
+    const outcomeDisplay = document.getElementById('calc-defense-outcome');
+    const effectDisplay = document.getElementById('calc-defense-effect');
+
+    if (poolSize <= 0) {
+        resultContainer.style.display = 'none';
+        return;
+    }
+
+    const results = rollD10Pool(poolSize);
+    const successes = countSuccesses(results);
+
+    // Format dice results with colors
+    const diceHtml = results.map(r => {
+        const interpretation = interpretD10(r);
+        let color = 'var(--text-muted)';
+        if (interpretation === 'success') color = 'var(--accent-green)';
+        else if (interpretation === 'critical') color = 'var(--accent-gold)';
+        else if (interpretation === 'barely') color = 'var(--text-secondary)';
+        return `<span style="display: inline-block; width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 4px; background: var(--bg-tertiary); color: ${color}; font-weight: 600; margin: 2px;">${r}</span>`;
+    }).join('');
+
+    // Determine defense outcome
+    let outcome = '';
+    let effect = '';
+    let outcomeColor = 'var(--text-muted)';
+
+    const defenseOutcomes = {
+        'block': {
+            0: { outcome: 'Failed Block', effect: 'Full damage → Armor HP', color: 'var(--accent-red)' },
+            1: { outcome: 'Partial Block', effect: 'Shield absorbs → Shield HP', color: 'var(--accent-gold)' },
+            2: { outcome: 'Full Block', effect: '50% damage → Shield HP', color: 'var(--accent-green)' }
+        },
+        'dodge': {
+            0: { outcome: 'Failed Dodge', effect: 'Full damage → Armor HP', color: 'var(--accent-red)' },
+            1: { outcome: 'Partial Dodge', effect: 'Half damage → Armor HP', color: 'var(--accent-gold)' },
+            2: { outcome: 'Full Dodge', effect: 'No damage taken', color: 'var(--accent-green)' }
+        },
+        'parry': {
+            0: { outcome: 'Failed Parry', effect: 'Full damage → Armor HP', color: 'var(--accent-red)' },
+            1: { outcome: 'Partial Parry', effect: 'Half damage → Armor HP', color: 'var(--accent-gold)' },
+            2: { outcome: 'Full Parry', effect: 'No damage taken', color: 'var(--accent-green)' }
+        },
+        'takeHit': {
+            0: { outcome: 'Failed Toughness', effect: 'Full damage → Armor HP + Stun', color: 'var(--accent-red)' },
+            1: { outcome: 'Absorbed', effect: 'Armor absorbs → Armor HP', color: 'var(--accent-gold)' },
+            2: { outcome: 'Tanked It', effect: 'Minimal (50%) → Armor HP', color: 'var(--accent-green)' }
+        }
+    };
+
+    const outcomes = defenseOutcomes[defenseType] || defenseOutcomes['block'];
+    const successKey = successes >= 2 ? 2 : successes;
+    const result = outcomes[successKey];
+
+    rollsDisplay.innerHTML = `<div style="display: flex; flex-wrap: wrap; gap: 2px; justify-content: center; margin-bottom: var(--space-2);">${diceHtml}</div>`;
+    outcomeDisplay.innerHTML = `<span style="color: ${result.color};">${successes} Success${successes !== 1 ? 'es' : ''} - ${result.outcome}</span>`;
+    effectDisplay.textContent = result.effect;
+
+    // Update the border color
+    resultContainer.style.borderLeftColor = result.color;
+    resultContainer.style.display = 'block';
+}
+
+// Calculate damage distribution
+function calculateDamage() {
+    const incomingDamage = parseInt(document.getElementById('calc-damage-incoming').value) || 0;
+    const successes = parseInt(document.getElementById('calc-damage-successes').value) || 0;
+    const defenseType = document.getElementById('calc-damage-defense-type').value;
+    const equipmentHp = parseInt(document.getElementById('calc-equipment-hp').value) || 0;
+    const resultContainer = document.getElementById('calc-damage-result');
+    const breakdownDisplay = document.getElementById('calc-damage-breakdown');
+
+    if (incomingDamage <= 0) {
+        resultContainer.style.display = 'none';
+        return;
+    }
+
+    let charDamage = 0;
+    let armorDamage = 0;
+    let shieldDamage = 0;
+
+    if (defenseType === 'dodge') {
+        // Dodge: 0 = full to armor, 1 = half to armor, 2+ = none
+        if (successes === 0) {
+            armorDamage = incomingDamage;
+        } else if (successes === 1) {
+            armorDamage = Math.ceil(incomingDamage / 2);
+        }
+        // 2+ = no damage
+    } else if (defenseType === 'parry') {
+        // Parry: 0 = full to armor, 1 = half to armor, 2+ = none
+        if (successes === 0) {
+            armorDamage = incomingDamage;
+        } else if (successes === 1) {
+            armorDamage = Math.ceil(incomingDamage / 2);
+        }
+        // 2+ = no damage
+    } else if (defenseType === 'block') {
+        // Block: 0 = full to armor, 1 = full to shield, 2+ = 50% to shield
+        if (successes === 0) {
+            armorDamage = incomingDamage;
+        } else if (successes === 1) {
+            shieldDamage = incomingDamage;
+        } else {
+            shieldDamage = Math.ceil(incomingDamage / 2);
+        }
+    } else if (defenseType === 'takeHit') {
+        // Take Hit: 0 = full to armor + stun, 1 = full to armor (absorbed), 2+ = minimal
+        if (successes === 0) {
+            armorDamage = incomingDamage;
+            // Note: Stun/Knockback effect applies (no extra HP damage)
+        } else if (successes === 1) {
+            armorDamage = incomingDamage;
+        } else {
+            armorDamage = Math.ceil(incomingDamage * 0.5);
+        }
+    }
+
+    // Check armor overflow (if armor HP tracked)
+    let overflowToChar = 0;
+    if (equipmentHp > 0 && armorDamage > equipmentHp) {
+        overflowToChar = armorDamage - equipmentHp;
+        armorDamage = equipmentHp;
+        charDamage += overflowToChar;
+    }
+    if (equipmentHp > 0 && shieldDamage > equipmentHp) {
+        overflowToChar = shieldDamage - equipmentHp;
+        shieldDamage = equipmentHp;
+        charDamage += overflowToChar;
+    }
+
+    let html = '<div style="display: grid; gap: var(--space-2);">';
+
+    if (armorDamage > 0) {
+        html += `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-2); background: var(--bg-tertiary); border-radius: 6px;">
+                <span style="color: var(--text-secondary);">Armor HP:</span>
+                <span style="font-size: 1.1rem; font-weight: 600; color: var(--accent-gold);">-${armorDamage}</span>
+            </div>`;
+    }
+
+    if (shieldDamage > 0) {
+        html += `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-2); background: var(--bg-tertiary); border-radius: 6px;">
+                <span style="color: var(--text-secondary);">Shield HP:</span>
+                <span style="font-size: 1.1rem; font-weight: 600; color: var(--primary-blue);">-${shieldDamage}</span>
+            </div>`;
+    }
+
+    if (charDamage > 0) {
+        html += `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-2); background: rgba(239, 68, 68, 0.15); border-radius: 6px; border: 1px solid var(--accent-red);">
+                <span style="color: var(--accent-red); font-weight: 600;">Character HP:</span>
+                <span style="font-size: 1.1rem; font-weight: 700; color: var(--accent-red);">-${charDamage}</span>
+            </div>`;
+    }
+
+    if (armorDamage === 0 && shieldDamage === 0 && charDamage === 0) {
+        html += `<div style="text-align: center; color: var(--accent-green); font-weight: 600;">No damage taken!</div>`;
+    }
+
+    if (overflowToChar > 0) {
+        html += `
+            <div style="padding: var(--space-2); background: rgba(239, 68, 68, 0.1); border-radius: 6px; text-align: center; margin-top: var(--space-1);">
+                <span style="color: var(--accent-red); font-size: 0.85rem;">⚠️ Equipment destroyed! ${overflowToChar} overflow to character</span>
+            </div>`;
+    }
+
+    html += '</div>';
+    breakdownDisplay.innerHTML = html;
+    resultContainer.style.display = 'block';
+}
+
+// NPC Quick Roll state
+let npcPoolSize = 5;
+
+function setNpcPool(size) {
+    npcPoolSize = size;
+    // Update button states
+    document.querySelectorAll('.npc-pool-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (parseInt(btn.dataset.pool) === size) {
+            btn.classList.add('active');
+        }
+    });
+    // Update the input field too
+    const poolInput = document.getElementById('calc-npc-pool');
+    if (poolInput) poolInput.value = size;
+    updateNpcOdds();
+}
+
+function updateNpcOdds() {
+    // Check if custom input has a different value
+    const poolInput = document.getElementById('calc-npc-pool');
+    if (poolInput) {
+        const inputValue = parseInt(poolInput.value) || 5;
+        if (inputValue !== npcPoolSize) {
+            npcPoolSize = inputValue;
+            // Clear button active states if custom value
+            document.querySelectorAll('.npc-pool-btn').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.pool) === npcPoolSize);
+            });
+        }
+    }
+
+    const oddsText = document.getElementById('npc-odds-text');
+    if (!oddsText) return;
+
+    const prob1 = calculateSuccessProbability(npcPoolSize, 1) * 100;
+    const prob2 = calculateSuccessProbability(npcPoolSize, 2) * 100;
+
+    oddsText.innerHTML = `<span style="color: var(--accent-green);">${prob1.toFixed(0)}% (1+)</span> | <span style="color: var(--primary-purple);">${prob2.toFixed(0)}% (2+)</span>`;
+}
+
+function rollNpc(type) {
+    // Get current pool size from input
+    const poolInput = document.getElementById('calc-npc-pool');
+    if (poolInput) npcPoolSize = parseInt(poolInput.value) || 5;
+
+    const resultContainer = document.getElementById('calc-npc-result');
+    const rollsDisplay = document.getElementById('calc-npc-rolls');
+    const outcomeDisplay = document.getElementById('calc-npc-outcome');
+
+    const results = rollD10Pool(npcPoolSize);
+    const successes = countSuccesses(results);
+
+    // Format dice results
+    const diceHtml = results.map(r => {
+        const interpretation = interpretD10(r);
+        let color = 'var(--text-muted)';
+        if (interpretation === 'success') color = 'var(--accent-green)';
+        else if (interpretation === 'critical') color = 'var(--accent-gold)';
+        else if (interpretation === 'barely') color = 'var(--text-secondary)';
+        return `<span style="display: inline-block; width: 24px; height: 24px; line-height: 24px; text-align: center; border-radius: 4px; background: var(--bg-tertiary); color: ${color}; font-weight: 600; font-size: 0.85rem;">${r}</span>`;
+    }).join(' ');
+
+    const typeLabels = {
+        'attack': '🎯 Attack',
+        'defense': '🛡️ Defense',
+        'skill': '📋 Skill'
+    };
+
+    let outcomeText = '';
+    let outcomeColor = 'var(--text-muted)';
+
+    if (successes === 0) {
+        outcomeText = 'Failure';
+        outcomeColor = 'var(--accent-red)';
+    } else if (successes === 1) {
+        outcomeText = 'Partial';
+        outcomeColor = 'var(--accent-gold)';
+    } else {
+        outcomeText = 'Success';
+        outcomeColor = 'var(--accent-green)';
+    }
+
+    rollsDisplay.innerHTML = `<span style="font-weight: 600; color: var(--text-secondary);">${typeLabels[type] || type}:</span> ${diceHtml}`;
+    outcomeDisplay.innerHTML = `<span style="color: var(--primary-purple); font-size: 1.2rem;">${successes}</span> success${successes !== 1 ? 'es' : ''} <span style="color: ${outcomeColor};">(${outcomeText})</span>`;
+
+    // Update border color based on outcome
+    resultContainer.style.borderLeftColor = outcomeColor;
+    resultContainer.style.display = 'block';
+}
+
+// Initialize calculator on page load
+function initCalculator() {
+    // Set default NPC pool button (5 is default)
+    const defaultBtn = document.querySelector('.npc-pool-btn[data-pool="5"]');
+    if (defaultBtn) defaultBtn.classList.add('active');
+    updateNpcOdds();
+    updateDefenseOdds();
+
+    // Add event listeners for defense pool input
+    const defensePoolInput = document.getElementById('calc-defense-pool');
+    if (defensePoolInput) {
+        defensePoolInput.addEventListener('input', updateDefenseOdds);
+    }
+
+    // Add event listener for NPC pool input
+    const npcPoolInput = document.getElementById('calc-npc-pool');
+    if (npcPoolInput) {
+        npcPoolInput.addEventListener('input', updateNpcOdds);
+    }
+}
+
+// ============================================
 // Initialize
 // ============================================
 
 window.addEventListener('load', () => {
+    initCalculator();
     updateAuthUI();
     setupAutoSaveListeners();
     setupMobileMenuCloseOnClick();

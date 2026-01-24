@@ -1416,6 +1416,29 @@
                 display: none;
             }
         }
+
+        /* Calculator NPC Pool Buttons */
+        .npc-pool-btn {
+            padding: var(--space-2) var(--space-3);
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            min-width: 40px;
+        }
+        .npc-pool-btn:hover {
+            border-color: var(--primary-purple);
+            color: var(--primary-purple);
+        }
+        .npc-pool-btn.active {
+            background: linear-gradient(135deg, var(--primary-purple) 0%, var(--primary-blue) 100%);
+            border-color: transparent;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -1741,6 +1764,10 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
                 Reference
             </div>
+            <div class="tab" onclick="switchTab('page-calculator')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
+                Calculator
+            </div>
             <div class="tab" onclick="switchTab('page-summary'); renderSessionSummary();">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                 Summary
@@ -2062,7 +2089,7 @@
                                     <tr><th>Defense</th><th>Dice Pool</th><th>2+ Success</th><th>1 Success</th><th>0 Success</th></tr>
                                     <tr><td><strong>Block</strong></td><td>STR + Shield Block</td><td>Shield HP (50%)</td><td>Shield absorbs → Shield HP</td><td>Armor HP</td></tr>
                                     <tr><td><strong>Dodge</strong></td><td>AGI or Acrobatics</td><td>No damage</td><td>Half → Armor HP</td><td>Full → Armor HP</td></tr>
-                                    <tr><td><strong>Parry</strong></td><td>Weapon Skill + STR</td><td>No damage</td><td>Half → Armor HP</td><td>Full → Armor HP</td></tr>
+                                    <tr><td><strong>Parry</strong></td><td>Weapon Atk Bonus + STR</td><td>No damage</td><td>Half → Armor HP</td><td>Full → Armor HP</td></tr>
                                     <tr><td><strong>Take Hit</strong></td><td>Toughness + Armor Block</td><td>Minimal damage</td><td>Absorbs → Armor HP</td><td>Full + Stun</td></tr>
                                 </table>
                                 <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: var(--space-2);"><strong>Equipment HP = 0?</strong> Destroyed. Remaining damage → Character HP. <strong>DM rec:</strong> Equipment takes 50% of attack damage.</p>
@@ -2774,6 +2801,200 @@
                         </div>
                     </div>
 
+                </div>
+            </div>
+
+            <!-- Page: Calculator (DM Dice Calculator) -->
+            <div id="page-calculator" class="tab-content">
+                <div class="section">
+                    <!-- Defense Calculator -->
+                    <div class="subsection">
+                        <h3 class="subsection-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            Defense Calculator
+                        </h3>
+                        <p style="color: var(--text-secondary); margin-bottom: var(--space-3); font-size: 0.9rem;">
+                            Calculate defense rolls and outcomes.
+                        </p>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin-bottom: var(--space-3);">
+                            <div>
+                                <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: var(--space-1);">Defense Type</label>
+                                <select id="calc-defense-type" onchange="updateDefenseInfo()" style="width: 100%; padding: var(--space-2); background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-base);">
+                                    <option value="block">Block (STR + Shield Block)</option>
+                                    <option value="dodge">Dodge (DEX or Acrobatics)</option>
+                                    <option value="parry">Parry (Weapon Atk Bonus + STR)</option>
+                                    <option value="takeHit">Take Hit (Toughness + Armor Block)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: var(--space-1);">Pool Size (D10s)</label>
+                                <input type="number" id="calc-defense-pool" value="5" min="1" max="20" onchange="updateDefenseOdds()" style="width: 100%; padding: var(--space-2); background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-base);">
+                            </div>
+                        </div>
+
+                        <!-- Probability Display -->
+                        <div id="calc-defense-odds" style="background: var(--bg-elevated); padding: var(--space-3); border-radius: var(--radius-sm); margin-bottom: var(--space-3); font-size: 0.85rem;">
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); text-align: center;">
+                                <div><span style="color: var(--accent-red);">0 succ</span><br><span id="odds-0-succ">--</span></div>
+                                <div><span style="color: var(--accent-gold);">1 succ</span><br><span id="odds-1-succ">--</span></div>
+                                <div><span style="color: var(--accent-green);">2+ succ</span><br><span id="odds-2-succ">--</span></div>
+                            </div>
+                        </div>
+
+                        <button onclick="rollDefense()" class="quick-add-btn" style="width: 100%; background: linear-gradient(135deg, var(--primary-purple) 0%, var(--primary-blue) 100%); margin-bottom: var(--space-3);">
+                            🎲 Roll Defense
+                        </button>
+
+                        <!-- Defense Result -->
+                        <div id="calc-defense-result" style="display: none; background: var(--bg-elevated); padding: var(--space-3); border-radius: var(--radius-sm); border-left: 3px solid var(--primary-purple);">
+                            <div id="calc-defense-rolls" style="margin-bottom: var(--space-2); font-family: monospace;"></div>
+                            <div id="calc-defense-outcome" style="font-weight: 600;"></div>
+                            <div id="calc-defense-effect" style="color: var(--text-secondary); margin-top: var(--space-2); font-size: 0.9rem;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Damage Calculator -->
+                    <div class="subsection" style="margin-top: var(--space-4);">
+                        <h3 class="subsection-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                            Damage Calculator
+                        </h3>
+                        <p style="color: var(--text-secondary); margin-bottom: var(--space-3); font-size: 0.9rem;">
+                            Calculate where damage goes based on defense result.
+                        </p>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin-bottom: var(--space-3);">
+                            <div>
+                                <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: var(--space-1);">Incoming Damage</label>
+                                <input type="number" id="calc-damage-incoming" value="10" min="1" style="width: 100%; padding: var(--space-2); background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-base);">
+                            </div>
+                            <div>
+                                <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: var(--space-1);">Defense Successes</label>
+                                <select id="calc-damage-successes" style="width: 100%; padding: var(--space-2); background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-base);">
+                                    <option value="0">0 Successes (Failed)</option>
+                                    <option value="1">1 Success (Barely)</option>
+                                    <option value="2">2+ Successes (Full Defense)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin-bottom: var(--space-3);">
+                            <div>
+                                <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: var(--space-1);">Defense Type Used</label>
+                                <select id="calc-damage-defense-type" style="width: 100%; padding: var(--space-2); background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-base);">
+                                    <option value="block">Block</option>
+                                    <option value="dodge">Dodge</option>
+                                    <option value="parry">Parry</option>
+                                    <option value="takeHit">Take Hit</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: var(--space-1);">Shield/Armor HP</label>
+                                <input type="number" id="calc-equipment-hp" value="20" min="0" style="width: 100%; padding: var(--space-2); background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-base);">
+                            </div>
+                        </div>
+
+                        <button onclick="calculateDamage()" class="quick-add-btn" style="width: 100%; background: linear-gradient(135deg, var(--accent-red) 0%, #ff6b6b 100%); margin-bottom: var(--space-3);">
+                            ⚔️ Calculate Damage
+                        </button>
+
+                        <!-- Damage Result -->
+                        <div id="calc-damage-result" style="display: none; background: var(--bg-elevated); padding: var(--space-3); border-radius: var(--radius-sm); border-left: 3px solid var(--accent-red);">
+                            <div id="calc-damage-breakdown"></div>
+                        </div>
+                    </div>
+
+                    <!-- NPC Quick Roll -->
+                    <div class="subsection" style="margin-top: var(--space-4);">
+                        <h3 class="subsection-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            NPC Quick Roll
+                        </h3>
+                        <p style="color: var(--text-secondary); margin-bottom: var(--space-3); font-size: 0.9rem;">
+                            Fast dice rolls for NPCs and enemies.
+                        </p>
+
+                        <div style="margin-bottom: var(--space-3);">
+                            <label style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-bottom: var(--space-1);">Pool Size</label>
+                            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-2);">
+                                <button onclick="setNpcPool(3)" class="npc-pool-btn" data-pool="3">3</button>
+                                <button onclick="setNpcPool(5)" class="npc-pool-btn active" data-pool="5">5</button>
+                                <button onclick="setNpcPool(7)" class="npc-pool-btn" data-pool="7">7</button>
+                                <button onclick="setNpcPool(10)" class="npc-pool-btn" data-pool="10">10</button>
+                                <input type="number" id="calc-npc-pool" value="5" min="1" max="20" onchange="updateNpcOdds()" style="width: 60px; padding: var(--space-2); background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-base); text-align: center;">
+                            </div>
+                            <div id="calc-npc-odds" style="color: var(--text-secondary); font-size: 0.85rem;">
+                                Odds: <span id="npc-odds-text">--</span>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); margin-bottom: var(--space-3);">
+                            <button onclick="rollNpc('attack')" class="quick-add-btn" style="background: linear-gradient(135deg, var(--accent-red) 0%, #ff6b6b 100%);">
+                                🎯 Attack
+                            </button>
+                            <button onclick="rollNpc('defense')" class="quick-add-btn" style="background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);">
+                                🛡️ Defense
+                            </button>
+                            <button onclick="rollNpc('skill')" class="quick-add-btn" style="background: linear-gradient(135deg, var(--accent-gold) 0%, #fbbf24 100%);">
+                                📋 Skill
+                            </button>
+                        </div>
+
+                        <!-- NPC Roll Result -->
+                        <div id="calc-npc-result" style="display: none; background: var(--bg-elevated); padding: var(--space-3); border-radius: var(--radius-sm); border-left: 3px solid var(--accent-gold);">
+                            <div id="calc-npc-rolls" style="margin-bottom: var(--space-2); font-family: monospace;"></div>
+                            <div id="calc-npc-outcome" style="font-weight: 600;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Reference -->
+                    <div class="subsection" style="margin-top: var(--space-4);">
+                        <h3 class="subsection-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            Quick Reference
+                        </h3>
+                        <div style="background: var(--bg-elevated); padding: var(--space-3); border-radius: var(--radius-sm); font-size: 0.85rem;">
+                            <div style="margin-bottom: var(--space-3);">
+                                <strong style="color: var(--accent-gold);">D10 Success Levels:</strong>
+                                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-2); margin-top: var(--space-2); text-align: center;">
+                                    <div style="color: var(--accent-red);">1-4<br>Failure</div>
+                                    <div style="color: var(--accent-gold);">5-6<br>Barely</div>
+                                    <div style="color: var(--accent-green);">7-9<br>Success</div>
+                                    <div style="color: var(--primary-purple);">10<br>Critical!</div>
+                                </div>
+                            </div>
+                            <div>
+                                <strong style="color: var(--accent-gold);">Defense Outcomes:</strong>
+                                <table style="width: 100%; margin-top: var(--space-2); border-collapse: collapse; font-size: 0.8rem;">
+                                    <tr style="border-bottom: 1px solid var(--border-subtle);">
+                                        <th style="text-align: left; padding: var(--space-1);">Defense</th>
+                                        <th style="text-align: center; padding: var(--space-1); color: var(--accent-green);">2+</th>
+                                        <th style="text-align: center; padding: var(--space-1); color: var(--accent-gold);">1</th>
+                                        <th style="text-align: center; padding: var(--space-1); color: var(--accent-red);">0</th>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid var(--border-subtle);">
+                                        <td style="padding: var(--space-1);">Block</td>
+                                        <td style="text-align: center; padding: var(--space-1);">Shield 50%</td>
+                                        <td style="text-align: center; padding: var(--space-1);">Shield HP</td>
+                                        <td style="text-align: center; padding: var(--space-1);">Armor HP</td>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid var(--border-subtle);">
+                                        <td style="padding: var(--space-1);">Dodge/Parry</td>
+                                        <td style="text-align: center; padding: var(--space-1);">No dmg</td>
+                                        <td style="text-align: center; padding: var(--space-1);">Half → Armor</td>
+                                        <td style="text-align: center; padding: var(--space-1);">Full → Armor</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: var(--space-1);">Take Hit</td>
+                                        <td style="text-align: center; padding: var(--space-1);">Minimal</td>
+                                        <td style="text-align: center; padding: var(--space-1);">Armor absorbs</td>
+                                        <td style="text-align: center; padding: var(--space-1);">Full + Stun</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
