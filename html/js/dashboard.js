@@ -52,6 +52,12 @@ function updateStatusBar() {
         arcanaContainer.classList.toggle('status-arcana-hidden', !isMagicClass);
     }
 
+    // Hide arcana row in Quick Actions for non-magic classes
+    const quickArcanaRow = document.querySelector('.stat-arcana');
+    if (quickArcanaRow) {
+        quickArcanaRow.style.display = isMagicClass ? 'flex' : 'none';
+    }
+
     // Willpower
     const willSlider = document.getElementById('willpower_slider');
     const willMax = willSlider ? parseInt(willSlider.max) : 3;
@@ -1293,11 +1299,22 @@ function updateQuickWeapons() {
 
         const type = typeEl?.value;
         if (type) {
+            // Look up weapon check from WEAPONS_DATA
+            const weaponData = typeof WEAPONS_DATA !== 'undefined' ? WEAPONS_DATA[type] : null;
+            let check = '';
+            if (weaponData) {
+                const abilityShort = weaponData.ability
+                    .replace('Strength', 'STR')
+                    .replace('Dexterity', 'DEX');
+                check = `${abilityShort}${weaponData.bonus}`;
+            }
+
             weapons.push({
                 name: type,
                 atk: atkEl?.value || '',
                 dmg: dmgEl?.value || '',
-                range: rangeEl?.value || ''
+                range: rangeEl?.value || '',
+                check: check
             });
         }
     }
@@ -1316,6 +1333,7 @@ function updateQuickWeapons() {
                     ${w.atk ? `<span class="weapon-stat"><span class="stat-label">ATK</span> ${w.atk}</span>` : ''}
                     ${w.dmg ? `<span class="weapon-stat"><span class="stat-label">DMG</span> ${w.dmg}</span>` : ''}
                     ${w.range ? `<span class="weapon-stat"><span class="stat-label">RNG</span> ${w.range}</span>` : ''}
+                    ${w.check ? `<span class="weapon-stat"><span class="stat-label">CHK</span> ${w.check}</span>` : ''}
                 </div>
             </div>
         `;

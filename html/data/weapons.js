@@ -10,7 +10,7 @@ const WEAPONS_DATA = {
     "Javelin": { type: "Simple Melee/Ranged", ability: "Strength", bonus: "+1", damage: "1d6", range: "3/10", break: "1" },
     "Light Hammer": { type: "Simple Melee", ability: "Strength", bonus: "+1", damage: "1d6", range: "1", break: "2" },
     "Mace": { type: "Simple Melee", ability: "Strength", bonus: "+1", damage: "1d6", range: "1", break: "2" },
-    "Quarterstaff": { type: "Simple Melee", ability: "Strength", bonus: "+1", damage: "1d6", range: "3", break: "1" },
+    "Quarterstaff": { type: "Simple Melee", ability: "Dexterity", bonus: "+1", damage: "1d6", range: "3", break: "1" },
     "Sickle": { type: "Simple Melee", ability: "Strength", bonus: "+1", damage: "1d6", range: "1", break: "0" },
     "Spear": { type: "Simple Melee", ability: "Strength", bonus: "+1", damage: "1d6", range: "3", break: "1" },
 
