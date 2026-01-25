@@ -1080,18 +1080,27 @@ function generateVisibilityDropdown(currentValue, dataPath) {
         <span style="color: ${isAll ? 'var(--accent-green)' : 'var(--text-secondary)'};">👥 All</span>
     </label>`;
 
-    // Player checkboxes
-    players.forEach(p => {
+    // Player checkboxes - use data attributes to avoid escaping issues
+    players.forEach((p, idx) => {
         const name = p.character;
         const isChecked = !isAll && selectedPlayers.includes(name.toLowerCase().trim());
+        const checkboxId = `${uniqueId}_player_${idx}`;
         html += `<label style="display: inline-flex; align-items: center; gap: 2px; font-size: 0.75rem; cursor: pointer; padding: 2px 6px; background: ${isChecked ? 'var(--primary-blue-20)' : 'var(--bg-elevated)'}; border-radius: 4px; border: 1px solid ${isChecked ? 'var(--primary-blue)' : 'var(--border-subtle)'};">
-            <input type="checkbox" ${isChecked ? 'checked' : ''} ${isAll ? 'disabled' : ''} onchange="toggleVisibilityPlayer('${dataPath}', '${escapeHtml(name)}', this.checked)" style="width: 12px; height: 12px;">
+            <input type="checkbox" id="${checkboxId}" ${isChecked ? 'checked' : ''} ${isAll ? 'disabled' : ''} data-datapath="${escapeHtml(dataPath)}" data-playername="${escapeHtml(name)}" onchange="handleVisibilityPlayerChange(this)" style="width: 12px; height: 12px;">
             <span style="color: ${isChecked ? 'var(--primary-blue)' : 'var(--text-secondary)'};">👤 ${escapeHtml(name)}</span>
         </label>`;
     });
 
     html += `</div>`;
     return html;
+}
+
+// Handle player visibility checkbox change via data attributes
+function handleVisibilityPlayerChange(checkbox) {
+    const dataPath = checkbox.dataset.datapath;
+    const playerName = checkbox.dataset.playername;
+    const isChecked = checkbox.checked;
+    toggleVisibilityPlayer(dataPath, playerName, isChecked);
 }
 
 // Toggle "All" visibility - if checked, set to 'all', otherwise clear
@@ -6869,6 +6878,96 @@ function getSessionContentGuidelines() {
     };
 }
 
+// Helper function to format full session data for AI context
+function formatSessionForAI(session) {
+    let output = '';
+    const data = session.data;
+    if (!data) return output;
+
+    // Prolog
+    if (data.prolog) {
+        output += `\n**Prolog:** ${data.prolog}\n`;
+    }
+
+    // Hook
+    if (data.hook) {
+        output += `\n**Hook:** ${data.hook}\n`;
+    }
+
+    // Session Notes
+    if (data.sessionNotes) {
+        if (data.sessionNotes.summary) {
+            output += `\n**Summary:** ${data.sessionNotes.summary}\n`;
+        }
+    }
+
+    // Turning Points
+    if (data.turningPoints && data.turningPoints.length > 0) {
+        output += `\n**Key Moments:** ${data.turningPoints.map(tp => tp.description).join('; ')}\n`;
+    }
+
+    // Event Log
+    if (data.eventLog && data.eventLog.length > 0) {
+        output += `\n**Events:** ${data.eventLog.map(e => e.text).join('; ')}\n`;
+    }
+
+    // NPCs
+    if (data.npcs && data.npcs.length > 0) {
+        output += `\n**NPCs:**\n`;
+        data.npcs.forEach(npc => {
+            output += `- ${npc.name}`;
+            if (npc.role) output += ` (${npc.role})`;
+            if (npc.description) output += `: ${npc.description}`;
+            output += `\n`;
+        });
+    }
+
+    // Places
+    if (data.places && data.places.length > 0) {
+        output += `\n**Places:**\n`;
+        data.places.forEach(place => {
+            output += `- ${place.name}`;
+            if (place.description) output += `: ${place.description}`;
+            output += `\n`;
+        });
+    }
+
+    // Encounters
+    if (data.encounters && data.encounters.length > 0) {
+        output += `\n**Encounters:**\n`;
+        data.encounters.forEach(enc => {
+            output += `- ${enc.name}`;
+            if (enc.description) output += `: ${enc.description}`;
+            if (enc.participants && enc.participants.length > 0) {
+                output += ` [Participants: ${enc.participants.map(p => p.name).join(', ')}]`;
+            }
+            output += `\n`;
+        });
+    }
+
+    // Read-Aloud
+    if (data.readAloud && data.readAloud.length > 0) {
+        output += `\n**Read-Aloud:**\n`;
+        data.readAloud.forEach(ra => {
+            const title = ra.title || ra.linkedTo || 'Untitled';
+            output += `- "${title}": ${ra.text.substring(0, 200)}${ra.text.length > 200 ? '...' : ''}\n`;
+        });
+    }
+
+    // Items
+    if (data.items && data.items.length > 0) {
+        output += `\n**Items/Loot:**\n`;
+        data.items.forEach(item => {
+            output += `- ${item.name}`;
+            if (item.description) output += `: ${item.description}`;
+            if (item.givenTo) output += ` (given to ${item.givenTo})`;
+            output += `\n`;
+        });
+    }
+
+    return output;
+}
+
 // Helper function to get session summary for AI context
 function getSelectedSessionSummary(selectedSessionId) {
     let output = '';
@@ -6883,15 +6982,8 @@ function getSelectedSessionSummary(selectedSessionId) {
         output += `\n### Previous Sessions\n`;
         campaign.sessions.forEach(session => {
             if (session.id !== currentSessionId) {
-                output += `\n**Session ${session.session_number}** (${session.date || 'No date'})\n`;
-                if (session.data) {
-                    if (session.data.sessionNotes && session.data.sessionNotes.summary) {
-                        output += `Summary: ${session.data.sessionNotes.summary}\n`;
-                    }
-                    if (session.data.turningPoints && session.data.turningPoints.length > 0) {
-                        output += `Key moments: ${session.data.turningPoints.map(tp => tp.description).join('; ')}\n`;
-                    }
-                }
+                output += `\n---\n**Session ${session.session_number}** (${session.date || 'No date'})\n`;
+                output += formatSessionForAI(session);
             }
         });
     } else if (selectedSessionId && selectedSessionId !== 'none') {
@@ -6900,17 +6992,7 @@ function getSelectedSessionSummary(selectedSessionId) {
         if (session && session.id !== currentSessionId) {
             output += `\n### Previous Session Context\n`;
             output += `\n**Session ${session.session_number}** (${session.date || 'No date'})\n`;
-            if (session.data) {
-                if (session.data.sessionNotes && session.data.sessionNotes.summary) {
-                    output += `Summary: ${session.data.sessionNotes.summary}\n`;
-                }
-                if (session.data.turningPoints && session.data.turningPoints.length > 0) {
-                    output += `Key moments: ${session.data.turningPoints.map(tp => tp.description).join('; ')}\n`;
-                }
-                if (session.data.eventLog && session.data.eventLog.length > 0) {
-                    output += `Events: ${session.data.eventLog.map(e => e.text).join('; ')}\n`;
-                }
-            }
+            output += formatSessionForAI(session);
         }
     }
 
