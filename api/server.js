@@ -379,6 +379,14 @@ app.post('/api/login', authLimiter, async (req, res) => {
 
         clearLoginAttempts(username);
 
+        // Log login history
+        const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip;
+        const userAgent = req.headers['user-agent'] || null;
+        await db.query(
+            'INSERT INTO login_history (user_id, ip_address, user_agent) VALUES ($1, $2, $3)',
+            [user.id, ip, userAgent]
+        );
+
         const token = generateToken();
         await db.query(
             'INSERT INTO auth_tokens (token, user_id) VALUES ($1, $2)',
