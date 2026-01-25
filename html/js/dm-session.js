@@ -18,6 +18,14 @@ let playerCampaignId = null; // Current player campaign being viewed
 // Session data structure
 let sessionData = getEmptySessionData();
 
+// Track which completed items have been rendered (to avoid duplicates in During Play)
+let _renderedCompletedItems = new Set();
+
+// Helper: Check if an item is "completed" (found + assigned to a player)
+function isItemCompleted(item) {
+    return item.found === true && item.givenTo && item.givenTo.trim() !== '';
+}
+
 // ============================================
 // View State Persistence (survive page refresh)
 // ============================================
@@ -504,6 +512,16 @@ async function doRegister() {
 }
 
 async function doLogout() {
+    // Save any unsaved session changes first
+    if (currentSessionId && !isSessionLocked && authToken) {
+        try {
+            await saveSession();
+        } catch (e) {
+            console.error('Failed to save before logout:', e);
+        }
+    }
+
+    // Call server logout
     try {
         await fetch('/api/logout', {
             method: 'POST',
@@ -511,12 +529,25 @@ async function doLogout() {
         });
     } catch (e) {}
 
+    // Clear local state
     authToken = null;
     currentCampaignId = null;
     currentCampaignName = '';
     currentSessionId = null;
     localStorage.removeItem('aedelore_auth_token');
-    updateAuthUI();
+
+    // Clear Service Worker cache
+    if ('caches' in window) {
+        try {
+            const cacheNames = await caches.keys();
+            await Promise.all(cacheNames.map(name => caches.delete(name)));
+        } catch (e) {
+            console.error('Failed to clear cache:', e);
+        }
+    }
+
+    // Reload page
+    location.reload();
 }
 
 // ============================================
@@ -1018,6 +1049,98 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// Generate visibility checkboxes for session content
+// Returns HTML for checkboxes with "All Players" + player character names
+// visibleTo can be: "all", a single name (string), or an array of names
+function generateVisibilityDropdown(currentValue, dataPath) {
+    const players = (sessionData.players || []).filter(p => p.character);
+
+    // Normalize currentValue to array for easier checking
+    let selectedPlayers = [];
+    let isAll = true;
+
+    if (currentValue && currentValue !== 'all') {
+        isAll = false;
+        if (Array.isArray(currentValue)) {
+            selectedPlayers = currentValue.map(n => n.toLowerCase().trim());
+        } else {
+            selectedPlayers = [currentValue.toLowerCase().trim()];
+        }
+    }
+
+    const uniqueId = 'vis_' + Math.random().toString(36).substr(2, 9);
+
+    let html = `<div class="visibility-picker" style="display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap;">`;
+
+    // "All" checkbox
+    html += `<label style="display: inline-flex; align-items: center; gap: 2px; font-size: 0.75rem; cursor: pointer; padding: 2px 6px; background: ${isAll ? 'var(--accent-green-20)' : 'var(--bg-elevated)'}; border-radius: 4px; border: 1px solid ${isAll ? 'var(--accent-green)' : 'var(--border-subtle)'};">
+        <input type="checkbox" ${isAll ? 'checked' : ''} onchange="toggleVisibilityAll('${dataPath}', this.checked)" style="width: 12px; height: 12px;">
+        <span style="color: ${isAll ? 'var(--accent-green)' : 'var(--text-secondary)'};">👥 All</span>
+    </label>`;
+
+    // Player checkboxes
+    players.forEach(p => {
+        const name = p.character;
+        const isChecked = !isAll && selectedPlayers.includes(name.toLowerCase().trim());
+        html += `<label style="display: inline-flex; align-items: center; gap: 2px; font-size: 0.75rem; cursor: pointer; padding: 2px 6px; background: ${isChecked ? 'var(--primary-blue-20)' : 'var(--bg-elevated)'}; border-radius: 4px; border: 1px solid ${isChecked ? 'var(--primary-blue)' : 'var(--border-subtle)'};">
+            <input type="checkbox" ${isChecked ? 'checked' : ''} ${isAll ? 'disabled' : ''} onchange="toggleVisibilityPlayer('${dataPath}', '${escapeHtml(name)}', this.checked)" style="width: 12px; height: 12px;">
+            <span style="color: ${isChecked ? 'var(--primary-blue)' : 'var(--text-secondary)'};">👤 ${escapeHtml(name)}</span>
+        </label>`;
+    });
+
+    html += `</div>`;
+    return html;
+}
+
+// Toggle "All" visibility - if checked, set to 'all', otherwise clear
+function toggleVisibilityAll(dataPath, isChecked) {
+    if (isChecked) {
+        eval(dataPath + " = 'all'");
+    } else {
+        eval(dataPath + " = []");
+    }
+    renderPlanningByDay();
+    renderNPCsList();
+    renderPlacesList();
+    renderEncountersList();
+    renderReadAloudList();
+    triggerAutoSave();
+}
+
+// Toggle individual player visibility
+function toggleVisibilityPlayer(dataPath, playerName, isChecked) {
+    let current = eval(dataPath);
+
+    // Normalize to array
+    if (!current || current === 'all') {
+        current = [];
+    } else if (!Array.isArray(current)) {
+        current = [current];
+    }
+
+    if (isChecked) {
+        if (!current.some(n => n.toLowerCase() === playerName.toLowerCase())) {
+            current.push(playerName);
+        }
+    } else {
+        current = current.filter(n => n.toLowerCase() !== playerName.toLowerCase());
+    }
+
+    // If empty, default back to 'all'
+    if (current.length === 0) {
+        eval(dataPath + " = 'all'");
+    } else {
+        eval(dataPath + " = " + JSON.stringify(current));
+    }
+
+    renderPlanningByDay();
+    renderNPCsList();
+    renderPlacesList();
+    renderEncountersList();
+    renderReadAloudList();
+    triggerAutoSave();
 }
 
 // ============================================
@@ -2546,6 +2669,7 @@ function renderPlaceWithLinkedContent(place, group, day) {
                         <option value="" ${!place.day ? 'selected' : ''}>No day</option>
                         ${[1,2,3,4,5].map(d => `<option value="${d}" ${place.day === d ? 'selected' : ''}>Day ${d}</option>`).join('')}
                     </select>
+                    ${generateVisibilityDropdown(place.visibleTo, `sessionData.places[${place._index}].visibleTo`)}
                 </div>
                 <input type="text" value="${escapeHtml(place.description || '')}" onchange="sessionData.places[${place._index}].description = this.value" placeholder="Description..." style="width: 100%; margin-top: var(--space-2); font-size: 0.85rem; background: transparent; border: none; border-bottom: 1px dashed var(--border-subtle); color: var(--text-secondary);">
             </div>
@@ -2636,6 +2760,7 @@ function renderEncounterCompact(enc, day, placeName, linkedRA = []) {
                     <span style="font-size: 0.75rem; color: var(--accent-cyan);">📍</span>
                     <input type="text" value="${escapeHtml(enc.location || '')}" onchange="sessionData.encounters[${enc._index}].location = this.value; renderPlanningByDay(); renderPlayLists();" placeholder="Location" style="width: 120px; font-size: 0.8rem; background: transparent; border: none; border-bottom: 1px dashed var(--border-subtle); color: var(--accent-cyan);">
                 </div>
+                ${generateVisibilityDropdown(enc.visibleTo, `sessionData.encounters[${enc._index}].visibleTo`)}
             </div>
 
             <!-- Participants section -->
@@ -2726,9 +2851,10 @@ function renderReadAloudCompact(ra, day, placeName) {
     return `
         <div style="padding: var(--space-2); margin-bottom: var(--space-1); background: linear-gradient(135deg, rgba(168, 85, 247, 0.08) 0%, rgba(168, 85, 247, 0.02) 100%); border-radius: var(--radius-sm); border-left: 3px solid var(--accent-purple); position: relative;">
             <button class="remove-btn" onclick="removeReadAloud(${ra._index}); renderPlanningByDay();" style="top: 4px; right: 4px; width: 18px; height: 18px; font-size: 12px;">&times;</button>
-            <div style="display: flex; gap: var(--space-2); align-items: center;">
+            <div style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap;">
                 <span style="color: var(--accent-purple); font-size: 0.75rem;">📖</span>
-                <input type="text" value="${escapeHtml(ra.title || '')}" onchange="updateReadAloud(${ra._index}, 'title', this.value); renderPlayLists();" placeholder="Title" style="flex: 1; font-size: 0.85rem; font-weight: 500; color: var(--accent-gold);">
+                <input type="text" value="${escapeHtml(ra.title || '')}" onchange="updateReadAloud(${ra._index}, 'title', this.value); renderPlayLists();" placeholder="Title" style="flex: 1; min-width: 100px; font-size: 0.85rem; font-weight: 500; color: var(--accent-gold);">
+                ${generateVisibilityDropdown(ra.visibleTo, `sessionData.readAloud[${ra._index}].visibleTo`)}
             </div>
             <textarea rows="2" onchange="updateReadAloud(${ra._index}, 'text', this.value)" placeholder="Text..." style="width: 100%; margin-top: var(--space-1); font-size: 0.8rem; font-style: italic;">${escapeHtml(ra.text || '')}</textarea>
         </div>`;
@@ -2747,6 +2873,7 @@ function renderNPCCompact(npc, day, placeName, linkedRA = []) {
                     <option value="friendly" ${npc.disposition === 'friendly' ? 'selected' : ''}>Friendly</option>
                     <option value="hostile" ${npc.disposition === 'hostile' ? 'selected' : ''}>Hostile</option>
                 </select>
+                ${generateVisibilityDropdown(npc.visibleTo, `sessionData.npcs[${npc._index}].visibleTo`)}
             </div>
             <textarea rows="2" onchange="sessionData.npcs[${npc._index}].description = this.value;" placeholder="Description..." style="width: 100%; font-size: 0.8rem; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: 4px; padding: 4px 8px; resize: vertical;">${escapeHtml(npc.description || '')}</textarea>`;
 
@@ -2802,6 +2929,7 @@ function renderUnlinkedContent(encounters, readAloud, npcs, items, day) {
                         <span style="font-size: 0.75rem; color: var(--accent-cyan);">📍</span>
                         <input type="text" value="${escapeHtml(enc.location || '')}" onchange="sessionData.encounters[${enc._index}].location = this.value; renderPlanningByDay(); renderPlayLists();" placeholder="Location" style="width: 120px; font-size: 0.8rem; background: transparent; border: none; border-bottom: 1px dashed var(--border-subtle); color: var(--accent-cyan);">
                     </div>
+                    ${generateVisibilityDropdown(enc.visibleTo, `sessionData.encounters[${enc._index}].visibleTo`)}
                 </div>
 
                 <!-- Participants section -->
@@ -2888,6 +3016,7 @@ function renderUnlinkedContent(encounters, readAloud, npcs, items, day) {
                         <option value="friendly" ${npc.disposition === 'friendly' ? 'selected' : ''}>Friendly</option>
                         <option value="hostile" ${npc.disposition === 'hostile' ? 'selected' : ''}>Hostile</option>
                     </select>
+                    ${generateVisibilityDropdown(npc.visibleTo, `sessionData.npcs[${npc._index}].visibleTo`)}
                     <select onchange="sessionData.npcs[${npc._index}].plannedLocation = this.value; renderPlanningByDay(); renderPlayLists();" style="font-size: 0.75rem; padding: 4px 8px; background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 4px;">
                         ${getPlaceOptions(npc.plannedLocation)}
                     </select>
@@ -3012,6 +3141,9 @@ function updatePlayDayFilterOptions(sortedDays, hasUnscheduled) {
 function renderDayTimeline() {
     const container = document.getElementById('day-timeline-container');
     if (!container) return;
+
+    // Reset the tracker for completed items (so they only render once)
+    _renderedCompletedItems = new Set();
 
     const dayFilter = getPlayDayFilter();
 
@@ -3294,7 +3426,7 @@ function renderPlayPlaceWithLinkedContent(place, group, day) {
 
     // 4. Items linked to this place (not via encounter)
     if (linkedItems.length > 0) {
-        html += linkedItems.map(item => renderPlayItem(item)).join('');
+        html += linkedItems.map(item => renderPlayItem(item, place.name)).join('');
     }
 
     html += `
@@ -3330,7 +3462,7 @@ function renderPlayUnlinkedContent(encounters, readAloud, npcs, items, day) {
 
     // Items
     items.forEach(item => {
-        html += renderPlayItem(item);
+        html += renderPlayItem(item, '_unlinked_');
     });
 
     html += `</div>`;
@@ -3401,8 +3533,9 @@ function renderPlayEncounter(enc, linkedRA = [], linkedItems = []) {
         }
 
         // Show linked items with found checkbox and "Given to" dropdown
+        const encLocation = enc.name || enc.location || 'encounter';
         linkedItems.forEach(item => {
-            html += renderPlayItemInline(item);
+            html += renderPlayItemInline(item, encLocation);
         });
         html += `</div>`;
     }
@@ -3454,12 +3587,27 @@ function renderPlayNPC(npc, linkedRA = []) {
 }
 
 // During Play: Render a single item (standalone)
-function renderPlayItem(item) {
+function renderPlayItem(item, location = '') {
+    // Skip items that are found but locked to a different location
+    if (item.found && item.actualLocation && item.actualLocation !== location) {
+        return '';
+    }
+
+    // Skip completed items that have already been rendered elsewhere (e.g., in an encounter)
+    if (isItemCompleted(item) && _renderedCompletedItems.has(item.name)) {
+        return '';
+    }
+    // Mark completed items as rendered
+    if (isItemCompleted(item)) {
+        _renderedCompletedItems.add(item.name);
+    }
+
     const players = sessionData.players || [];
+    const locationEscaped = escapeHtml(location).replace(/'/g, "\\'");
     return `
         <div style="padding: var(--space-3); margin-bottom: var(--space-2); background: var(--bg-surface); border-radius: var(--radius-sm); border-left: 3px solid ${item.found ? 'var(--accent-green)' : 'var(--accent-gold)'};">
             <div style="display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap;">
-                <input type="checkbox" ${item.found ? 'checked' : ''} onchange="sessionData.items[${item._index}].found = this.checked; renderDayTimeline(); triggerAutoSave();" style="width: 20px; height: 20px; cursor: pointer;">
+                <input type="checkbox" ${item.found ? 'checked' : ''} onchange="sessionData.items[${item._index}].found = this.checked; if(this.checked) sessionData.items[${item._index}].actualLocation = '${locationEscaped}'; renderDayTimeline(); triggerAutoSave();" style="width: 20px; height: 20px; cursor: pointer;">
                 <span style="flex: 1; min-width: 120px; font-weight: 500; ${item.found ? 'text-decoration: line-through; opacity: 0.6;' : ''}">📜 ${escapeHtml(item.name || 'Unnamed Item')}</span>
                 ${item.found ? `
                     <div style="display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap;">
@@ -3480,12 +3628,23 @@ function renderPlayItem(item) {
 }
 
 // During Play: Render an item inline (inside encounter loot section)
-function renderPlayItemInline(item) {
+function renderPlayItemInline(item, location = '') {
+    // Skip items that are found but locked to a different location
+    if (item.found && item.actualLocation && item.actualLocation !== location) {
+        return '';
+    }
+
+    // Mark completed items as rendered (encounter items get priority)
+    if (isItemCompleted(item)) {
+        _renderedCompletedItems.add(item.name);
+    }
+
     const players = sessionData.players || [];
+    const locationEscaped = escapeHtml(location).replace(/'/g, "\\'");
     return `
         <div style="margin-left: var(--space-2); padding: 10px; background: linear-gradient(135deg, rgba(251, 191, 36, 0.08) 0%, rgba(251, 191, 36, 0.02) 100%); border-radius: 6px; border-left: 2px solid var(--accent-gold); margin-bottom: 6px; ${item.found ? 'opacity: 0.7;' : ''}">
             <div style="display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap;">
-                <input type="checkbox" ${item.found ? 'checked' : ''} onchange="sessionData.items[${item._index}].found = this.checked; renderDayTimeline(); triggerAutoSave();" style="width: 18px; height: 18px; cursor: pointer;">
+                <input type="checkbox" ${item.found ? 'checked' : ''} onchange="sessionData.items[${item._index}].found = this.checked; if(this.checked) sessionData.items[${item._index}].actualLocation = '${locationEscaped}'; renderDayTimeline(); triggerAutoSave();" style="width: 18px; height: 18px; cursor: pointer;">
                 <span style="flex: 1; min-width: 100px; font-size: 0.9rem; font-weight: 500; color: var(--accent-gold); ${item.found ? 'text-decoration: line-through;' : ''}">📜 ${escapeHtml(item.name)}</span>
                 ${item.found ? `
                     <div style="display: flex; align-items: center; gap: var(--space-1); flex-wrap: wrap;">
@@ -3651,20 +3810,35 @@ async function syncCampaignPlayers() {
             sessionData.players = [];
         }
 
-        // Create a map of existing players by username (for campaign members)
-        const existingByUsername = new Map();
+        // Create maps of existing players by userId and by character name
+        const existingByUserId = new Map();
+        const existingByCharacter = new Map();
         sessionData.players.forEach((p, i) => {
             if (p.userId) {
-                existingByUsername.set(p.userId, i);
+                existingByUserId.set(p.userId, i);
+            }
+            if (p.character) {
+                existingByCharacter.set(p.character.toLowerCase().trim(), i);
             }
         });
 
         // Add/update campaign members
         campaignPlayers.forEach(cp => {
-            const existingIndex = existingByUsername.get(cp.id);
+            // First try to match by userId, then by character name
+            let existingIndex = existingByUserId.get(cp.id);
+
+            // If no match by userId, try matching by character name (for manual entries)
+            if (existingIndex === undefined && cp.character && cp.character.name) {
+                const charNameLower = cp.character.name.toLowerCase().trim();
+                existingIndex = existingByCharacter.get(charNameLower);
+            }
 
             if (existingIndex !== undefined) {
-                // Update existing player with character data if they linked a character
+                // Update existing player with campaign member data
+                sessionData.players[existingIndex].userId = cp.id;
+                sessionData.players[existingIndex].isCampaignMember = true;
+                sessionData.players[existingIndex].player = cp.username;
+
                 if (cp.character) {
                     sessionData.players[existingIndex].character = cp.character.name || '';
                     sessionData.players[existingIndex].characterId = cp.character.id;
@@ -3678,6 +3852,9 @@ async function syncCampaignPlayers() {
                     sessionData.players[existingIndex].attributes_locked = cp.character.attributes_locked || false;
                     sessionData.players[existingIndex].abilities_locked = cp.character.abilities_locked || false;
                 }
+
+                // Update the userId map so we don't add duplicates
+                existingByUserId.set(cp.id, existingIndex);
             } else {
                 // Add new campaign member
                 const newPlayer = {
@@ -3697,7 +3874,12 @@ async function syncCampaignPlayers() {
                     abilities_locked: cp.character ? cp.character.abilities_locked : false,
                     notes: ''
                 };
+                const newIndex = sessionData.players.length;
                 sessionData.players.push(newPlayer);
+                existingByUserId.set(cp.id, newIndex);
+                if (cp.character && cp.character.name) {
+                    existingByCharacter.set(cp.character.name.toLowerCase().trim(), newIndex);
+                }
             }
         });
 
@@ -3906,14 +4088,18 @@ function renderNPCsList() {
                     <input type="text" value="${escapeHtml(npc.disposition || '')}" onchange="sessionData.npcs[${i}].disposition = this.value" placeholder="Friendly, hostile, etc.">
                 </div>
             </div>
-            <div class="grid grid-2" style="gap: var(--space-2); margin-top: var(--space-2);">
-                <div class="field-group" style="margin-bottom: 0; flex: 1;">
+            <div style="display: flex; gap: var(--space-2); margin-top: var(--space-2); flex-wrap: wrap;">
+                <div class="field-group" style="margin-bottom: 0; flex: 1; min-width: 200px;">
                     <label style="font-size: 0.7rem;">Description / Info</label>
                     <textarea rows="2" onchange="sessionData.npcs[${i}].description = this.value" placeholder="What do they know? What can they provide?">${escapeHtml(npc.description || npc.info || '')}</textarea>
                 </div>
                 <div class="field-group" style="margin-bottom: 0; max-width: 80px;">
                     <label style="font-size: 0.7rem; color: var(--accent-blue);">Day</label>
                     <input type="number" min="1" value="${npc.day || ''}" onchange="sessionData.npcs[${i}].day = this.value ? parseInt(this.value) : null; renderPlayLists();" placeholder="-" style="text-align: center;">
+                </div>
+                <div class="field-group" style="margin-bottom: 0; min-width: 120px;">
+                    <label style="font-size: 0.7rem; color: var(--accent-cyan);">Visible To</label>
+                    ${generateVisibilityDropdown(npc.visibleTo, `sessionData.npcs[${i}].visibleTo`)}
                 </div>
             </div>
         </div>
@@ -4044,6 +4230,10 @@ function renderPlacesList() {
                     <label style="font-size: 0.7rem; color: var(--accent-blue);">Day</label>
                     <input type="number" min="1" value="${place.day || ''}" onchange="sessionData.places[${i}].day = this.value ? parseInt(this.value) : null; renderPlayLists();" placeholder="-" style="text-align: center;">
                 </div>
+                <div class="field-group" style="margin-bottom: 0; min-width: 120px;">
+                    <label style="font-size: 0.7rem; color: var(--accent-cyan);">Visible To</label>
+                    ${generateVisibilityDropdown(place.visibleTo, `sessionData.places[${i}].visibleTo`)}
+                </div>
             </div>
         </div>
     `).join('');
@@ -4108,18 +4298,22 @@ function renderEncountersList() {
     container.innerHTML = sessionData.encounters.map((enc, i) => `
         <div class="combat-encounter" id="planning-encounter-${i}">
             <button class="remove-btn" onclick="removeEncounter(${i})">&times;</button>
-            <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-3);">
-                <div class="field-group" style="margin-bottom: 0; flex: 1;">
+            <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-3); flex-wrap: wrap;">
+                <div class="field-group" style="margin-bottom: 0; flex: 1; min-width: 150px;">
                     <label style="font-size: 0.7rem; color: var(--accent-red);">Encounter Name</label>
                     <input type="text" value="${escapeHtml(enc.name || '')}" onchange="sessionData.encounters[${i}].name = this.value; renderPlayLists();" placeholder="e.g., Tavern Ambush">
                 </div>
-                <div class="field-group" style="margin-bottom: 0; flex: 1;">
+                <div class="field-group" style="margin-bottom: 0; flex: 1; min-width: 150px;">
                     <label style="font-size: 0.7rem;">Location</label>
                     <input type="text" value="${escapeHtml(enc.location || '')}" onchange="sessionData.encounters[${i}].location = this.value" placeholder="Where does this happen?">
                 </div>
                 <div class="field-group" style="margin-bottom: 0; max-width: 70px;">
                     <label style="font-size: 0.7rem; color: var(--accent-blue);">Day</label>
                     <input type="number" min="1" value="${enc.day || ''}" onchange="sessionData.encounters[${i}].day = this.value ? parseInt(this.value) : null; renderPlayLists();" placeholder="-" style="text-align: center;">
+                </div>
+                <div class="field-group" style="margin-bottom: 0; min-width: 120px;">
+                    <label style="font-size: 0.7rem; color: var(--accent-cyan);">Visible To</label>
+                    ${generateVisibilityDropdown(enc.visibleTo, `sessionData.encounters[${i}].visibleTo`)}
                 </div>
             </div>
             <div class="field-group">
@@ -4408,16 +4602,26 @@ function renderPlayItemsList() {
         return;
     }
 
-    // Progress indicator
+    // Filter: show items that are not found, OR found here in the items list, OR found but not locked elsewhere
+    const visibleItems = sessionData.items.filter((item, i) => {
+        if (!item.found) return true; // Not found yet - show it
+        if (!item.actualLocation) return true; // Found but no location set - show it
+        if (item.actualLocation === '_items_list_') return true; // Found in this list - show it
+        return false; // Found elsewhere - hide it
+    });
+
+    // Progress indicator (still counts all items)
     const foundCount = sessionData.items.filter(item => item.found).length;
     const totalCount = sessionData.items.length;
 
     let html = `<div style="font-size: 0.75rem; color: var(--accent-cyan); margin-bottom: var(--space-2);">${foundCount}/${totalCount} found</div>`;
 
-    html += sessionData.items.map((item, i) => `
+    html += visibleItems.map((item) => {
+        const i = sessionData.items.indexOf(item);
+        return `
         <div class="play-item" style="padding: var(--space-2); margin-bottom: var(--space-2); background: var(--bg-surface); border-radius: var(--radius-sm); border-left: 3px solid ${item.found ? 'var(--accent-green)' : 'var(--accent-gold)'};">
             <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-1);">
-                <input type="checkbox" ${item.found ? 'checked' : ''} onchange="sessionData.items[${i}].found = this.checked; renderItemsList(); renderPlayItemsList(); triggerAutoSave();" style="width: 18px; height: 18px; cursor: pointer;">
+                <input type="checkbox" ${item.found ? 'checked' : ''} onchange="sessionData.items[${i}].found = this.checked; if(this.checked) sessionData.items[${i}].actualLocation = '_items_list_'; renderItemsList(); renderPlayItemsList(); renderDayTimeline(); triggerAutoSave();" style="width: 18px; height: 18px; cursor: pointer;">
                 <span style="flex: 1; font-weight: 500; ${item.found ? 'text-decoration: line-through; opacity: 0.6;' : ''}">${escapeHtml(item.name || item.item || 'Unnamed Item')}</span>
             </div>
             <div style="margin-left: 24px; ${item.found ? 'opacity: 0.6;' : ''}">
@@ -4437,7 +4641,7 @@ function renderPlayItemsList() {
                 </div>
             ` : ''}
         </div>
-    `).join('');
+    `}).join('');
 
     container.innerHTML = html;
 }
@@ -4509,6 +4713,10 @@ function renderReadAloudList() {
                         ${linkedType === 'encounter' ? encounterOptions.map(e => `<option value="${escapeHtml(e)}" ${linkedTo === e ? 'selected' : ''}>${escapeHtml(e)}</option>`).join('') : ''}
                         ${linkedType === 'npc' ? npcOptions.map(n => `<option value="${escapeHtml(n)}" ${linkedTo === n ? 'selected' : ''}>${escapeHtml(n)}</option>`).join('') : ''}
                     </select>
+                </div>
+                <div class="field-group" style="margin-bottom: 0; min-width: 120px;">
+                    <label style="color: var(--accent-cyan);">Visible To</label>
+                    ${generateVisibilityDropdown(ra.visibleTo, `sessionData.readAloud[${i}].visibleTo`)}
                 </div>
             </div>
             <div class="field-group" style="margin-bottom: 0;">
@@ -5469,7 +5677,8 @@ async function giveItemToPlayer(itemIndex, playerName, oldPlayerName) {
             body: JSON.stringify({
                 name: item.name,
                 description: item.description || '',
-                campaign_id: currentCampaignId
+                campaign_id: currentCampaignId,
+                sessionName: sessionData.title || 'Unknown Session'
             })
         });
 

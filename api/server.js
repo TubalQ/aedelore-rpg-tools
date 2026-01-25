@@ -820,9 +820,11 @@ app.put('/api/characters/:id', authenticate, async (req, res) => {
         }
 
         // Merge: keep quest_items from database (only DM can modify via /give-item endpoint)
+        // But quest_items_archived is player-managed (from client data, or preserve existing)
         const mergedData = {
             ...data,
-            quest_items: existingData.quest_items || []
+            quest_items: existingData.quest_items || [],
+            quest_items_archived: data.quest_items_archived || existingData.quest_items_archived || []
         };
 
         // Include user_id in WHERE clause as additional safeguard
@@ -1340,7 +1342,7 @@ app.post('/api/dm/characters/:id/unlock', authenticate, async (req, res) => {
 
 // DM gives a quest item to a character (adds to quest_items array in character data)
 app.post('/api/dm/characters/:id/give-item', authenticate, async (req, res) => {
-    const { name, description } = req.body;
+    const { name, description, sessionName } = req.body;
     // Note: campaign_id from request body is intentionally ignored to prevent authorization bypass
 
     // Validate inputs with length limits
@@ -1412,12 +1414,14 @@ app.post('/api/dm/characters/:id/give-item', authenticate, async (req, res) => {
             // Update existing item instead of adding duplicate
             charData.quest_items[existingIndex].description = (description || '').trim();
             charData.quest_items[existingIndex].givenAt = new Date().toLocaleDateString('sv-SE');
+            charData.quest_items[existingIndex].sessionName = sessionName || 'Unknown Session';
         } else {
             // Add the new quest item (trimmed and sanitized)
             charData.quest_items.push({
                 name: trimmedName,
                 description: (description || '').trim(),
-                givenAt: new Date().toLocaleDateString('sv-SE')
+                givenAt: new Date().toLocaleDateString('sv-SE'),
+                sessionName: sessionName || 'Unknown Session'
             });
         }
 
@@ -1532,6 +1536,148 @@ app.post('/api/dm/characters/:id/remove-item', authenticate, async (req, res) =>
     } catch (error) {
         await client.query('ROLLBACK');
         console.error('Remove item error:', error);
+        res.status(500).json({ error: 'Server error' });
+    } finally {
+        client.release();
+    }
+});
+
+// Player archives a quest item (moves from quest_items to quest_items_archived)
+app.post('/api/characters/:id/archive-item', authenticate, async (req, res) => {
+    const { itemIndex } = req.body;
+
+    if (typeof itemIndex !== 'number' || itemIndex < 0) {
+        return res.status(400).json({ error: 'Valid item index is required' });
+    }
+
+    const client = await db.pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        // Get character with row lock - verify ownership
+        const characterResult = await client.query(
+            `SELECT id, data FROM characters WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL FOR UPDATE`,
+            [req.params.id, req.userId]
+        );
+        const character = characterResult.rows[0];
+
+        if (!character) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ error: 'Character not found' });
+        }
+
+        let charData = {};
+        try {
+            charData = typeof character.data === 'string' ? JSON.parse(character.data) : (character.data || {});
+        } catch (parseErr) {
+            await client.query('ROLLBACK');
+            return res.status(500).json({ error: 'Failed to parse character data' });
+        }
+
+        if (!charData.quest_items || itemIndex >= charData.quest_items.length) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ error: 'Item not found' });
+        }
+
+        // Get the item and remove from active list
+        const item = charData.quest_items.splice(itemIndex, 1)[0];
+
+        // Add to archived list with archive date
+        if (!charData.quest_items_archived) {
+            charData.quest_items_archived = [];
+        }
+        charData.quest_items_archived.push({
+            ...item,
+            archivedAt: new Date().toLocaleDateString('sv-SE')
+        });
+
+        // Save back to database
+        await client.query(
+            'UPDATE characters SET data = $1 WHERE id = $2',
+            [JSON.stringify(charData), req.params.id]
+        );
+
+        await client.query('COMMIT');
+
+        res.json({
+            success: true,
+            quest_items: charData.quest_items,
+            quest_items_archived: charData.quest_items_archived
+        });
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Archive item error:', error);
+        res.status(500).json({ error: 'Server error' });
+    } finally {
+        client.release();
+    }
+});
+
+// Player unarchives a quest item (moves from quest_items_archived back to quest_items)
+app.post('/api/characters/:id/unarchive-item', authenticate, async (req, res) => {
+    const { archiveIndex } = req.body;
+
+    if (typeof archiveIndex !== 'number' || archiveIndex < 0) {
+        return res.status(400).json({ error: 'Valid archive index is required' });
+    }
+
+    const client = await db.pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        // Get character with row lock - verify ownership
+        const characterResult = await client.query(
+            `SELECT id, data FROM characters WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL FOR UPDATE`,
+            [req.params.id, req.userId]
+        );
+        const character = characterResult.rows[0];
+
+        if (!character) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ error: 'Character not found' });
+        }
+
+        let charData = {};
+        try {
+            charData = typeof character.data === 'string' ? JSON.parse(character.data) : (character.data || {});
+        } catch (parseErr) {
+            await client.query('ROLLBACK');
+            return res.status(500).json({ error: 'Failed to parse character data' });
+        }
+
+        if (!charData.quest_items_archived || archiveIndex >= charData.quest_items_archived.length) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ error: 'Archived item not found' });
+        }
+
+        // Get the item and remove from archived list
+        const item = charData.quest_items_archived.splice(archiveIndex, 1)[0];
+
+        // Remove archivedAt property
+        delete item.archivedAt;
+
+        // Add back to active list
+        if (!charData.quest_items) {
+            charData.quest_items = [];
+        }
+        charData.quest_items.push(item);
+
+        // Save back to database
+        await client.query(
+            'UPDATE characters SET data = $1 WHERE id = $2',
+            [JSON.stringify(charData), req.params.id]
+        );
+
+        await client.query('COMMIT');
+
+        res.json({
+            success: true,
+            quest_items: charData.quest_items,
+            quest_items_archived: charData.quest_items_archived
+        });
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Unarchive item error:', error);
         res.status(500).json({ error: 'Server error' });
     } finally {
         client.release();
@@ -1909,6 +2055,15 @@ app.get('/api/player/campaigns/:id', authenticate, async (req, res) => {
             return res.status(403).json({ error: 'Not a member of this campaign' });
         }
 
+        // Get player's character for this campaign (if any)
+        const playerCharacter = await db.get(
+            'SELECT name FROM characters WHERE campaign_id = $1 AND user_id = $2 AND deleted_at IS NULL',
+            [req.params.id, req.userId]
+        );
+
+        // Player's character name for filtering items
+        const playerCharacterName = playerCharacter ? playerCharacter.name : '';
+
         // Get campaign info
         const campaign = await db.get(`
             SELECT c.id, c.name, c.description, u.username as dm_name
@@ -1929,14 +2084,14 @@ app.get('/api/player/campaigns/:id', authenticate, async (req, res) => {
             ORDER BY session_number DESC
         `, [req.params.id]);
 
-        // Process locked sessions to include summaries
+        // Process locked sessions to include summaries (filtered for this player)
         const lockedSessions = lockedSessionsRaw.map(session => ({
             id: session.id,
             session_number: session.session_number,
             date: session.date,
             location: session.location,
             status: session.status,
-            summary: generateSessionSummary(session.data)
+            summary: generateSessionSummary(session.data, playerCharacterName)
         }));
 
         // Get latest session (active or most recent) for live summary
@@ -1957,7 +2112,7 @@ app.get('/api/player/campaigns/:id', authenticate, async (req, res) => {
                 date: latestSession.date,
                 location: latestSession.location,
                 status: latestSession.status,
-                summary: generateSessionSummary(latestSession.data)
+                summary: generateSessionSummary(latestSession.data, playerCharacterName)
             } : null
         });
     } catch (error) {
@@ -1968,18 +2123,60 @@ app.get('/api/player/campaigns/:id', authenticate, async (req, res) => {
 
 // Helper function to generate summary from session data
 // Only shows marked items (used NPCs, visited places, completed encounters, found items)
-function generateSessionSummary(data) {
+// If playerCharacterName is provided, filter content based on visibleTo field
+function generateSessionSummary(data, playerCharacterName = null) {
     if (!data) return null;
 
-    // Get marked items only
-    const usedNPCs = (data.npcs || []).filter(npc => npc.status === 'used' && npc.name);
-    const visitedPlaces = (data.places || []).filter(place => place.visited && place.name);
-    const completedEncounters = (data.encounters || []).filter(enc => enc.status === 'completed' && enc.name);
-    const foundItems = (data.items || []).filter(item => item.found && item.name);
+    // Helper to check if content is visible to player
+    // visibleTo can be: undefined/null/'all' (visible to all), a string (single player), or array (multiple players)
+    const isVisibleToPlayer = (visibleTo) => {
+        if (!playerCharacterName) return true; // No filter = show all (DM view)
+        if (!visibleTo || visibleTo === 'all') return true; // No restriction or "all"
+
+        const playerNameLower = playerCharacterName.toLowerCase().trim();
+
+        // Handle array of player names
+        if (Array.isArray(visibleTo)) {
+            return visibleTo.some(name => name.toLowerCase().trim() === playerNameLower);
+        }
+
+        // Handle single player name (string)
+        return visibleTo.toLowerCase().trim() === playerNameLower;
+    };
+
+    // Get marked items only, then filter by visibility
+    let usedNPCs = (data.npcs || []).filter(npc => npc.status === 'used' && npc.name);
+    let visitedPlaces = (data.places || []).filter(place => place.visited && place.name);
+    let completedEncounters = (data.encounters || []).filter(enc => enc.status === 'completed' && enc.name);
+    let foundItems = (data.items || []).filter(item => item.found && item.name);
+    let readAloud = (data.readAloud || []).filter(ra => ra.read && ra.title);
     const turningPoints = data.turningPoints || [];
     const eventLog = data.eventLog || [];
 
-    return {
+    // If player character name is provided, filter by visibility
+    if (playerCharacterName) {
+        const playerNameLower = playerCharacterName.toLowerCase().trim();
+
+        // Filter NPCs by visibleTo
+        usedNPCs = usedNPCs.filter(npc => isVisibleToPlayer(npc.visibleTo));
+
+        // Filter Places by visibleTo
+        visitedPlaces = visitedPlaces.filter(place => isVisibleToPlayer(place.visibleTo));
+
+        // Filter Encounters by visibleTo
+        completedEncounters = completedEncounters.filter(enc => isVisibleToPlayer(enc.visibleTo));
+
+        // Filter Items by givenTo (existing behavior)
+        foundItems = foundItems.filter(item => {
+            const givenToLower = (item.givenTo || '').toLowerCase().trim();
+            return givenToLower === playerNameLower;
+        });
+
+        // Filter Read-Aloud by visibleTo
+        readAloud = readAloud.filter(ra => isVisibleToPlayer(ra.visibleTo));
+    }
+
+    const summary = {
         hook: data.hook || '',
         prolog: data.prolog || '',
         npcs: usedNPCs.map(npc => ({
@@ -2002,13 +2199,27 @@ function generateSessionSummary(data) {
         items: foundItems.map(item => ({
             name: item.name,
             description: item.description || '',
-            location: item.actualLocation || item.plannedLocation || item.location || '',
-            givenTo: item.givenTo || ''
+            location: item.actualLocation || item.plannedLocation || item.location || ''
         })),
-        turning_points: turningPoints.map(tp => ({ description: tp.description, consequence: tp.consequence })),
-        event_log: eventLog.map(e => ({ text: e.text, timestamp: e.timestamp })),
-        session_notes: data.sessionNotes || null
+        read_aloud: readAloud.map(ra => ({
+            title: ra.title,
+            text: ra.text || ''
+        }))
     };
+
+    // Only include DM-only fields if not player view
+    if (!playerCharacterName) {
+        summary.turning_points = turningPoints.map(tp => ({ description: tp.description, consequence: tp.consequence }));
+        summary.event_log = eventLog.map(e => ({ text: e.text, timestamp: e.timestamp }));
+        summary.session_notes = data.sessionNotes || null;
+    } else {
+        // Players only see followUp from session_notes
+        if (data.sessionNotes && data.sessionNotes.followUp) {
+            summary.session_notes = { followUp: data.sessionNotes.followUp };
+        }
+    }
+
+    return summary;
 }
 
 // Get players in a campaign (for DM and campaign members)

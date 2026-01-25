@@ -539,7 +539,8 @@ function getAllFields() {
     // Save avatar data
     data._avatar = getAvatarData();
 
-    // Note: quest_items are NOT included here - they are DM-managed
+    // Note: quest_items and quest_items_archived are NOT included here
+    // They are managed via dedicated API endpoints (/give-item, /archive-item, etc.)
     // and preserved server-side in PUT /api/characters/:id
 
     return data;
@@ -601,6 +602,24 @@ function setAllFields(data) {
     if (typeof updateDashboard === 'function') {
         updateDashboard();
     }
+
+    // Sync notes between desktop and mobile
+    syncNotesToMobile();
+}
+
+// Sync notes textareas from desktop to mobile
+function syncNotesToMobile() {
+    const syncPairs = [
+        ['inventory_freetext', 'inventory_freetext_mobile'],
+        ['notes_freetext', 'notes_freetext_mobile']
+    ];
+    syncPairs.forEach(([desktopId, mobileId]) => {
+        const desktop = document.getElementById(desktopId);
+        const mobile = document.getElementById(mobileId);
+        if (desktop && mobile) {
+            mobile.value = desktop.value;
+        }
+    });
 }
 
 // Save character to localStorage
@@ -1129,6 +1148,16 @@ async function doRegister() {
 }
 
 async function doLogout() {
+    // Save any unsaved character changes first
+    if (currentCharacterId && authToken) {
+        try {
+            await saveToServer(true);  // skipReload = true
+        } catch (e) {
+            console.error('Failed to save before logout:', e);
+        }
+    }
+
+    // Call server logout
     try {
         await fetch('/api/logout', {
             method: 'POST',
@@ -1138,11 +1167,24 @@ async function doLogout() {
         // Ignore errors
     }
 
+    // Clear local state
     authToken = null;
     currentCharacterId = null;
     currentCampaign = null;
     localStorage.removeItem('aedelore_auth_token');
     localStorage.removeItem('aedelore_current_character_id');
+
+    // Clear Service Worker cache
+    if ('caches' in window) {
+        try {
+            const cacheNames = await caches.keys();
+            await Promise.all(cacheNames.map(name => caches.delete(name)));
+        } catch (e) {
+            console.error('Failed to clear cache:', e);
+        }
+    }
+
+    // Reload page
     location.reload();
 }
 
@@ -1453,6 +1495,7 @@ async function loadCharacterById(id) {
         const charData = typeof character.data === 'string' ? JSON.parse(character.data) : character.data;
         setAllFields(charData);
         renderQuestItems(charData.quest_items || []);
+        window._questItemsArchived = charData.quest_items_archived || [];
         currentCharacterId = id;
         currentCampaign = character.campaign || null;
 
@@ -1936,15 +1979,14 @@ function updatePointsDisplay() {
 
 // Render quest items given by DM (compact grid, click for details)
 function renderQuestItems(questItems) {
-    const container = document.getElementById('quest-items-container');
-    if (!container) return;
+    const containers = [
+        document.getElementById('quest-items-container'),
+        document.getElementById('quest-items-container-mobile')
+    ];
 
-    if (!questItems || questItems.length === 0) {
-        container.innerHTML = `<p style="color: var(--text-muted); font-style: italic; text-align: center; padding: var(--space-4);">No quest items yet. Your DM can give you items during sessions.</p>`;
-        return;
-    }
+    const emptyHtml = `<p style="color: var(--text-muted); font-style: italic; text-align: center; padding: var(--space-4);">No quest items yet. Your DM can give you items during sessions.</p>`;
 
-    container.innerHTML = `
+    const itemsHtml = (!questItems || questItems.length === 0) ? emptyHtml : `
         <div style="display: flex; flex-wrap: wrap; gap: 8px;">
             ${questItems.map((item, i) => `
                 <div onclick="showQuestItemDetails(${i})" style="padding: 8px 12px; background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(251, 191, 36, 0.05) 100%); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: transform 0.1s, box-shadow 0.1s;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 2px 8px rgba(251, 191, 36, 0.2)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
@@ -1955,23 +1997,162 @@ function renderQuestItems(questItems) {
         </div>
     `;
 
+    containers.forEach(container => {
+        if (container) container.innerHTML = itemsHtml;
+    });
+
     // Store quest items for detail view
     window._questItems = questItems;
 }
 
-// Show quest item details in a modal/alert
+// Show quest item details in a modal
 function showQuestItemDetails(index) {
     const item = window._questItems?.[index];
     if (!item) return;
 
-    let message = item.name || 'Unknown Item';
-    if (item.description) {
-        message += '\n\n' + item.description;
-    }
+    window._currentQuestItemIndex = index;
+
+    document.getElementById('quest-item-modal-title').textContent = '🗝️ ' + (item.name || 'Unknown Item');
+    document.getElementById('quest-item-modal-description').textContent = item.description || 'No description.';
+
+    let receivedText = '';
     if (item.givenAt) {
-        message += '\n\nReceived: ' + item.givenAt;
+        receivedText = 'Received: ' + item.givenAt;
     }
-    alert(message);
+    if (item.sessionName) {
+        receivedText += receivedText ? ' • ' : '';
+        receivedText += 'Session: ' + item.sessionName;
+    }
+    document.getElementById('quest-item-modal-received').textContent = receivedText;
+
+    document.getElementById('quest-item-modal').style.display = 'flex';
+}
+
+function hideQuestItemModal() {
+    document.getElementById('quest-item-modal').style.display = 'none';
+    window._currentQuestItemIndex = null;
+}
+
+// Archive current quest item via API
+async function archiveCurrentQuestItem() {
+    const index = window._currentQuestItemIndex;
+    if (index === null || index === undefined) return;
+
+    if (!currentCharacterId || !authToken) {
+        alert('Please save character to cloud first');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/characters/${currentCharacterId}/archive-item`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ itemIndex: index })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            // Update local state
+            window._questItems = data.quest_items || [];
+            window._questItemsArchived = data.quest_items_archived || [];
+            renderQuestItems(window._questItems);
+            hideQuestItemModal();
+        } else {
+            alert('Failed to archive: ' + (data.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Archive error:', error);
+        alert('Failed to archive item');
+    }
+}
+
+// Show quest archive modal
+function showQuestArchive() {
+    const archived = window._questItemsArchived || [];
+
+    const content = document.getElementById('quest-archive-content');
+
+    if (archived.length === 0) {
+        content.innerHTML = '<p style="color: var(--text-muted); font-style: italic; text-align: center; padding: 20px;">No archived items yet.</p>';
+    } else {
+        // Group by session
+        const bySession = {};
+        archived.forEach((item, index) => {
+            const session = item.sessionName || 'Unknown Session';
+            if (!bySession[session]) {
+                bySession[session] = [];
+            }
+            bySession[session].push({ ...item, archiveIndex: index });
+        });
+
+        let html = '';
+        for (const session of Object.keys(bySession)) {
+            html += `<div style="margin-bottom: 16px;">
+                <h3 style="color: var(--accent-gold); font-size: 0.95rem; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid rgba(251, 191, 36, 0.2);">${escapeHtml(session)}</h3>
+                <div style="display: flex; flex-direction: column; gap: 8px;">`;
+
+            for (const item of bySession[session]) {
+                html += `<div style="padding: 10px; background: rgba(50, 50, 50, 0.3); border-radius: 6px; display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; color: var(--text-primary);">🗝️ ${escapeHtml(item.name || 'Unknown Item')}</div>
+                        ${item.description ? `<div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;">${escapeHtml(item.description)}</div>` : ''}
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 6px;">
+                            ${item.givenAt ? 'Received: ' + item.givenAt : ''}
+                            ${item.archivedAt ? ' • Archived: ' + item.archivedAt : ''}
+                        </div>
+                    </div>
+                    <button onclick="unarchiveQuestItem(${item.archiveIndex})" style="padding: 4px 10px; font-size: 0.75rem; background: rgba(34, 197, 94, 0.2); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 4px; color: var(--primary-green); cursor: pointer; white-space: nowrap; margin-left: 10px;">↩️ Restore</button>
+                </div>`;
+            }
+
+            html += '</div></div>';
+        }
+
+        content.innerHTML = html;
+    }
+
+    document.getElementById('quest-archive-modal').style.display = 'flex';
+}
+
+function hideQuestArchive() {
+    document.getElementById('quest-archive-modal').style.display = 'none';
+}
+
+// Unarchive a quest item via API
+async function unarchiveQuestItem(archiveIndex) {
+    if (!currentCharacterId || !authToken) {
+        alert('Please save character to cloud first');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/characters/${currentCharacterId}/unarchive-item`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ archiveIndex: archiveIndex })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            // Update local state
+            window._questItems = data.quest_items || [];
+            window._questItemsArchived = data.quest_items_archived || [];
+            renderQuestItems(window._questItems);
+            // Refresh archive modal
+            showQuestArchive();
+        } else {
+            alert('Failed to restore: ' + (data.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Unarchive error:', error);
+        alert('Failed to restore item');
+    }
 }
 
 
@@ -2833,4 +3014,35 @@ window.addEventListener('resize', function() {
             document.body.classList.remove('onboarding-active');
         }
     }
+});
+
+// ============================================
+// Quest & Notes Page - Sync between desktop and mobile
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+    // Pairs of [desktop, mobile] textareas to sync
+    const syncPairs = [
+        ['inventory_freetext', 'inventory_freetext_mobile'],
+        ['notes_freetext', 'notes_freetext_mobile']
+    ];
+
+    syncPairs.forEach(([desktopId, mobileId]) => {
+        const desktop = document.getElementById(desktopId);
+        const mobile = document.getElementById(mobileId);
+
+        if (desktop && mobile) {
+            // Sync desktop -> mobile
+            desktop.addEventListener('input', () => {
+                mobile.value = desktop.value;
+            });
+
+            // Sync mobile -> desktop
+            mobile.addEventListener('input', () => {
+                desktop.value = mobile.value;
+            });
+
+            // Initial sync (desktop to mobile)
+            mobile.value = desktop.value;
+        }
+    });
 });
