@@ -30,10 +30,10 @@ function setupArmorAutofill() {
                         disadvantageInput.value = armor.disadvantage || 'None';
                     }
 
-                    // Auto-fill damage (if available)
-                    const dmgInput = document.getElementById(`armor_${i}_dmg`);
-                    if (dmgInput && armor.damage) {
-                        dmgInput.value = armor.damage;
+                    // Set current HP to max HP
+                    const currentInput = document.getElementById(`armor_${i}_current`);
+                    if (currentInput) {
+                        currentInput.value = armor.hp;
                     }
                 } else {
                     // Clear fields if armor name is empty
@@ -52,9 +52,9 @@ function setupArmorAutofill() {
                         disadvantageInput.value = '';
                     }
 
-                    const dmgInput = document.getElementById(`armor_${i}_dmg`);
-                    if (dmgInput) {
-                        dmgInput.value = '';
+                    const currentInput = document.getElementById(`armor_${i}_current`);
+                    if (currentInput) {
+                        currentInput.value = '';
                     }
                 }
             };
@@ -107,6 +107,12 @@ function setupArmorAutofill() {
                 if (disadvantageInput && shield.disadvantage) {
                     disadvantageInput.value = shield.disadvantage;
                 }
+
+                // Set current HP to max HP
+                const currentInput = document.getElementById('shield_current');
+                if (currentInput) {
+                    currentInput.value = shield.hp;
+                }
             } else {
                 // Clear fields if shield name is empty
                 const hpInput = document.getElementById('shield_hp');
@@ -132,6 +138,11 @@ function setupArmorAutofill() {
                 const disadvantageInput = document.getElementById('shield_disadvantage');
                 if (disadvantageInput) {
                     disadvantageInput.value = '';
+                }
+
+                const currentInput = document.getElementById('shield_current');
+                if (currentInput) {
+                    currentInput.value = '';
                 }
             }
         };

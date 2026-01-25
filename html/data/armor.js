@@ -4,47 +4,47 @@
 const ARMOR_DATA = {
     // HEAD ARMOR
     "Cloth Hood": { bodypart: "head", type: "Light", hp: "1", bonus: "0+block", disadvantage: "None" },
-    "Leather Cap": { bodypart: "head", type: "Light", hp: "2", bonus: "0+block", disadvantage: "None" },
-    "Chain Coif": { bodypart: "head", type: "Medium", hp: "8", bonus: "1+block", disadvantage: "-1 Stealth, -1D10 on Perception" },
-    "Light Helmet": { bodypart: "head", type: "Medium", hp: "10", bonus: "1+block", disadvantage: "-1D10 on Perception" },
-    "Heavy Helmet": { bodypart: "head", type: "Heavy", hp: "12", bonus: "2+block", disadvantage: "-1 Stealth, -1D10 on Perception" },
-    "Great Helm": { bodypart: "head", type: "Heavy", hp: "14", bonus: "2+block", disadvantage: "-1 Stealth, -1D10 on Perception & Investigation" },
+    "Leather Cap": { bodypart: "head", type: "Light", hp: "2", bonus: "0+block", disadvantage: "-1 Per" },
+    "Chain Coif": { bodypart: "head", type: "Medium", hp: "8", bonus: "1+block", disadvantage: "-1 Per" },
+    "Light Helmet": { bodypart: "head", type: "Medium", hp: "10", bonus: "1+block", disadvantage: "-1 Per" },
+    "Heavy Helmet": { bodypart: "head", type: "Heavy", hp: "12", bonus: "2+block", disadvantage: "-2 Per" },
+    "Great Helm": { bodypart: "head", type: "Heavy", hp: "14", bonus: "2+block", disadvantage: "-2 Per" },
 
     // SHOULDER ARMOR
     "Cloth Mantle": { bodypart: "shoulders", type: "Light", hp: "1", bonus: "0+block", disadvantage: "None" },
     "Leather Pauldrons": { bodypart: "shoulders", type: "Light", hp: "3", bonus: "1+block", disadvantage: "None" },
     "Studded Pauldrons": { bodypart: "shoulders", type: "Light", hp: "3", bonus: "1+block", disadvantage: "None" },
-    "Chain Pauldrons": { bodypart: "shoulders", type: "Medium", hp: "10", bonus: "1+block", disadvantage: "-1 Stealth" },
-    "Plate Pauldrons": { bodypart: "shoulders", type: "Heavy", hp: "14", bonus: "2+block", disadvantage: "-1 Stealth, -1D10 on Acrobatics" },
+    "Chain Pauldrons": { bodypart: "shoulders", type: "Medium", hp: "10", bonus: "1+block", disadvantage: "-1 Acro" },
+    "Plate Pauldrons": { bodypart: "shoulders", type: "Heavy", hp: "14", bonus: "2+block", disadvantage: "-2 Acro" },
 
     // CHEST ARMOR (Main armor - where starting armor goes)
     "Cloth": { bodypart: "chest", type: "Cloth", hp: "2", bonus: "0+block", disadvantage: "None" },
-    "Padded": { bodypart: "chest", type: "Light", hp: "3", bonus: "1+block", disadvantage: "-1 Stealth" },
+    "Padded": { bodypart: "chest", type: "Light", hp: "3", bonus: "1+block", disadvantage: "None" },
     "Leather": { bodypart: "chest", type: "Light", hp: "5", bonus: "1+block", disadvantage: "None" },
     "Studded Leather": { bodypart: "chest", type: "Light", hp: "6", bonus: "2+block", disadvantage: "None" },
-    "Hide": { bodypart: "chest", type: "Medium", hp: "10", bonus: "2+block", disadvantage: "-1 Stealth" },
-    "Chain Shirt": { bodypart: "chest", type: "Medium", hp: "15", bonus: "3+block", disadvantage: "-1 Stealth" },
-    "Scale Mail": { bodypart: "chest", type: "Medium", hp: "18", bonus: "3+block", disadvantage: "-1 Stealth" },
-    "Breastplate": { bodypart: "chest", type: "Medium", hp: "20", bonus: "3+block", disadvantage: "-1 Stealth" },
-    "Half Plate": { bodypart: "chest", type: "Medium", hp: "25", bonus: "4+block", disadvantage: "-1 Stealth, -1D10 on Acrobatics" },
-    "Ring Mail": { bodypart: "chest", type: "Heavy", hp: "16", bonus: "3+block", disadvantage: "-1 Stealth" },
-    "Chainmail": { bodypart: "chest", type: "Heavy", hp: "22", bonus: "4+block", disadvantage: "-1 Stealth, -1D10 on Acrobatics & Athletics" },
-    "Splint": { bodypart: "chest", type: "Heavy", hp: "28", bonus: "5+block", disadvantage: "-1 Stealth, -1D10 on Acrobatics & Athletics" },
-    "Plate": { bodypart: "chest", type: "Heavy", hp: "35", bonus: "6+block", disadvantage: "-1 Stealth, -1D10 on Acrobatics & Athletics" },
+    "Hide": { bodypart: "chest", type: "Medium", hp: "10", bonus: "2+block", disadvantage: "-1 Stl" },
+    "Chain Shirt": { bodypart: "chest", type: "Medium", hp: "15", bonus: "3+block", disadvantage: "-1 Stl" },
+    "Scale Mail": { bodypart: "chest", type: "Medium", hp: "18", bonus: "3+block", disadvantage: "-1 Stl" },
+    "Breastplate": { bodypart: "chest", type: "Medium", hp: "20", bonus: "3+block", disadvantage: "-1 Stl" },
+    "Half Plate": { bodypart: "chest", type: "Medium", hp: "25", bonus: "4+block", disadvantage: "-1 Stl, -1 Acro" },
+    "Ring Mail": { bodypart: "chest", type: "Heavy", hp: "16", bonus: "3+block", disadvantage: "-1 Stl, -1 Acro" },
+    "Chainmail": { bodypart: "chest", type: "Heavy", hp: "22", bonus: "4+block", disadvantage: "-2 Stl, -1 Acro" },
+    "Splint": { bodypart: "chest", type: "Heavy", hp: "28", bonus: "5+block", disadvantage: "-2 Stl, -1 Acro, -1 Ath" },
+    "Plate": { bodypart: "chest", type: "Heavy", hp: "35", bonus: "6+block", disadvantage: "-2 Stl, -2 Acro, -1 Ath" },
 
     // HAND ARMOR
     "Cloth Gloves": { bodypart: "hands", type: "Light", hp: "1", bonus: "0+block", disadvantage: "None" },
     "Leather Gloves": { bodypart: "hands", type: "Light", hp: "2", bonus: "0+block", disadvantage: "None" },
     "Studded Gloves": { bodypart: "hands", type: "Light", hp: "3", bonus: "1+block", disadvantage: "None" },
-    "Chain Gloves": { bodypart: "hands", type: "Medium", hp: "8", bonus: "1+block", disadvantage: "-1 Stealth, -1D10 on Sleight of Hand" },
-    "Plate Gauntlets": { bodypart: "hands", type: "Heavy", hp: "12", bonus: "2+block", disadvantage: "-1 Stealth, -1D10 on Sleight of Hand" },
+    "Chain Gloves": { bodypart: "hands", type: "Medium", hp: "8", bonus: "1+block", disadvantage: "-1 SoH" },
+    "Plate Gauntlets": { bodypart: "hands", type: "Heavy", hp: "12", bonus: "2+block", disadvantage: "-2 SoH" },
 
     // LEG ARMOR
     "Cloth Pants": { bodypart: "legs", type: "Light", hp: "1", bonus: "0+block", disadvantage: "None" },
     "Leather Greaves": { bodypart: "legs", type: "Light", hp: "3", bonus: "1+block", disadvantage: "None" },
     "Studded Greaves": { bodypart: "legs", type: "Light", hp: "3", bonus: "1+block", disadvantage: "None" },
-    "Chain Greaves": { bodypart: "legs", type: "Medium", hp: "10", bonus: "1+block", disadvantage: "-1 Stealth" },
-    "Plate Greaves": { bodypart: "legs", type: "Heavy", hp: "14", bonus: "2+block", disadvantage: "-1 Stealth, -1D10 on Athletics" }
+    "Chain Greaves": { bodypart: "legs", type: "Medium", hp: "10", bonus: "1+block", disadvantage: "-1 Ath" },
+    "Plate Greaves": { bodypart: "legs", type: "Heavy", hp: "14", bonus: "2+block", disadvantage: "-2 Ath, -1 Acro" }
 };
 
 // Organize armor by body part for easy dropdown population

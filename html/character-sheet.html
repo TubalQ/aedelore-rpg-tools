@@ -1365,7 +1365,7 @@
                                 <th>Block Value</th>
                                 <th>Defence</th>
                                 <th>Damage</th>
-                                <th>Dmg on Shield</th>
+                                <th>Current HP</th>
                                 <th>Broken</th>
                             </tr>
                         </thead>
@@ -1387,9 +1387,9 @@
                                 <td><input type="text" id="shield_dmg" placeholder="Damage"></td>
                                 <td>
                                     <div class="value-controls">
-                                        <button type="button" class="value-btn minus" onclick="adjustValue('shield_dmg_taken', -1)">−</button>
-                                        <input type="number" id="shield_dmg_taken" placeholder="0">
-                                        <button type="button" class="value-btn plus" onclick="adjustValue('shield_dmg_taken', 1)">+</button>
+                                        <button type="button" class="value-btn minus" onclick="adjustValue('shield_current', -1)">−</button>
+                                        <input type="number" id="shield_current" placeholder="0">
+                                        <button type="button" class="value-btn plus" onclick="adjustValue('shield_current', 1)">+</button>
                                     </div>
                                 </td>
                                 <td style="text-align: center;"><input type="checkbox" id="shield_broken" onchange="toggleShieldBroken()"></td>
@@ -1417,7 +1417,7 @@
                                 <th>Type</th>
                                 <th>Hitpoints</th>
                                 <th>Block</th>
-                                <th>Dmg on Armour</th>
+                                <th>Current HP</th>
                                 <th>Disadvantage</th>
                                 <th>Broken</th>
                             </tr>
@@ -1440,9 +1440,9 @@
                                 <td><input type="text" id="armor_1_bonus" placeholder="4+block"></td>
                                 <td>
                                     <div class="value-controls">
-                                        <button type="button" class="value-btn minus" onclick="adjustValue('armor_1_dmg', -1)">−</button>
-                                        <input type="number" id="armor_1_dmg" placeholder="0">
-                                        <button type="button" class="value-btn plus" onclick="adjustValue('armor_1_dmg', 1)">+</button>
+                                        <button type="button" class="value-btn minus" onclick="adjustValue('armor_1_current', -1)">−</button>
+                                        <input type="number" id="armor_1_current" placeholder="0">
+                                        <button type="button" class="value-btn plus" onclick="adjustValue('armor_1_current', 1)">+</button>
                                     </div>
                                 </td>
                                 <td><input type="text" id="armor_1_disadvantage" placeholder="Disadvantage"></td>
@@ -1464,9 +1464,9 @@
                                 <td><input type="text" id="armor_2_bonus" placeholder="4+block"></td>
                                 <td>
                                     <div class="value-controls">
-                                        <button type="button" class="value-btn minus" onclick="adjustValue('armor_2_dmg', -1)">−</button>
-                                        <input type="number" id="armor_2_dmg" placeholder="0">
-                                        <button type="button" class="value-btn plus" onclick="adjustValue('armor_2_dmg', 1)">+</button>
+                                        <button type="button" class="value-btn minus" onclick="adjustValue('armor_2_current', -1)">−</button>
+                                        <input type="number" id="armor_2_current" placeholder="0">
+                                        <button type="button" class="value-btn plus" onclick="adjustValue('armor_2_current', 1)">+</button>
                                     </div>
                                 </td>
                                 <td><input type="text" id="armor_2_disadvantage" placeholder="Disadvantage"></td>
@@ -1496,9 +1496,9 @@
                                 <td><input type="text" id="armor_3_bonus" placeholder="4+block"></td>
                                 <td>
                                     <div class="value-controls">
-                                        <button type="button" class="value-btn minus" onclick="adjustValue('armor_3_dmg', -1)">−</button>
-                                        <input type="number" id="armor_3_dmg" placeholder="0">
-                                        <button type="button" class="value-btn plus" onclick="adjustValue('armor_3_dmg', 1)">+</button>
+                                        <button type="button" class="value-btn minus" onclick="adjustValue('armor_3_current', -1)">−</button>
+                                        <input type="number" id="armor_3_current" placeholder="0">
+                                        <button type="button" class="value-btn plus" onclick="adjustValue('armor_3_current', 1)">+</button>
                                     </div>
                                 </td>
                                 <td><input type="text" id="armor_3_disadvantage" placeholder="Disadvantage"></td>
@@ -1520,9 +1520,9 @@
                                 <td><input type="text" id="armor_4_bonus" placeholder="4+block"></td>
                                 <td>
                                     <div class="value-controls">
-                                        <button type="button" class="value-btn minus" onclick="adjustValue('armor_4_dmg', -1)">−</button>
-                                        <input type="number" id="armor_4_dmg" placeholder="0">
-                                        <button type="button" class="value-btn plus" onclick="adjustValue('armor_4_dmg', 1)">+</button>
+                                        <button type="button" class="value-btn minus" onclick="adjustValue('armor_4_current', -1)">−</button>
+                                        <input type="number" id="armor_4_current" placeholder="0">
+                                        <button type="button" class="value-btn plus" onclick="adjustValue('armor_4_current', 1)">+</button>
                                     </div>
                                 </td>
                                 <td><input type="text" id="armor_4_disadvantage" placeholder="Disadvantage"></td>
@@ -1544,9 +1544,9 @@
                                 <td><input type="text" id="armor_5_bonus" placeholder="4+block"></td>
                                 <td>
                                     <div class="value-controls">
-                                        <button type="button" class="value-btn minus" onclick="adjustValue('armor_5_dmg', -1)">−</button>
-                                        <input type="number" id="armor_5_dmg" placeholder="0">
-                                        <button type="button" class="value-btn plus" onclick="adjustValue('armor_5_dmg', 1)">+</button>
+                                        <button type="button" class="value-btn minus" onclick="adjustValue('armor_5_current', -1)">−</button>
+                                        <input type="number" id="armor_5_current" placeholder="0">
+                                        <button type="button" class="value-btn plus" onclick="adjustValue('armor_5_current', 1)">+</button>
                                     </div>
                                 </td>
                                 <td><input type="text" id="armor_5_disadvantage" placeholder="Disadvantage"></td>
@@ -3002,15 +3002,14 @@
             }
         }
 
-        // Check if armor/shield should be marked as broken based on damage vs HP
+        // Check if armor/shield should be marked as broken based on current HP
         function checkEquipmentBroken(fieldId) {
-            // Shield damage check
-            if (fieldId === 'shield_dmg_taken') {
-                const dmg = parseInt(document.getElementById('shield_dmg_taken').value) || 0;
-                const hp = parseInt(document.getElementById('shield_hp').value) || 0;
+            // Shield check
+            if (fieldId === 'shield_current') {
+                const current = parseInt(document.getElementById('shield_current').value) || 0;
                 const checkbox = document.getElementById('shield_broken');
-                if (checkbox && hp > 0) {
-                    const shouldBeBroken = dmg >= hp;
+                if (checkbox) {
+                    const shouldBeBroken = current <= 0;
                     if (checkbox.checked !== shouldBeBroken) {
                         checkbox.checked = shouldBeBroken;
                         toggleShieldBroken();
@@ -3019,15 +3018,14 @@
                 return;
             }
 
-            // Armor damage check (armor_1_dmg through armor_5_dmg)
-            const armorMatch = fieldId.match(/^armor_(\d)_dmg$/);
+            // Armor check (armor_1_current through armor_5_current)
+            const armorMatch = fieldId.match(/^armor_(\d)_current$/);
             if (armorMatch) {
                 const index = armorMatch[1];
-                const dmg = parseInt(document.getElementById(`armor_${index}_dmg`).value) || 0;
-                const hp = parseInt(document.getElementById(`armor_${index}_hp`).value) || 0;
+                const current = parseInt(document.getElementById(`armor_${index}_current`).value) || 0;
                 const checkbox = document.getElementById(`armor_${index}_broken`);
-                if (checkbox && hp > 0) {
-                    const shouldBeBroken = dmg >= hp;
+                if (checkbox) {
+                    const shouldBeBroken = current <= 0;
                     if (checkbox.checked !== shouldBeBroken) {
                         checkbox.checked = shouldBeBroken;
                         toggleArmorBroken(index);
@@ -3522,27 +3520,43 @@
             }
         }
 
-        // Add listeners for armor/shield damage and HP fields to auto-update broken status
+        // Add listeners for armor/shield current HP fields to auto-update broken status
         function initEquipmentBrokenListeners() {
             // Shield listeners
-            const shieldDmg = document.getElementById('shield_dmg_taken');
+            const shieldCurrent = document.getElementById('shield_current');
             const shieldHp = document.getElementById('shield_hp');
-            if (shieldDmg) {
-                shieldDmg.addEventListener('input', () => checkEquipmentBroken('shield_dmg_taken'));
+            if (shieldCurrent) {
+                shieldCurrent.addEventListener('input', () => checkEquipmentBroken('shield_current'));
             }
             if (shieldHp) {
-                shieldHp.addEventListener('input', () => checkEquipmentBroken('shield_dmg_taken'));
+                shieldHp.addEventListener('input', () => {
+                    // When max HP changes, also update current if it's higher than new max
+                    const current = parseInt(shieldCurrent?.value) || 0;
+                    const max = parseInt(shieldHp.value) || 0;
+                    if (current > max && shieldCurrent) {
+                        shieldCurrent.value = max;
+                    }
+                    checkEquipmentBroken('shield_current');
+                });
             }
 
             // Armor listeners (1-5)
             for (let i = 1; i <= 5; i++) {
-                const armorDmg = document.getElementById(`armor_${i}_dmg`);
+                const armorCurrent = document.getElementById(`armor_${i}_current`);
                 const armorHp = document.getElementById(`armor_${i}_hp`);
-                if (armorDmg) {
-                    armorDmg.addEventListener('input', () => checkEquipmentBroken(`armor_${i}_dmg`));
+                if (armorCurrent) {
+                    armorCurrent.addEventListener('input', () => checkEquipmentBroken(`armor_${i}_current`));
                 }
                 if (armorHp) {
-                    armorHp.addEventListener('input', () => checkEquipmentBroken(`armor_${i}_dmg`));
+                    armorHp.addEventListener('input', () => {
+                        // When max HP changes, also update current if it's higher than new max
+                        const current = parseInt(armorCurrent?.value) || 0;
+                        const max = parseInt(armorHp.value) || 0;
+                        if (current > max && armorCurrent) {
+                            armorCurrent.value = max;
+                        }
+                        checkEquipmentBroken(`armor_${i}_current`);
+                    });
                 }
             }
         }

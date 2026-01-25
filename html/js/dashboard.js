@@ -20,6 +20,73 @@ function getSimpleWorthiness(value) {
 }
 
 // ===========================================
+// ARMOR PENALTY CALCULATION
+// ===========================================
+
+// Map skill names from armor disadvantage to field IDs
+// Supports both full names and abbreviations
+const SKILL_NAME_TO_FIELD = {
+    // Full names (backwards compatibility)
+    'Stealth': 'dexterity_stealth',
+    'Acrobatics': 'dexterity_acrobatics',
+    'Athletics': 'strength_athletics',
+    'Perception': 'wisdom_perception',
+    'Sleight of Hand': 'dexterity_sleight_of_hand',
+    // Abbreviations
+    'Stl': 'dexterity_stealth',
+    'Acro': 'dexterity_acrobatics',
+    'Ath': 'strength_athletics',
+    'Per': 'wisdom_perception',
+    'SoH': 'dexterity_sleight_of_hand'
+};
+
+// Calculate total armor penalties from all equipped armor
+function calculateArmorPenalties() {
+    const penalties = {};
+
+    // Check all 5 armor slots
+    for (let i = 1; i <= 5; i++) {
+        const armorType = document.getElementById(`armor_${i}_type`)?.value;
+        const armorHp = parseInt(document.getElementById(`armor_${i}_hp`)?.value) || 0;
+        const armorCurrent = parseInt(document.getElementById(`armor_${i}_current`)?.value) || 0;
+
+        // Skip if no armor, no HP, or armor is broken
+        if (!armorType || armorHp <= 0 || armorCurrent <= 0) continue;
+
+        // Get disadvantage from ARMOR_DATA
+        const armorData = typeof ARMOR_DATA !== 'undefined' ? ARMOR_DATA[armorType] : null;
+        if (!armorData || !armorData.disadvantage || armorData.disadvantage === 'None') continue;
+
+        // Parse disadvantage string (e.g., "-1 Stealth, -1 Acrobatics, -1 Athletics")
+        const parts = armorData.disadvantage.split(',').map(s => s.trim());
+        parts.forEach(part => {
+            // Match pattern like "-1 Stealth" or "-2 Athletics"
+            const match = part.match(/^(-?\d+)\s+(.+)$/);
+            if (match) {
+                const penalty = parseInt(match[1]);
+                const skillName = match[2];
+                const fieldId = SKILL_NAME_TO_FIELD[skillName];
+
+                if (fieldId) {
+                    penalties[fieldId] = (penalties[fieldId] || 0) + penalty;
+                }
+            }
+        });
+    }
+
+    return penalties;
+}
+
+// Get effective skill value (base - armor penalties)
+function getEffectiveSkillValue(fieldId) {
+    const field = document.getElementById(fieldId);
+    const baseValue = field ? parseInt(field.value) || 0 : 0;
+    const penalties = calculateArmorPenalties();
+    const penalty = penalties[fieldId] || 0;
+    return { base: baseValue, penalty: penalty, effective: baseValue + penalty };
+}
+
+// ===========================================
 // STATUS BAR SYNC
 // ===========================================
 
@@ -343,11 +410,24 @@ function updateDesktopSidebar() {
         { sidebar: 'sidebar-tgh-resistance', field: 'toughness_resistance' }
     ];
 
+    // Calculate armor penalties once for all skills
+    const armorPenalties = calculateArmorPenalties();
+
     skills.forEach(skill => {
         const field = document.getElementById(skill.field);
         const sidebarEl = document.getElementById(skill.sidebar);
         if (sidebarEl && field) {
-            sidebarEl.textContent = field.value || '0';
+            const baseValue = parseInt(field.value) || 0;
+            const penalty = armorPenalties[skill.field] || 0;
+
+            if (penalty !== 0) {
+                const effective = baseValue + penalty;
+                sidebarEl.textContent = `${effective} (${penalty})`;
+                sidebarEl.classList.add('has-penalty');
+            } else {
+                sidebarEl.textContent = baseValue;
+                sidebarEl.classList.remove('has-penalty');
+            }
         }
     });
 }
@@ -594,11 +674,24 @@ function updateDashboard() {
         'dash-fow-persuasion': 'force_of_will_persuasion'
     };
 
+    // Calculate armor penalties for skill display
+    const dashArmorPenalties = calculateArmorPenalties();
+
     Object.entries(skillMappings).forEach(([dashId, fieldId]) => {
         const dashEl = document.getElementById(dashId);
         const field = document.getElementById(fieldId);
         if (dashEl && field) {
-            dashEl.textContent = field.value || '0';
+            const baseValue = parseInt(field.value) || 0;
+            const penalty = dashArmorPenalties[fieldId] || 0;
+
+            if (penalty !== 0) {
+                const effective = baseValue + penalty;
+                dashEl.textContent = `${effective} (${penalty})`;
+                dashEl.classList.add('has-penalty');
+            } else {
+                dashEl.textContent = baseValue;
+                dashEl.classList.remove('has-penalty');
+            }
         }
     });
 
@@ -1170,17 +1263,17 @@ function showQuickMessage(message) {
 // ===========================================
 
 function quickArmorDmg(slot, amount) {
-    let dmgField, hpField, brokenCheckbox, rowId, label;
+    let currentField, hpField, brokenCheckbox, rowId, label;
 
     if (slot === 'shield') {
-        dmgField = document.getElementById('shield_dmg_taken');
+        currentField = document.getElementById('shield_current');
         hpField = document.getElementById('shield_hp');
         brokenCheckbox = document.getElementById('shield_broken');
         rowId = 'quick-shield-row';
         label = 'Shield';
     } else {
         // armor_1 through armor_5
-        dmgField = document.getElementById(`${slot}_dmg`);
+        currentField = document.getElementById(`${slot}_current`);
         hpField = document.getElementById(`${slot}_hp`);
         brokenCheckbox = document.getElementById(`${slot}_broken`);
         rowId = `quick-${slot.replace('_', '-')}-row`;
@@ -1188,52 +1281,53 @@ function quickArmorDmg(slot, amount) {
         label = slotLabels[slot] || slot;
     }
 
-    if (!dmgField || !hpField) return;
+    if (!currentField || !hpField) return;
 
     const hp = parseInt(hpField.value) || 0;
-    const currentDmg = parseInt(dmgField.value) || 0;
-    const newDmg = Math.max(0, currentDmg + amount);
+    const currentHp = parseInt(currentField.value) || 0;
+    // amount is negative for damage (-1), positive for repair (+1)
+    const newHp = Math.max(0, Math.min(hp, currentHp + amount));
 
-    if (amount > 0 && currentDmg >= hp && hp > 0) {
+    if (amount < 0 && currentHp <= 0) {
         showQuickMessage(`${label} already broken!`);
         return;
     }
 
-    if (amount < 0 && currentDmg <= 0) {
-        showQuickMessage(`${label} has no damage to repair!`);
+    if (amount > 0 && currentHp >= hp) {
+        showQuickMessage(`${label} already at full HP!`);
         return;
     }
 
-    dmgField.value = newDmg;
-    dmgField.dispatchEvent(new Event('input'));
-    dmgField.dispatchEvent(new Event('change'));
+    currentField.value = newHp;
+    currentField.dispatchEvent(new Event('input'));
+    currentField.dispatchEvent(new Event('change'));
 
     // Check and update broken status
     if (typeof checkEquipmentBroken === 'function') {
-        checkEquipmentBroken(slot === 'shield' ? 'shield_dmg_taken' : `${slot}_dmg`);
+        checkEquipmentBroken(slot === 'shield' ? 'shield_current' : `${slot}_current`);
     }
 
     updateQuickEquipment();
 
-    if (amount > 0) {
-        showQuickMessage(`${label} took ${amount} damage (${newDmg}/${hp})`);
+    if (amount < 0) {
+        showQuickMessage(`${label} took ${Math.abs(amount)} damage (${newHp}/${hp})`);
     } else {
-        showQuickMessage(`${label} repaired! (${newDmg}/${hp})`);
+        showQuickMessage(`${label} repaired! (${newHp}/${hp})`);
     }
 }
 
 function updateQuickEquipment() {
     // Update Shield
     const shieldHp = parseInt(document.getElementById('shield_hp')?.value) || 0;
-    const shieldDmg = parseInt(document.getElementById('shield_dmg_taken')?.value) || 0;
+    const shieldCurrent = parseInt(document.getElementById('shield_current')?.value) || 0;
     const shieldRow = document.getElementById('quick-shield-row');
     const shieldValue = document.getElementById('quick-shield-value');
 
     if (shieldRow) {
         if (shieldHp > 0) {
             shieldRow.style.display = 'flex';
-            if (shieldValue) shieldValue.textContent = `${shieldDmg}/${shieldHp}`;
-            updateEquipRowBroken(shieldRow, shieldDmg, shieldHp);
+            if (shieldValue) shieldValue.textContent = `${shieldCurrent}/${shieldHp}`;
+            updateEquipRowBroken(shieldRow, shieldCurrent);
         } else {
             shieldRow.style.display = 'none';
         }
@@ -1243,15 +1337,15 @@ function updateQuickEquipment() {
     const slotLabels = ['Head', 'Shoulders', 'Chest', 'Hands', 'Legs'];
     for (let i = 1; i <= 5; i++) {
         const hp = parseInt(document.getElementById(`armor_${i}_hp`)?.value) || 0;
-        const dmg = parseInt(document.getElementById(`armor_${i}_dmg`)?.value) || 0;
+        const current = parseInt(document.getElementById(`armor_${i}_current`)?.value) || 0;
         const row = document.getElementById(`quick-armor-${i}-row`);
         const value = document.getElementById(`quick-armor-${i}-value`);
 
         if (row) {
             if (hp > 0) {
                 row.style.display = 'flex';
-                if (value) value.textContent = `${dmg}/${hp}`;
-                updateEquipRowBroken(row, dmg, hp);
+                if (value) value.textContent = `${current}/${hp}`;
+                updateEquipRowBroken(row, current);
             } else {
                 row.style.display = 'none';
             }
@@ -1267,8 +1361,8 @@ function updateQuickEquipment() {
     }
 }
 
-function updateEquipRowBroken(row, dmg, hp) {
-    if (dmg >= hp && hp > 0) {
+function updateEquipRowBroken(row, current) {
+    if (current <= 0) {
         row.classList.add('stat-equip-broken');
     } else {
         row.classList.remove('stat-equip-broken');

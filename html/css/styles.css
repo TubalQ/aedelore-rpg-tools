@@ -8268,6 +8268,16 @@ input[type="range"]::-moz-range-thumb {
     color: var(--accent-red);
 }
 
+/* Armor penalty indicator on skills */
+.has-penalty {
+    color: var(--accent-orange, #f59e0b) !important;
+}
+.sidebar-skill .has-penalty,
+.skill-value.has-penalty {
+    color: var(--accent-orange, #f59e0b) !important;
+    font-weight: 600;
+}
+
 /* Weapons and Abilities Section */
 .dashboard-weapons-abilities {
     margin-bottom: var(--space-4);
