@@ -2792,6 +2792,7 @@
     <script src="data/religions.js"></script>
     <script src="data/weapons.js"></script>
     <script src="data/armor.js"></script>
+    <script src="data/starting-equipment.js"></script>
     <script src="data/spells.js"></script>
 
     <!-- Load JS Modules -->
@@ -3139,7 +3140,7 @@
             worthinessSlider.dispatchEvent(new Event('input'));
         }
 
-        // Function to auto-fill starting weapon and armor
+        // Function to auto-fill starting weapon and armor based on Race + Class combination
         function autoFillStartingEquipment() {
             const raceValue = document.getElementById('race').value;
             const classValue = document.getElementById('class').value;
@@ -3158,6 +3159,68 @@
                 }
             });
 
+            // Check for race+class specific starting equipment
+            const comboKey = raceValue + '_' + classValue;
+            if (typeof STARTING_EQUIPMENT !== 'undefined' && STARTING_EQUIPMENT[comboKey]) {
+                const equipment = STARTING_EQUIPMENT[comboKey];
+
+                // Fill weapon
+                if (equipment.weapon) {
+                    const weapon1Field = document.getElementById('weapon_1_type');
+                    if (weapon1Field) {
+                        weapon1Field.value = equipment.weapon;
+                        weapon1Field.dispatchEvent(new Event('change'));
+                    }
+                }
+
+                // Fill armor pieces
+                if (equipment.armor) {
+                    // Head (armor_1)
+                    if (equipment.armor.head) {
+                        const headField = document.getElementById('armor_1_type');
+                        if (headField) {
+                            headField.value = equipment.armor.head;
+                            headField.dispatchEvent(new Event('change'));
+                        }
+                    }
+                    // Shoulders (armor_2)
+                    if (equipment.armor.shoulders) {
+                        const shouldersField = document.getElementById('armor_2_type');
+                        if (shouldersField) {
+                            shouldersField.value = equipment.armor.shoulders;
+                            shouldersField.dispatchEvent(new Event('change'));
+                        }
+                    }
+                    // Chest (armor_3)
+                    if (equipment.armor.chest) {
+                        const chestField = document.getElementById('armor_3_type');
+                        if (chestField) {
+                            chestField.value = equipment.armor.chest;
+                            chestField.dispatchEvent(new Event('change'));
+                        }
+                    }
+                    // Legs (armor_5)
+                    if (equipment.armor.legs) {
+                        const legsField = document.getElementById('armor_5_type');
+                        if (legsField) {
+                            legsField.value = equipment.armor.legs;
+                            legsField.dispatchEvent(new Event('change'));
+                        }
+                    }
+                }
+
+                // Fill shield
+                if (equipment.shield) {
+                    const shieldField = document.getElementById('shield_type');
+                    if (shieldField) {
+                        shieldField.value = equipment.shield;
+                        shieldField.dispatchEvent(new Event('change'));
+                    }
+                }
+                return; // Done with race+class combo
+            }
+
+            // Fallback to old system if no combo found
             // Auto-fill starting weapons: Class weapon in slot 1, Race weapon in slot 2
             let classWeapon = '';
             let raceWeapon = '';
@@ -3198,7 +3261,6 @@
                     }
                 } else if (typeof armorData === 'object') {
                     // New format: object with head, shoulders, chest, legs
-                    // Head (armor_1)
                     if (armorData.head) {
                         const headField = document.getElementById('armor_1_type');
                         if (headField) {
@@ -3206,7 +3268,6 @@
                             headField.dispatchEvent(new Event('change'));
                         }
                     }
-                    // Shoulders (armor_2)
                     if (armorData.shoulders) {
                         const shouldersField = document.getElementById('armor_2_type');
                         if (shouldersField) {
@@ -3214,7 +3275,6 @@
                             shouldersField.dispatchEvent(new Event('change'));
                         }
                     }
-                    // Chest (armor_3)
                     if (armorData.chest) {
                         const chestField = document.getElementById('armor_3_type');
                         if (chestField) {
@@ -3222,7 +3282,6 @@
                             chestField.dispatchEvent(new Event('change'));
                         }
                     }
-                    // Legs (armor_5)
                     if (armorData.legs) {
                         const legsField = document.getElementById('armor_5_type');
                         if (legsField) {
@@ -3245,7 +3304,6 @@
             const shieldField = document.getElementById('shield_type');
             if (shieldField && startingShield) {
                 shieldField.value = startingShield;
-                // Trigger auto-fill for shield stats
                 shieldField.dispatchEvent(new Event('change'));
             }
         }
