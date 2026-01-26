@@ -211,9 +211,13 @@ aedelore-rpg-tools/
 | `/api/dm/characters/:id/give-item` | POST | Give item to player |
 | `/api/dm/characters/:id/unlock` | POST | Unlock character sections |
 
+## Documentation
+
+For detailed technical documentation including architecture, API endpoints, database schema, and development guides, see [docs/DEVELOPER.md](docs/DEVELOPER.md).
+
 ## Development
 
-Want to see what we're currently working on? Check out the [development repository](https://github.com/TubalQ/aedelore-development) for upcoming features, testing, and experimental changes.
+Want to see what we're currently working on? Check out the [development repository](https://github.com/TubalQ/aedelore-rpg-tool-development-suite) for upcoming features, testing, and experimental changes.
 
 ## Contributing
 
