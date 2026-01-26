@@ -213,7 +213,7 @@ aedelore-rpg-tools/
 
 ## Development
 
-Want to see what we're currently working on? Check out the [development repository](https://github.com/TubalQ/aedelore-development) for upcoming features, testing, and experimental changes.
+Want to see what we're currently working on? Check out the [development repository](https://github.com/TubalQ/aedelore-rpg-tool-development-suite) for upcoming features, testing, and experimental changes.
 
 ## Contributing
 
