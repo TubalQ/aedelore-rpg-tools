@@ -4,6 +4,50 @@
 
 // Global state
 let authToken = localStorage.getItem('aedelore_auth_token');
+
+// Get CSRF token from cookie
+function getCsrfToken() {
+    const match = document.cookie.match(/(?:^|; )csrf_token=([^;]*)/);
+    return match ? decodeURIComponent(match[1]) : null;
+}
+
+// Ensure CSRF cookie is set (fixes cache load issue)
+async function ensureCsrfToken() {
+    if (!getCsrfToken()) {
+        try {
+            await fetch('/api/health', { credentials: 'include' });
+        } catch (e) {
+            // Ignore - offline or network issue
+        }
+    }
+}
+ensureCsrfToken();
+
+// API request helper with CSRF protection
+async function apiRequest(url, options = {}) {
+    const csrfToken = getCsrfToken();
+    const headers = {
+        'Content-Type': 'application/json',
+        ...(options.headers || {})
+    };
+
+    // Add auth token if available
+    if (authToken && !headers['Authorization']) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+    }
+
+    // Add CSRF token for non-GET requests
+    if (options.method && options.method !== 'GET' && csrfToken) {
+        headers['X-CSRF-Token'] = csrfToken;
+    }
+
+    return fetch(url, {
+        ...options,
+        headers,
+        credentials: 'include'  // Include cookies in request
+    });
+}
+
 let currentCampaignId = null;
 let currentCampaignName = '';
 let currentCampaignDescription = '';
@@ -414,9 +458,8 @@ async function requestPasswordReset() {
     successEl.textContent = '';
 
     try {
-        const res = await fetch('/api/forgot-password', {
+        const res = await apiRequest('/api/forgot-password', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email })
         });
 
@@ -447,9 +490,8 @@ async function doLogin() {
     }
 
     try {
-        const res = await fetch('/api/login', {
+        const res = await apiRequest('/api/login', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
         });
 
@@ -489,9 +531,8 @@ async function doRegister() {
     }
 
     try {
-        const res = await fetch('/api/register', {
+        const res = await apiRequest('/api/register', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, email, password })
         });
 
@@ -521,11 +562,14 @@ async function doLogout() {
         }
     }
 
+    // Clear session data
+    sessionData = getEmptySessionData();
+    hasUnsavedChanges = false;
+
     // Call server logout
     try {
-        await fetch('/api/logout', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${authToken}` }
+        await apiRequest('/api/logout', {
+            method: 'POST'
         });
     } catch (e) {}
 
@@ -604,12 +648,8 @@ async function changePassword() {
     }
 
     try {
-        const res = await fetch('/api/account/password', {
+        const res = await apiRequest('/api/account/password', {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
             body: JSON.stringify({ currentPassword, newPassword })
         });
 
@@ -639,9 +679,7 @@ async function showMyDataModal() {
     modal.style.display = 'flex';
 
     try {
-        const res = await fetch('/api/me', {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest('/api/me');
 
         if (!res.ok) {
             content.innerHTML = '<p style="color: var(--accent-red);">Failed to load data</p>';
@@ -806,12 +844,8 @@ async function saveEmail() {
     }
 
     try {
-        const res = await fetch('/api/account/email', {
+        const res = await apiRequest('/api/account/email', {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
             body: JSON.stringify({ email, password })
         });
 
@@ -849,9 +883,7 @@ async function loadTrashCampaigns() {
     list.innerHTML = '<p class="trash-loading">Loading...</p>';
 
     try {
-        const res = await fetch('/api/trash/campaigns', {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest('/api/trash/campaigns');
 
         if (!res.ok) throw new Error('Failed to load trash');
 
@@ -908,9 +940,7 @@ async function loadTrashSessions() {
     list.innerHTML = '<p class="trash-loading">Loading...</p>';
 
     try {
-        const res = await fetch('/api/trash/sessions', {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest('/api/trash/sessions');
 
         if (!res.ok) throw new Error('Failed to load trash');
 
@@ -965,10 +995,7 @@ async function loadTrashSessions() {
 
 async function restoreCampaign(id) {
     try {
-        const res = await fetch(`/api/trash/campaigns/${id}/restore`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest(`/api/trash/campaigns/${id}/restore`, { method: 'POST' });
 
         if (!res.ok) throw new Error('Failed to restore');
 
@@ -987,10 +1014,7 @@ async function permanentDeleteCampaign(id, name) {
     }
 
     try {
-        const res = await fetch(`/api/trash/campaigns/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest(`/api/trash/campaigns/${id}`, { method: 'DELETE' });
 
         if (!res.ok) throw new Error('Failed to delete');
 
@@ -1004,10 +1028,7 @@ async function permanentDeleteCampaign(id, name) {
 
 async function restoreSession(id) {
     try {
-        const res = await fetch(`/api/trash/sessions/${id}/restore`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest(`/api/trash/sessions/${id}/restore`, { method: 'POST' });
 
         if (!res.ok) throw new Error('Failed to restore');
 
@@ -1029,10 +1050,7 @@ async function permanentDeleteSession(id, name) {
     }
 
     try {
-        const res = await fetch(`/api/trash/sessions/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest(`/api/trash/sessions/${id}`, { method: 'DELETE' });
 
         if (!res.ok) throw new Error('Failed to delete');
 
@@ -1095,6 +1113,37 @@ function generateVisibilityDropdown(currentValue, dataPath) {
     return html;
 }
 
+// Helper to parse dataPath like "sessionData.npcs[0].visibleTo" and get the target object and property
+function parseDataPath(dataPath) {
+    // Expected format: sessionData.<type>[<index>].visibleTo
+    const match = dataPath.match(/^sessionData\.(\w+)\[(\d+)\]\.visibleTo$/);
+    if (!match) {
+        console.error('Invalid dataPath:', dataPath);
+        return null;
+    }
+    const type = match[1]; // npcs, places, encounters, readAloud
+    const index = parseInt(match[2], 10);
+    return { type, index };
+}
+
+// Get visibility value at path
+function getVisibilityAt(dataPath) {
+    const parsed = parseDataPath(dataPath);
+    if (!parsed) return 'all';
+    const { type, index } = parsed;
+    if (!sessionData[type] || !sessionData[type][index]) return 'all';
+    return sessionData[type][index].visibleTo;
+}
+
+// Set visibility value at path
+function setVisibilityAt(dataPath, value) {
+    const parsed = parseDataPath(dataPath);
+    if (!parsed) return;
+    const { type, index } = parsed;
+    if (!sessionData[type] || !sessionData[type][index]) return;
+    sessionData[type][index].visibleTo = value;
+}
+
 // Handle player visibility checkbox change via data attributes
 function handleVisibilityPlayerChange(checkbox) {
     const dataPath = checkbox.dataset.datapath;
@@ -1105,22 +1154,25 @@ function handleVisibilityPlayerChange(checkbox) {
 
 // Toggle "All" visibility - if checked, set to 'all', otherwise clear
 function toggleVisibilityAll(dataPath, isChecked) {
+    console.log('[Visibility] toggleVisibilityAll called:', dataPath, 'isChecked:', isChecked);
     if (isChecked) {
-        eval(dataPath + " = 'all'");
+        setVisibilityAt(dataPath, 'all');
     } else {
-        eval(dataPath + " = []");
+        setVisibilityAt(dataPath, []);
     }
+    console.log('[Visibility] After setting, value is:', getVisibilityAt(dataPath));
     renderPlanningByDay();
     renderNPCsList();
     renderPlacesList();
     renderEncountersList();
     renderReadAloudList();
-    triggerAutoSave();
+    // Visibility changes save immediately to prevent data loss
+    triggerImmediateSave();
 }
 
 // Toggle individual player visibility
 function toggleVisibilityPlayer(dataPath, playerName, isChecked) {
-    let current = eval(dataPath);
+    let current = getVisibilityAt(dataPath);
 
     // Normalize to array
     if (!current || current === 'all') {
@@ -1139,9 +1191,9 @@ function toggleVisibilityPlayer(dataPath, playerName, isChecked) {
 
     // If empty, default back to 'all'
     if (current.length === 0) {
-        eval(dataPath + " = 'all'");
+        setVisibilityAt(dataPath, 'all');
     } else {
-        eval(dataPath + " = " + JSON.stringify(current));
+        setVisibilityAt(dataPath, current);
     }
 
     renderPlanningByDay();
@@ -1149,7 +1201,8 @@ function toggleVisibilityPlayer(dataPath, playerName, isChecked) {
     renderPlacesList();
     renderEncountersList();
     renderReadAloudList();
-    triggerAutoSave();
+    // Visibility changes save immediately to prevent data loss
+    triggerImmediateSave();
 }
 
 // ============================================
@@ -1159,11 +1212,13 @@ function toggleVisibilityPlayer(dataPath, playerName, isChecked) {
 async function loadCampaignsAndShowDashboard() {
     if (!authToken) return;
 
+    // Check for URL parameters (e.g., from character sheet link)
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlCampaignId = urlParams.get('campaign');
+
     try {
         // Load DM campaigns
-        const res = await fetch('/api/campaigns', {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest('/api/campaigns');
 
         if (res.status === 401) {
             authToken = null;
@@ -1177,9 +1232,7 @@ async function loadCampaignsAndShowDashboard() {
         // Fetch sessions for each campaign
         for (let campaign of allCampaigns) {
             try {
-                const sessRes = await fetch(`/api/campaigns/${campaign.id}/sessions`, {
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
+                const sessRes = await apiRequest(`/api/campaigns/${campaign.id}/sessions`);
                 if (sessRes.ok) {
                     campaign.sessions = await sessRes.json();
                 } else {
@@ -1192,9 +1245,7 @@ async function loadCampaignsAndShowDashboard() {
 
         // Load joined campaigns (as player)
         try {
-            const playerRes = await fetch('/api/player/campaigns', {
-                headers: { 'Authorization': `Bearer ${authToken}` }
-            });
+            const playerRes = await apiRequest('/api/player/campaigns');
             if (playerRes.ok) {
                 joinedCampaigns = await playerRes.json();
             } else {
@@ -1202,6 +1253,34 @@ async function loadCampaignsAndShowDashboard() {
             }
         } catch (e) {
             joinedCampaigns = [];
+        }
+
+        // Check if URL parameter specifies a campaign to open
+        if (urlCampaignId) {
+            const campaignIdNum = parseInt(urlCampaignId);
+            // Clear the URL parameter to avoid reopening on refresh
+            window.history.replaceState({}, '', window.location.pathname);
+
+            // Check if it's a joined campaign (player view)
+            const joinedCampaign = joinedCampaigns.find(c => c.id === campaignIdNum);
+            if (joinedCampaign) {
+                await openPlayerCampaignView(campaignIdNum);
+                return;
+            }
+
+            // Check if it's a DM campaign
+            const dmCampaign = allCampaigns.find(c => c.id === campaignIdNum);
+            if (dmCampaign) {
+                // Open the campaign's session list or create new session
+                if (dmCampaign.sessions && dmCampaign.sessions.length > 0) {
+                    // Open the most recent session
+                    const latestSession = dmCampaign.sessions[dmCampaign.sessions.length - 1];
+                    await openSession(campaignIdNum, latestSession.id);
+                } else {
+                    await createNewSessionForCampaign(campaignIdNum);
+                }
+                return;
+            }
         }
 
         // Try to restore previous view state (e.g., after page refresh)
@@ -1492,10 +1571,7 @@ async function deleteCampaignFromDashboard(campaignId) {
     }
 
     try {
-        const res = await fetch(`/api/campaigns/${campaignId}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest(`/api/campaigns/${campaignId}`, { method: 'DELETE' });
 
         if (res.ok) {
             // Reload dashboard
@@ -1584,23 +1660,15 @@ async function saveCampaign() {
         let res;
         if (isEditingCampaign && currentCampaignId) {
             // Update existing campaign
-            res = await fetch(`/api/campaigns/${currentCampaignId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${authToken}`
-                },
-                body: JSON.stringify({ name, description })
+            res = await apiRequest(`/api/campaigns/${currentCampaignId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ name, description })
             });
         } else {
             // Create new campaign
-            res = await fetch('/api/campaigns', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${authToken}`
-                },
-                body: JSON.stringify({ name, description })
+            res = await apiRequest('/api/campaigns', {
+            method: 'POST',
+            body: JSON.stringify({ name, description })
             });
         }
 
@@ -1642,10 +1710,7 @@ async function deleteCampaign() {
         `Are you sure you want to delete "${currentCampaignName}"? This will also delete ALL sessions in this campaign. This action cannot be undone.`,
         async () => {
             try {
-                const res = await fetch(`/api/campaigns/${currentCampaignId}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
+                const res = await apiRequest(`/api/campaigns/${currentCampaignId}`, { method: 'DELETE' });
 
                 if (!res.ok) {
                     const data = await res.json();
@@ -1720,9 +1785,7 @@ async function onCampaignChange() {
 
     // Fetch campaign details to get name and description
     try {
-        const res = await fetch(`/api/campaigns/${campaignId}`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest(`/api/campaigns/${campaignId}`);
         if (res.ok) {
             const campaign = await res.json();
             currentCampaignName = campaign.name;
@@ -1741,9 +1804,7 @@ async function onCampaignChange() {
 
 async function loadSessions(campaignId) {
     try {
-        const res = await fetch(`/api/campaigns/${campaignId}/sessions`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest(`/api/campaigns/${campaignId}/sessions`);
 
         const sessions = await res.json();
         const select = document.getElementById('session-select');
@@ -1778,12 +1839,8 @@ async function createNewSession() {
     sessionData = getEmptySessionData();
 
     try {
-        const res = await fetch(`/api/campaigns/${currentCampaignId}/sessions`, {
+        const res = await apiRequest(`/api/campaigns/${currentCampaignId}/sessions`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
             body: JSON.stringify({ data: sessionData })
         });
 
@@ -1829,9 +1886,7 @@ async function onSessionChange() {
 
 async function loadSession(sessionId) {
     try {
-        const res = await fetch(`/api/sessions/${sessionId}`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest(`/api/sessions/${sessionId}`);
 
         const session = await res.json();
 
@@ -1876,9 +1931,7 @@ async function updateImportPlayersButton() {
     if (!importBtn || !currentCampaignId) return;
 
     try {
-        const res = await fetch(`/api/campaigns/${currentCampaignId}/sessions`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest(`/api/campaigns/${currentCampaignId}/sessions`);
         const sessions = await res.json();
 
         const currentSessionNumber = parseInt(document.getElementById('session_number').value) || 0;
@@ -1908,12 +1961,8 @@ async function saveSession() {
     const location = document.getElementById('session_location').value;
 
     try {
-        const res = await fetch(`/api/sessions/${currentSessionId}`, {
+        const res = await apiRequest(`/api/sessions/${currentSessionId}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
             body: JSON.stringify({
                 session_number: sessionNumber,
                 date: date,
@@ -1943,10 +1992,7 @@ async function lockCurrentSession() {
     if (!confirm('Lock this session? It will become read-only.')) return;
 
     try {
-        const res = await fetch(`/api/sessions/${currentSessionId}/lock`, {
-            method: 'PUT',
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest(`/api/sessions/${currentSessionId}/lock`, { method: 'PUT' });
 
         if (res.ok) {
             isSessionLocked = true;
@@ -1967,10 +2013,7 @@ async function unlockCurrentSession() {
     if (!confirm('Unlock this session? It will become editable again.')) return;
 
     try {
-        const res = await fetch(`/api/sessions/${currentSessionId}/unlock`, {
-            method: 'PUT',
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest(`/api/sessions/${currentSessionId}/unlock`, { method: 'PUT' });
 
         if (res.ok) {
             isSessionLocked = false;
@@ -2002,10 +2045,7 @@ async function deleteSession() {
         `Are you sure you want to delete Session ${sessionNumber}? This action cannot be undone.`,
         async () => {
             try {
-                const res = await fetch(`/api/sessions/${currentSessionId}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
+                const res = await apiRequest(`/api/sessions/${currentSessionId}`, { method: 'DELETE' });
 
                 if (!res.ok) {
                     const data = await res.json();
@@ -3805,9 +3845,7 @@ async function syncCampaignPlayers() {
     if (!currentCampaignId) return;
 
     try {
-        const res = await fetch(`/api/campaigns/${currentCampaignId}/players`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest(`/api/campaigns/${currentCampaignId}/players`);
 
         if (!res.ok) return;
 
@@ -3912,9 +3950,7 @@ async function importPlayersFromPrevious() {
 
     try {
         // Fetch all sessions for this campaign
-        const res = await fetch(`/api/campaigns/${currentCampaignId}/sessions`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest(`/api/campaigns/${currentCampaignId}/sessions`);
 
         const sessions = await res.json();
 
@@ -3930,9 +3966,7 @@ async function importPlayersFromPrevious() {
         }
 
         // Fetch the previous session data
-        const sessionRes = await fetch(`/api/sessions/${previousSession.id}`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const sessionRes = await apiRequest(`/api/sessions/${previousSession.id}`);
 
         const prevSessionData = await sessionRes.json();
 
@@ -5310,9 +5344,7 @@ async function exportCampaignMarkdown() {
 
     try {
         // Fetch all sessions for this campaign
-        const res = await fetch(`/api/campaigns/${currentCampaignId}/sessions`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest(`/api/campaigns/${currentCampaignId}/sessions`);
         const sessionList = await res.json();
 
         if (sessionList.length === 0) {
@@ -5339,9 +5371,7 @@ async function exportCampaignMarkdown() {
 
         // Fetch and add each session
         for (const sessionInfo of sessionList) {
-            const sessionRes = await fetch(`/api/sessions/${sessionInfo.id}`, {
-                headers: { 'Authorization': `Bearer ${authToken}` }
-            });
+            const sessionRes = await apiRequest(`/api/sessions/${sessionInfo.id}`);
             const session = await sessionRes.json();
 
             // Add anchor for TOC linking
@@ -5410,9 +5440,7 @@ async function showPlayerBuild(characterId, characterName) {
     modal.style.display = 'flex';
 
     try {
-        const res = await fetch(`/api/dm/characters/${characterId}/build`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest(`/api/dm/characters/${characterId}/build`);
 
         if (!res.ok) {
             const data = await res.json();
@@ -5606,12 +5634,8 @@ async function confirmGiveXP() {
     }
 
     try {
-        const res = await fetch(`/api/dm/characters/${giveXPCharacterId}/give-xp`, {
+        const res = await apiRequest(`/api/dm/characters/${giveXPCharacterId}/give-xp`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
             body: JSON.stringify({ amount })
         });
 
@@ -5677,12 +5701,8 @@ async function giveItemToPlayer(itemIndex, playerName, oldPlayerName) {
     const player = matchingPlayers[0];
 
     try {
-        const res = await fetch(`/api/dm/characters/${player.characterId}/give-item`, {
+        const res = await apiRequest(`/api/dm/characters/${player.characterId}/give-item`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
             body: JSON.stringify({
                 name: item.name,
                 description: item.description || '',
@@ -5739,12 +5759,8 @@ async function removeItemFromPlayer(itemIndex, playerName) {
     const player = matchingPlayers[0];
 
     try {
-        const res = await fetch(`/api/dm/characters/${player.characterId}/remove-item`, {
+        const res = await apiRequest(`/api/dm/characters/${player.characterId}/remove-item`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
             body: JSON.stringify({
                 name: item.name
             })
@@ -5842,12 +5858,8 @@ async function saveLockStates() {
     pendingLockCharacterId = null;
 
     try {
-        const res = await fetch(`/api/dm/characters/${characterId}/set-locks`, {
+        const res = await apiRequest(`/api/dm/characters/${characterId}/set-locks`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
             body: JSON.stringify({
                 race_class_locked: pendingLockStates.rc,
                 attributes_locked: pendingLockStates.attr,
@@ -5902,10 +5914,21 @@ function toggleAccordion(element) {
 
 let saveTimeout = null;
 let isSaving = false;
+let hasUnsavedChanges = false;
+
+// Warn user about unsaved changes when leaving page
+window.addEventListener('beforeunload', (e) => {
+    if (hasUnsavedChanges && !isSessionLocked) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
 
 // Debounced auto-save to server (waits 2 seconds after last change)
 function triggerAutoSave() {
     if (!currentSessionId || isSessionLocked || !authToken) return;
+
+    hasUnsavedChanges = true;
 
     // Clear any pending save
     if (saveTimeout) {
@@ -5918,6 +5941,21 @@ function triggerAutoSave() {
     }, 2000);
 }
 
+// Immediate save (bypasses debounce) - use for important changes like visibility
+async function triggerImmediateSave() {
+    if (!currentSessionId || isSessionLocked || !authToken) return;
+
+    hasUnsavedChanges = true;
+
+    // Clear any pending debounced save
+    if (saveTimeout) {
+        clearTimeout(saveTimeout);
+        saveTimeout = null;
+    }
+
+    await autoSaveToServer();
+}
+
 async function autoSaveToServer() {
     if (!currentSessionId || isSessionLocked || !authToken || isSaving) return;
 
@@ -5928,13 +5966,14 @@ async function autoSaveToServer() {
     const date = document.getElementById('session_date').value;
     const location = document.getElementById('session_location').value;
 
+    // Debug: Log NPCs with visibleTo
+    if (sessionData.npcs && sessionData.npcs.length > 0) {
+        console.log('[Save] NPCs being saved:', sessionData.npcs.map(n => ({name: n.name, visibleTo: n.visibleTo})));
+    }
+
     try {
-        const res = await fetch(`/api/sessions/${currentSessionId}`, {
+        const res = await apiRequest(`/api/sessions/${currentSessionId}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
             body: JSON.stringify({
                 session_number: sessionNumber,
                 date: date,
@@ -5944,8 +5983,11 @@ async function autoSaveToServer() {
         });
 
         if (res.ok) {
+            hasUnsavedChanges = false;
             // Show brief save indicator
             showSaveIndicator('Saved');
+        } else {
+            showSaveIndicator('Save failed', true);
         }
     } catch (error) {
         console.error('Auto-save error:', error);
@@ -6609,9 +6651,7 @@ async function showPrologueSessionModal() {
 
     // Fetch all sessions for current campaign
     try {
-        const res = await fetch(`/api/campaigns/${currentCampaignId}/sessions`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest(`/api/campaigns/${currentCampaignId}/sessions`);
 
         if (res.ok) {
             const sessions = await res.json();
@@ -6667,9 +6707,7 @@ async function generatePrologueFromSelectedSession() {
     } else {
         // Fetch the selected session's data
         try {
-            const res = await fetch(`/api/sessions/${selectedValue}`, {
-                headers: { 'Authorization': `Bearer ${authToken}` }
-            });
+            const res = await apiRequest(`/api/sessions/${selectedValue}`);
 
             if (res.ok) {
                 const session = await res.json();
@@ -8153,10 +8191,7 @@ async function generateShareCode() {
     if (!shareCampaignId) return;
 
     try {
-        const res = await fetch(`/api/campaigns/${shareCampaignId}/share`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest(`/api/campaigns/${shareCampaignId}/share`, { method: 'POST' });
 
         if (res.ok) {
             const data = await res.json();
@@ -8204,10 +8239,7 @@ async function revokeShareCode() {
     }
 
     try {
-        const res = await fetch(`/api/campaigns/${shareCampaignId}/share`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest(`/api/campaigns/${shareCampaignId}/share`, { method: 'DELETE' });
 
         if (res.ok) {
             // Update the campaign in our local data
@@ -8235,9 +8267,7 @@ async function revokeShareCode() {
 
 async function loadCampaignPlayers(campaignId) {
     try {
-        const res = await fetch(`/api/campaigns/${campaignId}/players`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest(`/api/campaigns/${campaignId}/players`);
 
         if (res.ok) {
             const data = await res.json();
@@ -8289,10 +8319,7 @@ async function removeCampaignPlayer(playerId) {
     }
 
     try {
-        const res = await fetch(`/api/campaigns/${shareCampaignId}/players/${playerId}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest(`/api/campaigns/${shareCampaignId}/players/${playerId}`, { method: 'DELETE' });
 
         if (res.ok) {
             await loadCampaignPlayers(shareCampaignId);
@@ -8382,12 +8409,8 @@ async function joinCampaign() {
     }
 
     try {
-        const res = await fetch('/api/campaigns/join', {
+        const res = await apiRequest('/api/campaigns/join', {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${authToken}`,
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify({ share_code: code })
         });
 
@@ -8415,10 +8438,7 @@ async function leaveCampaign(campaignId, event) {
     }
 
     try {
-        const res = await fetch(`/api/campaigns/${campaignId}/leave`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        const res = await apiRequest(`/api/campaigns/${campaignId}/leave`, { method: 'DELETE' });
 
         if (res.ok) {
             showSaveIndicator('Left campaign');
@@ -8759,6 +8779,23 @@ function renderPlayerCampaignView() {
             `;
         }
 
+        // Read Aloud
+        if (summary.read_aloud && summary.read_aloud.length > 0) {
+            summaryHtml += `
+                <div style="margin-bottom: var(--space-4);">
+                    <h5 style="color: var(--accent-gold); margin: 0 0 var(--space-2) 0; font-size: 0.9rem;">📜 Story Moments (${summary.read_aloud.length})</h5>
+                    <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+                        ${summary.read_aloud.map(ra => `
+                            <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.15) 100%); border-radius: var(--radius-sm); padding: var(--space-3); border-left: 3px solid var(--accent-gold);">
+                                <div style="font-weight: 600; color: var(--accent-gold); margin-bottom: var(--space-1);">${escapeHtml(ra.title)}</div>
+                                <p style="margin: 0; color: var(--text-secondary); font-style: italic; white-space: pre-wrap; line-height: 1.5;">${escapeHtml(ra.text)}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
         // Turning Points
         if (summary.turning_points && summary.turning_points.length > 0) {
             summaryHtml += `
@@ -8798,6 +8835,7 @@ function renderPlayerCampaignView() {
             (summary.places && summary.places.length > 0) ||
             (summary.encounters && summary.encounters.length > 0) ||
             (summary.items && summary.items.length > 0) ||
+            (summary.read_aloud && summary.read_aloud.length > 0) ||
             (summary.turning_points && summary.turning_points.length > 0) ||
             (summary.event_log && summary.event_log.length > 0) ||
             (summary.session_notes && summary.session_notes.followUp);
