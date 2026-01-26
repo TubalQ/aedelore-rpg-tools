@@ -11,6 +11,15 @@ const CSRF_HEADER_NAME = 'x-csrf-token';
 // Skip CSRF protection for safe methods (GET, HEAD, OPTIONS) and in test environment
 const SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS'];
 
+// Endpoints that don't require CSRF protection (pre-authentication endpoints)
+const CSRF_EXEMPT_PATHS = [
+    '/api/login',
+    '/api/register',
+    '/api/forgot-password',
+    '/api/reset-password',
+    '/api/errors'  // Error logging from frontend
+];
+
 function generateCsrfToken() {
     return crypto.randomBytes(32).toString('hex');
 }
@@ -41,6 +50,11 @@ function csrfProtection(req, res, next) {
 
     // Skip in test environment
     if (process.env.NODE_ENV === 'test') {
+        return next();
+    }
+
+    // Skip for exempt paths (login, register, etc.)
+    if (CSRF_EXEMPT_PATHS.some(path => req.path === path || req.path.startsWith(path + '/'))) {
         return next();
     }
 
