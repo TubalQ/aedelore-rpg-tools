@@ -10,6 +10,9 @@ docs/rules/AEDELORE-RULES-COMPLETE.md
 # Security documents (internal audits)
 docs/security/
 
+# Restore instructions (contains server-specific paths)
+docs/RESTORE-INSTRUCTIONS.md
+
 # Claude Code files (all Claude-related folders and files)
 .claude/
 claude/
