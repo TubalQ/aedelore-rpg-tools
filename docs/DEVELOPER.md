@@ -60,13 +60,22 @@ Complete technical documentation for developers who want to understand, modify, 
 │   ├── character-sheet.html      # Character sheet (243 KB)
 │   ├── dm-session.html           # DM tools (237 KB)
 │   ├── manifest.json             # PWA manifest
-│   ├── service-worker.js         # Offline caching (v201)
+│   ├── service-worker.js         # Offline caching (v296)
 │   │
 │   ├── css/
 │   │   └── styles.css            # All styling (214 KB)
 │   │
 │   ├── js/
-│   │   ├── main.js               # Character sheet logic
+│   │   ├── main.js               # Entry point (loads modules)
+│   │   ├── modules/              # Character sheet modules
+│   │   │   ├── core-api.js       # API requests, CSRF
+│   │   │   ├── character-data.js # Form serialization
+│   │   │   ├── ui-common.js      # Menu, themes, avatar
+│   │   │   ├── auth.js           # Authentication
+│   │   │   ├── persistence.js    # Save/load, cloud sync
+│   │   │   ├── campaigns.js      # Campaign linking
+│   │   │   ├── progression.js    # XP, locks, quest items
+│   │   │   └── onboarding.js     # Getting started guide
 │   │   ├── dashboard.js          # Status bar & dashboard
 │   │   ├── dm-session.js         # DM tools logic (393 KB)
 │   │   ├── tabs.js               # Tab navigation
@@ -129,12 +138,18 @@ Complete technical documentation for developers who want to understand, modify, 
 
 #### Core Logic
 
-**main.js** - Character sheet core
-- Character data CRUD (load, save, export, import)
-- Auto-fill equipment based on race/class
-- Lock system (race/class → attributes → abilities)
-- localStorage persistence
-- Cloud sync integration
+**main.js** - Entry point that loads 8 modules:
+
+| Module | File | Purpose |
+|--------|------|---------|
+| Core API | `modules/core-api.js` | API requests, CSRF tokens |
+| Character Data | `modules/character-data.js` | Form serialization |
+| UI Common | `modules/ui-common.js` | Menu, themes, avatar |
+| Auth | `modules/auth.js` | Login, register, logout |
+| Persistence | `modules/persistence.js` | Save/load, cloud sync, trash |
+| Campaigns | `modules/campaigns.js` | Campaign linking, party |
+| Progression | `modules/progression.js` | XP, locks, quest items |
+| Onboarding | `modules/onboarding.js` | Getting started guide |
 
 **dashboard.js** - Status bar & dashboard
 - `updateStatusBar()` - Sync stats to status bar
@@ -216,7 +231,7 @@ switchTab(tabId)  // Switch between character sheet pages
 **Cache Strategy:** Cache-first with network fallback
 
 ```javascript
-const CACHE_NAME = 'aedelore-v201';
+const CACHE_NAME = 'aedelore-v296';
 
 const STATIC_ASSETS = [
   '/character-sheet',
@@ -789,4 +804,4 @@ SPELLS_BY_CLASS["Mage"].push({
 
 ---
 
-*Last updated: 2026-01-23*
+*Last updated: 2026-01-26*
