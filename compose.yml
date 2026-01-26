@@ -15,6 +15,18 @@ services:
       timeout: 5s
       retries: 5
 
+  aedelore-proffs-redis:
+    image: redis:7-alpine
+    container_name: aedelore-proffs-redis
+    restart: unless-stopped
+    volumes:
+      - aedelore-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   aedelore-proffs-web:
     image: nginx:alpine
     container_name: aedelore-proffs-web
@@ -32,7 +44,9 @@ services:
     container_name: aedelore-proffs-api
     restart: unless-stopped
     environment:
+      NODE_ENV: production
       DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: redis://aedelore-proffs-redis:6379
       SMTP_HOST: ${SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT}
       SMTP_USER: ${SMTP_USER}
@@ -45,6 +59,8 @@ services:
       - "3000"
     depends_on:
       aedelore-proffs-db:
+        condition: service_healthy
+      aedelore-proffs-redis:
         condition: service_healthy
 
   aedelore-umami-db:
@@ -80,4 +96,5 @@ services:
 
 volumes:
   aedelore-pgdata:
+  aedelore-redis:
   aedelore-umami-pgdata:

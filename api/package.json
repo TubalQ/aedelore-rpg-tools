@@ -4,7 +4,16 @@
   "description": "API for Aedelore character storage",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "start:ts": "ts-node src/server.ts",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "NODE_ENV=test jest --coverage --detectOpenHandles --forceExit",
+    "test:watch": "NODE_ENV=test jest --watch",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "express": "^5.0.1",
@@ -12,7 +21,32 @@
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "express-rate-limit": "^7.5.0",
+    "rate-limit-redis": "^4.2.0",
+    "ioredis": "^5.4.1",
     "helmet": "^8.0.0",
-    "nodemailer": "^6.9.0"
+    "nodemailer": "^6.9.0",
+    "cookie-parser": "^1.4.7",
+    "pino": "^9.0.0",
+    "pino-http": "^10.0.0",
+    "swagger-jsdoc": "^6.2.0",
+    "swagger-ui-express": "^5.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-node": "^11.1.0",
+    "typescript": "^5.3.0",
+    "@types/node": "^20.0.0",
+    "@types/express": "^5.0.0",
+    "@types/bcrypt": "^5.0.0",
+    "@types/cors": "^2.8.0",
+    "@types/cookie-parser": "^1.4.0",
+    "@types/nodemailer": "^6.4.0",
+    "ts-node": "^10.9.0",
+    "@types/jest": "^29.0.0",
+    "@types/supertest": "^6.0.0"
   }
 }

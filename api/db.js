@@ -174,6 +174,45 @@ async function initializeDatabase() {
             );
 
             CREATE INDEX IF NOT EXISTS idx_frontend_errors_created ON frontend_errors(created_at DESC);
+
+            -- Login history table (IP + user-agent logging)
+            CREATE TABLE IF NOT EXISTS login_history (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                ip_address VARCHAR(45),
+                user_agent TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_login_history_user_id ON login_history(user_id);
+            CREATE INDEX IF NOT EXISTS idx_login_history_created ON login_history(created_at DESC);
+
+            -- Add share_code column to campaigns (migration for campaign sharing)
+            DO $$
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                               WHERE table_name = 'campaigns' AND column_name = 'share_code') THEN
+                    ALTER TABLE campaigns ADD COLUMN share_code TEXT UNIQUE;
+                END IF;
+            END $$;
+
+            -- Add soft delete column for campaigns (migration for trash/restore feature)
+            DO $$
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                               WHERE table_name = 'campaigns' AND column_name = 'deleted_at') THEN
+                    ALTER TABLE campaigns ADD COLUMN deleted_at TIMESTAMP;
+                END IF;
+            END $$;
+
+            -- Add soft delete column for sessions (migration for trash/restore feature)
+            DO $$
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                               WHERE table_name = 'sessions' AND column_name = 'deleted_at') THEN
+                    ALTER TABLE sessions ADD COLUMN deleted_at TIMESTAMP;
+                END IF;
+            END $$;
         `);
         console.log('Database schema initialized');
     } finally {
