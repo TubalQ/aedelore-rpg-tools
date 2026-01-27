@@ -273,6 +273,34 @@
             animation: fadeIn 2s ease-out 1s both;
         }
 
+        .hero-quote {
+            font-family: 'Crimson Text', Georgia, serif;
+            font-size: 1.15rem;
+            font-style: italic;
+            color: var(--text-secondary);
+            max-width: 750px;
+            margin: 0 auto 50px;
+            text-align: center;
+            line-height: 1.9;
+            animation: fadeIn 2s ease-out 1s both;
+        }
+
+        .hero-quote p {
+            margin-bottom: 0.8em;
+        }
+
+        .hero-quote p:last-of-type {
+            margin-bottom: 1.5em;
+        }
+
+        .hero-quote cite {
+            display: block;
+            font-size: 0.95rem;
+            color: var(--accent-gold);
+            font-style: normal;
+            letter-spacing: 0.02em;
+        }
+
         .scroll-indicator {
             position: absolute;
             bottom: 30px;
@@ -530,6 +558,207 @@
             color: var(--text-base);
         }
 
+        /* Privacy Banner */
+        .privacy-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-elevated);
+            border-top: 1px solid var(--accent-purple);
+            padding: 16px 24px;
+            z-index: 10000;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .privacy-banner.visible {
+            transform: translateY(0);
+        }
+
+        .privacy-banner-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .privacy-banner-text {
+            flex: 1;
+        }
+
+        .privacy-banner-title {
+            font-weight: 600;
+            color: var(--accent-purple);
+            margin-bottom: 4px;
+            font-size: 1rem;
+        }
+
+        .privacy-banner-description {
+            color: var(--text-subdued);
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .privacy-banner-link {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .privacy-banner-link:hover {
+            text-decoration: underline;
+        }
+
+        .privacy-banner-actions {
+            display: flex;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .privacy-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .privacy-btn-primary {
+            background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-blue) 100%);
+            color: white;
+        }
+
+        .privacy-btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--accent-purple-glow);
+        }
+
+        .privacy-btn-secondary {
+            background: var(--bg-surface);
+            color: var(--text-subdued);
+            border: 1px solid var(--border-default);
+        }
+
+        .privacy-btn-secondary:hover {
+            background: var(--bg-surface-hover);
+            color: var(--text-base);
+        }
+
+        /* Privacy Details Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--bg-elevated);
+            border: 1px solid var(--accent-purple);
+            border-radius: 12px;
+            max-width: 550px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: var(--text-base);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-subdued);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: var(--text-base);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .privacy-status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: var(--bg-surface);
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .privacy-status-label {
+            color: var(--text-base);
+            font-weight: 500;
+        }
+
+        .privacy-status-value {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .privacy-status-enabled {
+            color: var(--accent-green);
+        }
+
+        .privacy-status-disabled {
+            color: var(--text-muted);
+        }
+
+        .privacy-details-section {
+            margin-bottom: 20px;
+        }
+
+        .privacy-details-section h4 {
+            color: var(--accent-cyan);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .privacy-details-section p,
+        .privacy-details-section ul {
+            color: var(--text-subdued);
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .privacy-details-section ul {
+            margin-left: 20px;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .side-nav {
@@ -575,6 +804,68 @@
                 flex-direction: column;
                 gap: 30px;
             }
+
+            /* Privacy banner mobile - centered modal */
+            .privacy-banner {
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(0, 0, 0, 0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transform: none;
+                opacity: 0;
+                visibility: hidden;
+                border: none;
+                padding: 20px;
+            }
+
+            .privacy-banner.visible {
+                opacity: 1;
+                visibility: visible;
+                transform: none;
+            }
+
+            .privacy-banner-content {
+                background: var(--bg-elevated);
+                border: 1px solid var(--accent-purple);
+                border-radius: 12px;
+                padding: 24px;
+                max-width: 320px;
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .privacy-banner-title {
+                font-size: 1.1rem;
+                margin-bottom: 8px;
+            }
+
+            .privacy-banner-description {
+                margin-bottom: 20px;
+            }
+
+            .privacy-banner-actions {
+                width: 100%;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .privacy-btn {
+                width: 100%;
+                min-height: 44px;
+            }
+
+            .hero-quote {
+                font-size: 1rem;
+                padding: 0 10px;
+            }
+
+            .hero-quote cite {
+                font-size: 0.85rem;
+            }
         }
     </style>
 </head>
@@ -616,7 +907,11 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
                 <span class="nav-label">DM</span>
             </a>
-            <a href="#wiki" class="nav-icon" title="Wiki">
+            <a href="#lore" class="nav-icon" title="Lore">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                <span class="nav-label">Lore</span>
+            </a>
+            <a href="wiki" class="nav-icon" title="Wiki">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
                 <span class="nav-label">Wiki</span>
             </a>
@@ -630,11 +925,12 @@
             <div class="hero-content">
                 <h1 class="hero-title">Aedelore</h1>
                 <p class="hero-subtitle">A World Born from Dragons</p>
-                <p class="hero-text">
-                    In the timeless void, the Black Sun gave birth to the Dragon Aspects. 
-                    They discovered a desolate world and shaped it into Aedelore—a realm where seven races walk different paths, 
-                    where ancient magic flows through the land, and where the echoes of war still shape the present.
-                </p>
+                <blockquote class="hero-quote">
+                    <p>Herein lies the sacred history of Aedelore, transcribed from the whispers of the Eternal and the memories of stone.</p>
+                    <p>Let those who seek wisdom read with open hearts, for in these words are hidden the keys to understanding the Great Mystery.</p>
+                    <p>As it was spoken by the ancients, so it is written here: that which is above reflects that which is below, and through the sacred dance of light and shadow, all things find their purpose.</p>
+                    <cite>— Set down by Aelindor the Ageless, First Keeper of the Great Tree, in the time before counting</cite>
+                </blockquote>
             </div>
             <div class="scroll-indicator">
                 ↓ Scroll to explore
@@ -679,8 +975,7 @@
 
                         <h3>Faith & Power</h3>
                         <p>
-                            Fourteen distinct religions guide the faithful. The Flame of Taninsam burns in temples 
-                            of renewal. The Silent Hunt follows the Groove Guardian through wild places. 
+                            Fourteen distinct religions guide the faithful. The Flame of Taninsam teaches that trials forge the soul. The Silent Hunt follows the Groove Guardian through wild places. 
                             The Shattered Path offers solace to outcasts. Each creed shapes how its followers 
                             understand their place in Aedelore.
                         </p>
@@ -720,39 +1015,48 @@
                 <div class="decorative-line"></div>
 
                 <div class="column-content" style="max-width: 800px; margin: 0 auto;">
-                    <h3>The Dawn of the 4th Birth</h3>
+                    <h3>The Fourth Birth</h3>
                     <p>
-                        The Black Sun gathered energy since the dawn of existence. When it erupted, 
-                        it gave birth to the Dragon Aspects—primordial beings who discovered a desolate world 
-                        and shaped it into Aedelore.
+                        In the time before counting, the Black Sun dreamed within the Void—gathering
+                        the essence of three fallen worlds, three great cycles of creation and dissolution.
+                        When at last it awakened, six Divine Aspects emerged as vessels of the Eternal Light.
+                        Upon a barren world they descended, and through their sacred union was born Aedelore,
+                        the Land of Divine Light.
                     </p>
 
-                    <h3>The First War</h3>
+                    <h3>The Fall from Grace</h3>
                     <p>
-                        Harmony was fleeting. Centuries into the Age of Magic, the races turned against each other. 
-                        The war that followed shattered continents, created the Floating Isles, and nearly destroyed 
-                        the world the Dragon Gods had built.
+                        For an age, the veil between mortal and divine was thin, and wonders walked openly
+                        upon the land. Yet peace among the unenlightened is but a fleeting shadow.
+                        Pride and resentment kindled flames of war, and for fifty years the races bled.
+                        When mortal hands refused to stay their violence, the Dragon Gods stirred from slumber.
+                        At Nortaq, the priest Lordean offered himself to Tohu's sacred fire—and from that sacrifice,
+                        the very earth was torn skyward, giving birth to the Floating Isles.
                     </p>
 
                     <h3>The Age of Silence</h3>
                     <p>
-                        In the aftermath, magic faded. The world grew quiet. It was during this time that Halflings 
-                        emerged, a race born without the touch of the Dragon Gods. Cities were built, alliances formed, 
-                        and life continued in a world where magic was but a whisper.
+                        As punishment for the sins of the unworthy, Tohu withdrew magic from the world.
+                        The divine light dimmed; what once flowed freely became but a whisper.
+                        In the quiet centuries that followed, wounds healed and new truths emerged—some Elves,
+                        touched by mortality, became the first Humans. The world rebuilt itself in shadow,
+                        awaiting the day when the light might return.
                     </p>
 
-                    <h3>The Rising Threat</h3>
+                    <h3>The Rising Shadow</h3>
                     <p>
-                        Orcs and Trolls, hardened by centuries of survival, began organizing. The Siege of Rivermount 
-                        tested the elven defenses. Dark forces stirred. Ancient knowledge resurfaced. 
-                        This is Aedelore as it stands today—a world shaped by its past, living in an uncertain present.
+                        Now ancient forces stir once more. The Orcs and Trolls, hardened by centuries of exile
+                        in the outer darkness, have emerged from the Barrowhills. At Rivermount they tested
+                        the elven watch—and though the siege was broken, darker whispers spread.
+                        Forgotten knowledge resurfaces. The Void grows restless. This is Aedelore as it stands:
+                        a world shaped by cycles of light and shadow, awaiting those who would choose which to serve.
                     </p>
                     
                     <p style="margin-top: 40px; text-align: center; font-size: 1.2rem;">
-                        Want to dive into the full story? Start with the
-                        <a href="https://wiki.aedelore.nu/books/miscs-of-aedelore/page/first-time-guide"
+                        Want to dive into the full story? Explore the
+                        <a href="https://wiki.aedelore.nu/books/aedelore"
                            style="color: var(--accent-gold); text-decoration: none; border-bottom: 2px solid var(--accent-gold);">
-                            First Time Guide
+                            Rivermount Library
                         </a>
                     </p>
                 </div>
@@ -850,6 +1154,63 @@
             </div>
         </section>
 
+        <!-- Explore the Lore Section -->
+        <section id="lore" class="content-section" style="background: rgba(30, 41, 59, 0.2);">
+            <div class="section-inner">
+                <div class="section-number">Chapter IV</div>
+                <h2 class="section-title">Explore the Lore</h2>
+                <div class="decorative-line"></div>
+
+                <p style="color: var(--text-secondary); font-size: 1.1rem; max-width: 700px; margin-bottom: 50px; line-height: 1.8;">
+                    Dive deeper into the world with these collections of knowledge, recently added to the archives.
+                </p>
+
+                <div class="info-grid">
+                    <a href="https://wiki.aedelore.nu/books/bestiary-of-aedelore" class="info-card">
+                        <h4>Bestiary</h4>
+                        <p>
+                            A comprehensive collection documenting the creatures that inhabit Aedelore,
+                            from common beasts to legendary monsters of myth.
+                        </p>
+                    </a>
+                    <a href="https://wiki.aedelore.nu/books/artifacts-and-relics" class="info-card">
+                        <h4>Artifacts & Relics</h4>
+                        <p>
+                            Legendary items of power scattered across the realm, each with its own
+                            history and purpose waiting to be discovered.
+                        </p>
+                    </a>
+                    <a href="https://wiki.aedelore.nu/books/nature-of-aedelore" class="info-card">
+                        <h4>Nature of Aedelore</h4>
+                        <p>
+                            Documentation of flora and fauna, from ordinary plants to magical species
+                            that thrive in the wild places of the world.
+                        </p>
+                    </a>
+                    <a href="https://wiki.aedelore.nu/books/societies-and-secrets" class="info-card">
+                        <h4>Societies & Secrets</h4>
+                        <p>
+                            The organizations and guilds that shape the world's politics, trade,
+                            and hidden power structures across all races.
+                        </p>
+                    </a>
+                </div>
+
+                <p style="margin-top: 60px; text-align: center; font-size: 1.1rem; color: var(--text-secondary);">
+                    New to Aedelore? Start with the
+                    <a href="https://wiki.aedelore.nu/books/miscs-of-aedelore/page/first-time-guide"
+                       style="color: var(--accent-gold); text-decoration: none; border-bottom: 2px solid var(--accent-gold);">
+                        First Time Guide
+                    </a>
+                    or explore the
+                    <a href="https://wiki.aedelore.nu/books/miscs-of-aedelore/page/part-1-core-system"
+                       style="color: var(--accent-gold); text-decoration: none; border-bottom: 2px solid var(--accent-gold);">
+                        Game Rules
+                    </a>
+                </p>
+            </div>
+        </section>
+
         <!-- CTA Section -->
         <section id="wiki" class="cta-section">
             <div class="section-number">The Journey Continues</div>
@@ -866,8 +1227,10 @@
             <p>&copy; 2025 World of Aedelore</p>
             <p style="margin-top: 10px;">
                 <a href="https://wiki.aedelore.nu">Wiki</a> ·
-                <a href="https://wiki.aedelore.nu/books">Books</a> ·
-                <a href="https://wiki.aedelore.nu/shelves">Shelves</a>
+                <a href="https://wiki.aedelore.nu/books/bestiary-of-aedelore">Bestiary</a> ·
+                <a href="https://wiki.aedelore.nu/books/artifacts-and-relics">Artifacts</a> ·
+                <a href="https://wiki.aedelore.nu/books/societies-and-secrets">Societies</a> ·
+                <a href="https://wiki.aedelore.nu/books/miscs-of-aedelore">Rules</a>
             </p>
         </footer>
     </main>

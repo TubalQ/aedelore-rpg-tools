@@ -6343,7 +6343,11 @@ const AI_WIKI_LINKS = {
     characters: 'https://wiki.aedelore.nu/books/characters-of-aedelore',
     world: 'https://wiki.aedelore.nu/books/aedelore/chapter/the-world',
     weapons: 'https://wiki.aedelore.nu/books/miscs-of-aedelore/page/weapons',
-    armor: 'https://wiki.aedelore.nu/books/miscs-of-aedelore/page/armor-shields'
+    armor: 'https://wiki.aedelore.nu/books/miscs-of-aedelore/page/armor-shields',
+    bestiary: 'https://wiki.aedelore.nu/books/bestiary-of-aedelore',
+    artifacts: 'https://wiki.aedelore.nu/books/artifacts-and-relics',
+    nature: 'https://wiki.aedelore.nu/books/nature-of-aedelore',
+    societies: 'https://wiki.aedelore.nu/books/societies-and-secrets'
 };
 
 const AI_TASK_DESCRIPTIONS = {
@@ -7293,6 +7297,10 @@ You are a DM assistant for the Aedelore tabletop RPG system. Your role is to hel
 - Important Characters: ${AI_WIKI_LINKS.characters}
 - Weapons: ${AI_WIKI_LINKS.weapons}
 - Armor & Shields: ${AI_WIKI_LINKS.armor}
+- Bestiary (creatures & monsters): ${AI_WIKI_LINKS.bestiary}
+- Artifacts & Relics: ${AI_WIKI_LINKS.artifacts}
+- Nature (flora & fauna): ${AI_WIKI_LINKS.nature}
+- Societies & Secrets: ${AI_WIKI_LINKS.societies}
 
 ## GAME ITEMS (use ONLY these)
 **Potions in Aedelore (no health potions exist!):**

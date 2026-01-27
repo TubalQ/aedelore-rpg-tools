@@ -304,6 +304,7 @@ router.get('/me', authenticate, async (req, res) => {
         `, [userId]);
 
         res.json({
+            id: userId,
             username: user.username,
             email: user.email || null,
             createdAt: user.created_at,

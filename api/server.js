@@ -19,6 +19,7 @@ const campaignRoutes = require('./routes/campaigns');
 const sessionRoutes = require('./routes/sessions');
 const trashRoutes = require('./routes/trash');
 const errorRoutes = require('./routes/errors');
+const wikiRoutes = require('./routes/wiki');
 
 // Import middleware
 const { generalLimiter, authenticate } = require('./middleware/auth');
@@ -213,6 +214,7 @@ characterRoutes.setMetrics(metrics, writeMetricsFile);
 campaignRoutes.setMetrics(metrics, writeMetricsFile);
 sessionRoutes.setMetrics(metrics, writeMetricsFile);
 errorRoutes.setMetrics(metrics);
+wikiRoutes.setMetrics(metrics, writeMetricsFile);
 
 // ============================================
 // Mount Routes
@@ -257,6 +259,9 @@ app.use('/api/trash', trashRoutes);
 
 // Error logging routes
 app.use('/api/errors', errorRoutes);
+
+// Wiki routes
+app.use('/api/wiki', wikiRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
