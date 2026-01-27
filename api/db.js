@@ -213,6 +213,63 @@ async function initializeDatabase() {
                     ALTER TABLE sessions ADD COLUMN deleted_at TIMESTAMP;
                 END IF;
             END $$;
+
+            -- Wiki system tables
+            CREATE TABLE IF NOT EXISTS wiki_books (
+                id SERIAL PRIMARY KEY,
+                slug TEXT UNIQUE NOT NULL,
+                title TEXT NOT NULL,
+                description TEXT,
+                cover_image TEXT,
+                author_note TEXT,
+                sort_order INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                deleted_at TIMESTAMP
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_wiki_books_slug ON wiki_books(slug);
+            CREATE INDEX IF NOT EXISTS idx_wiki_books_deleted ON wiki_books(deleted_at);
+
+            CREATE TABLE IF NOT EXISTS wiki_chapters (
+                id SERIAL PRIMARY KEY,
+                book_id INTEGER NOT NULL REFERENCES wiki_books(id) ON DELETE CASCADE,
+                slug TEXT NOT NULL,
+                title TEXT NOT NULL,
+                description TEXT,
+                author_note TEXT,
+                sort_order INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                deleted_at TIMESTAMP,
+                UNIQUE(book_id, slug)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_wiki_chapters_book ON wiki_chapters(book_id);
+            CREATE INDEX IF NOT EXISTS idx_wiki_chapters_deleted ON wiki_chapters(deleted_at);
+
+            CREATE TABLE IF NOT EXISTS wiki_pages (
+                id SERIAL PRIMARY KEY,
+                book_id INTEGER NOT NULL REFERENCES wiki_books(id) ON DELETE CASCADE,
+                chapter_id INTEGER REFERENCES wiki_chapters(id) ON DELETE SET NULL,
+                slug TEXT NOT NULL,
+                title TEXT NOT NULL,
+                content TEXT,
+                summary TEXT,
+                author_note TEXT,
+                tags TEXT[],
+                sort_order INTEGER DEFAULT 0,
+                view_count INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                deleted_at TIMESTAMP,
+                UNIQUE(book_id, slug)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_wiki_pages_book ON wiki_pages(book_id);
+            CREATE INDEX IF NOT EXISTS idx_wiki_pages_chapter ON wiki_pages(chapter_id);
+            CREATE INDEX IF NOT EXISTS idx_wiki_pages_deleted ON wiki_pages(deleted_at);
+            CREATE INDEX IF NOT EXISTS idx_wiki_pages_tags ON wiki_pages USING GIN(tags);
         `);
         console.log('Database schema initialized');
     } finally {

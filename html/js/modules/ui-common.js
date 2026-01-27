@@ -437,6 +437,82 @@ function setAvatarData(data) {
     applyAvatar();
 }
 
+// ========================================
+// Wiki Search Modal
+// ========================================
+
+let wikiSearchTimeout = null;
+
+function openWikiSearch() {
+    const modal = document.getElementById('wiki-search-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        const input = document.getElementById('wiki-search-input');
+        if (input) {
+            input.value = '';
+            input.focus();
+        }
+        // Reset results
+        const results = document.getElementById('wiki-search-results');
+        if (results) {
+            results.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 40px 20px;">Type at least 2 characters to search...</p>';
+        }
+    }
+}
+
+function closeWikiSearch() {
+    const modal = document.getElementById('wiki-search-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function handleWikiSearch(query) {
+    clearTimeout(wikiSearchTimeout);
+    const results = document.getElementById('wiki-search-results');
+
+    if (!query || query.length < 2) {
+        results.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 40px 20px;">Type at least 2 characters to search...</p>';
+        return;
+    }
+
+    // Debounce search
+    wikiSearchTimeout = setTimeout(async () => {
+        results.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 40px 20px;">Searching...</p>';
+
+        try {
+            const response = await fetch(`/api/wiki/search?q=${encodeURIComponent(query)}`);
+            if (!response.ok) throw new Error('Search failed');
+
+            const data = await response.json();
+
+            if (!data.results || data.results.length === 0) {
+                results.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 40px 20px;">No results found for "${escapeHtmlWiki(query)}"</p>`;
+                return;
+            }
+
+            results.innerHTML = data.results.map(result => `
+                <a href="/wiki#${result.book_slug}/${result.slug}" target="_blank" class="wiki-search-result-item" style="display: block; padding: 12px 16px; margin-bottom: 8px; background: var(--bg-elevated); border-radius: 8px; text-decoration: none; color: inherit; border: 1px solid var(--border-default); transition: all 0.2s;">
+                    <div style="font-weight: 500; color: var(--text-primary); margin-bottom: 4px;">${escapeHtmlWiki(result.title)}</div>
+                    ${result.summary ? `<div style="font-size: 0.85rem; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtmlWiki(result.summary.substring(0, 100))}${result.summary.length > 100 ? '...' : ''}</div>` : ''}
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">${escapeHtmlWiki(result.book_title)}</div>
+                </a>
+            `).join('');
+
+        } catch (error) {
+            console.error('Wiki search error:', error);
+            results.innerHTML = '<p style="color: var(--accent-red); text-align: center; padding: 40px 20px;">Search failed. Please try again.</p>';
+        }
+    }, 300);
+}
+
+function escapeHtmlWiki(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 // Export to global scope
 window.toggleMobileMenu = toggleMobileMenu;
 window.initCollapsibleSections = initCollapsibleSections;
@@ -458,3 +534,6 @@ window.clearAvatar = clearAvatar;
 window.applyAvatar = applyAvatar;
 window.getAvatarData = getAvatarData;
 window.setAvatarData = setAvatarData;
+window.openWikiSearch = openWikiSearch;
+window.closeWikiSearch = closeWikiSearch;
+window.handleWikiSearch = handleWikiSearch;

@@ -27,6 +27,12 @@ backups/
 # API data files (contains user data)
 api/data/
 
+# Wiki uploads (images from BookStack migration)
+html/uploads/
+
+# Wiki export data
+scripts/bookstack-export.json
+
 # Node modules
 node_modules/
 api/node_modules/
