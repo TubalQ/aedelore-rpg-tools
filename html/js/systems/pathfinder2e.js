@@ -4,8 +4,157 @@
 
 function renderPathfinder2eSheet(config) {
     return `
+        <!-- OVERVIEW TAB -->
+        <div class="tab-content active" id="system-overview" style="display: block;">
+            <div class="system-dashboard pf2e-dashboard">
+                <!-- Character Summary -->
+                <div class="dashboard-card character-summary">
+                    <div class="summary-avatar" id="pf-avatar">
+                        <span class="avatar-initial">?</span>
+                    </div>
+                    <div class="summary-info">
+                        <h2 class="summary-name" id="pf-summary-name">New Character</h2>
+                        <div class="summary-details">
+                            <span id="pf-summary-ancestry">-</span>
+                            <span id="pf-summary-class">-</span>
+                            <span class="summary-level">Lvl <span id="pf-summary-level">1</span></span>
+                        </div>
+                    </div>
+                    <div class="hero-points-display">
+                        <span class="hero-label">Hero Points</span>
+                        <div class="hero-dots" id="pf-hero-points">
+                            <span class="hero-dot" onclick="setPFHeroPoints(1)">○</span>
+                            <span class="hero-dot" onclick="setPFHeroPoints(2)">○</span>
+                            <span class="hero-dot" onclick="setPFHeroPoints(3)">○</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Combat Stats Grid -->
+                <div class="dashboard-row combat-row">
+                    <div class="dashboard-stat hp-stat">
+                        <div class="stat-label">HP</div>
+                        <div class="stat-adjuster">
+                            <button class="adj-btn" onclick="adjustPFHP(-1)">−</button>
+                            <span class="stat-value">
+                                <span id="pf-overview-hp">10</span>/<span id="pf-overview-hp-max">10</span>
+                            </span>
+                            <button class="adj-btn" onclick="adjustPFHP(1)">+</button>
+                        </div>
+                        <div class="temp-hp" id="pf-temp-hp-display" style="display: none;">
+                            +<span id="pf-overview-temp-hp">0</span> temp
+                        </div>
+                    </div>
+                    <div class="dashboard-stat">
+                        <div class="stat-label">AC</div>
+                        <div class="stat-value-large" id="pf-overview-ac">10</div>
+                    </div>
+                    <div class="dashboard-stat" onclick="rollPFPerception()">
+                        <div class="stat-label">Perception</div>
+                        <div class="stat-value-large" id="pf-overview-perception">+0</div>
+                    </div>
+                    <div class="dashboard-stat">
+                        <div class="stat-label">Speed</div>
+                        <div class="stat-value-large" id="pf-overview-speed">25</div>
+                    </div>
+                    <div class="dashboard-stat">
+                        <div class="stat-label">Class DC</div>
+                        <div class="stat-value-large" id="pf-overview-class-dc">10</div>
+                    </div>
+                </div>
+
+                <!-- Ability Scores -->
+                <div class="dashboard-section">
+                    <h3 class="section-header">Ability Modifiers</h3>
+                    <div class="ability-grid">
+                        ${config.attributes.map(attr => `
+                            <div class="ability-card" onclick="rollPFCheck('${attr.id}')">
+                                <div class="ability-abbr">${attr.abbr}</div>
+                                <div class="ability-mod" id="pf-overview-mod-${attr.id}">+0</div>
+                                <div class="ability-score" id="pf-overview-score-${attr.id}">10</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Saving Throws -->
+                <div class="dashboard-section">
+                    <h3 class="section-header">Saving Throws</h3>
+                    <div class="pf-saves-row">
+                        ${config.savingThrows.map(save => `
+                            <div class="pf-save-card" onclick="rollPFSaveCheck('${save.id}')">
+                                <div class="save-name">${save.name}</div>
+                                <div class="save-total-large" id="pf-overview-save-${save.id}">+0</div>
+                                <div class="save-prof-badge" id="pf-overview-save-prof-${save.id}">U</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Focus Points (if applicable) -->
+                <div class="dashboard-section" id="pf-focus-section" style="display: none;">
+                    <h3 class="section-header">Focus Points</h3>
+                    <div class="focus-points-display">
+                        <div class="stat-adjuster">
+                            <button class="adj-btn" onclick="adjustPFFocus(-1)">−</button>
+                            <span class="stat-value">
+                                <span id="pf-overview-focus">0</span>/<span id="pf-overview-focus-max">0</span>
+                            </span>
+                            <button class="adj-btn" onclick="adjustPFFocus(1)">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resistances/Weaknesses (if any) -->
+                <div class="dashboard-row">
+                    <div class="dashboard-section compact" id="pf-resistances-section" style="display: none;">
+                        <h3 class="section-header">Resistances</h3>
+                        <div class="resistances-list" id="pf-overview-resistances">-</div>
+                    </div>
+                    <div class="dashboard-section compact" id="pf-weaknesses-section" style="display: none;">
+                        <h3 class="section-header">Weaknesses</h3>
+                        <div class="weaknesses-list" id="pf-overview-weaknesses">-</div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="dashboard-section">
+                    <h3 class="section-header">Quick Actions</h3>
+                    <div class="quick-actions-grid">
+                        <button class="quick-action-btn" onclick="rollPFDice(20)">
+                            <span class="action-icon">🎲</span>
+                            <span class="action-label">d20</span>
+                        </button>
+                        <button class="quick-action-btn" onclick="pfRefocus()">
+                            <span class="action-icon">🧘</span>
+                            <span class="action-label">Refocus</span>
+                        </button>
+                        <button class="quick-action-btn" onclick="pfTreatWounds()">
+                            <span class="action-icon">🩹</span>
+                            <span class="action-label">Treat Wounds</span>
+                        </button>
+                        <button class="quick-action-btn" onclick="pfRest()">
+                            <span class="action-icon">🛏️</span>
+                            <span class="action-label">Rest</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Degrees of Success Reference -->
+                <div class="dashboard-section">
+                    <h3 class="section-header">Degrees of Success</h3>
+                    <div class="degrees-reference">
+                        <div class="degree crit-success">Critical Success: Beat DC by 10+</div>
+                        <div class="degree success">Success: Meet or beat DC</div>
+                        <div class="degree failure">Failure: Below DC</div>
+                        <div class="degree crit-fail">Critical Failure: Below DC by 10+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- INFO TAB -->
-        <div class="tab-content active" id="system-info" style="display: block;">
+        <div class="tab-content" id="system-info" style="display: none;">
             <div class="section">
                 <h2 class="section-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -880,6 +1029,267 @@ function initializePF2e() {
     updatePFBulk();
 }
 
+// Update the overview tab with current values
+function updatePFOverview() {
+    const config = SYSTEM_CONFIGS.pathfinder2e;
+
+    // Character summary
+    const name = document.getElementById('character_name')?.value || 'New Character';
+    const ancestry = document.getElementById('pf_ancestry')?.value || '-';
+    const charClass = document.getElementById('pf_class')?.value || '-';
+    const level = document.getElementById('pf_level')?.value || '1';
+
+    const nameEl = document.getElementById('pf-summary-name');
+    const ancestryEl = document.getElementById('pf-summary-ancestry');
+    const classEl = document.getElementById('pf-summary-class');
+    const levelEl = document.getElementById('pf-summary-level');
+    const avatarEl = document.getElementById('pf-avatar');
+
+    if (nameEl) nameEl.textContent = name || 'New Character';
+    if (ancestryEl) ancestryEl.textContent = ancestry || '-';
+    if (classEl) classEl.textContent = charClass || '-';
+    if (levelEl) levelEl.textContent = level;
+    if (avatarEl) {
+        const initial = name ? name.charAt(0).toUpperCase() : '?';
+        avatarEl.querySelector('.avatar-initial').textContent = initial;
+    }
+
+    // Combat stats
+    const hp = document.getElementById('pf_hp_current')?.value || '10';
+    const hpMax = document.getElementById('pf_hp_max')?.value || '10';
+    const tempHp = document.getElementById('pf_hp_temp')?.value || '0';
+    const ac = document.getElementById('pf_ac')?.value || '10';
+    const speed = document.getElementById('pf_speed')?.value || '25';
+    const classDC = document.getElementById('pf_class_dc')?.value || '10';
+
+    const hpEl = document.getElementById('pf-overview-hp');
+    const hpMaxEl = document.getElementById('pf-overview-hp-max');
+    const acEl = document.getElementById('pf-overview-ac');
+    const speedEl = document.getElementById('pf-overview-speed');
+    const classDCEl = document.getElementById('pf-overview-class-dc');
+
+    if (hpEl) hpEl.textContent = hp;
+    if (hpMaxEl) hpMaxEl.textContent = hpMax;
+    if (acEl) acEl.textContent = ac;
+    if (speedEl) speedEl.textContent = speed.replace(' ft', '').replace(' feet', '');
+    if (classDCEl) classDCEl.textContent = classDC;
+
+    // Temp HP
+    const tempHpDisplay = document.getElementById('pf-temp-hp-display');
+    const tempHpValue = document.getElementById('pf-overview-temp-hp');
+    if (tempHpDisplay && tempHpValue) {
+        if (parseInt(tempHp) > 0) {
+            tempHpDisplay.style.display = 'block';
+            tempHpValue.textContent = tempHp;
+        } else {
+            tempHpDisplay.style.display = 'none';
+        }
+    }
+
+    // Perception
+    const perceptionTotal = document.getElementById('pf_perception_total')?.textContent || '+0';
+    const perceptionEl = document.getElementById('pf-overview-perception');
+    if (perceptionEl) perceptionEl.textContent = perceptionTotal;
+
+    // Ability scores and mods
+    config.attributes.forEach(attr => {
+        const score = parseInt(document.getElementById(`pf_attr_${attr.id}`)?.value) || 10;
+        const mod = Math.floor((score - 10) / 2);
+
+        const scoreEl = document.getElementById(`pf-overview-score-${attr.id}`);
+        const modEl = document.getElementById(`pf-overview-mod-${attr.id}`);
+
+        if (scoreEl) scoreEl.textContent = score;
+        if (modEl) modEl.textContent = formatModifier(mod);
+    });
+
+    // Saving throws
+    config.savingThrows.forEach(save => {
+        const totalEl = document.getElementById(`pf_save_${save.id}_total`);
+        const profSelect = document.getElementById(`pf_save_${save.id}_prof`);
+
+        const overviewTotalEl = document.getElementById(`pf-overview-save-${save.id}`);
+        const overviewProfEl = document.getElementById(`pf-overview-save-prof-${save.id}`);
+
+        if (totalEl && overviewTotalEl) {
+            overviewTotalEl.textContent = totalEl.textContent;
+        }
+
+        if (profSelect && overviewProfEl) {
+            const profRanks = ['U', 'T', 'E', 'M', 'L'];
+            const profIndex = profSelect.selectedIndex;
+            overviewProfEl.textContent = profRanks[profIndex] || 'U';
+            overviewProfEl.className = 'save-prof-badge prof-' + profRanks[profIndex]?.toLowerCase();
+        }
+    });
+
+    // Hero points
+    const heroPoints = parseInt(document.getElementById('pf_hero_points')?.value) || 0;
+    updatePFHeroPointsDisplay(heroPoints);
+
+    // Focus points
+    const focusCurrent = document.getElementById('pf_focus_current')?.value;
+    const focusMax = document.getElementById('pf_focus_max')?.value;
+    const focusSection = document.getElementById('pf-focus-section');
+    if (focusMax && parseInt(focusMax) > 0) {
+        if (focusSection) focusSection.style.display = 'block';
+        const focusCurrentEl = document.getElementById('pf-overview-focus');
+        const focusMaxEl = document.getElementById('pf-overview-focus-max');
+        if (focusCurrentEl) focusCurrentEl.textContent = focusCurrent || '0';
+        if (focusMaxEl) focusMaxEl.textContent = focusMax;
+    } else {
+        if (focusSection) focusSection.style.display = 'none';
+    }
+
+    // Resistances/Weaknesses
+    const resistances = document.getElementById('pf_resistances')?.value;
+    const weaknesses = document.getElementById('pf_weaknesses')?.value;
+
+    const resistSection = document.getElementById('pf-resistances-section');
+    const weakSection = document.getElementById('pf-weaknesses-section');
+    const resistList = document.getElementById('pf-overview-resistances');
+    const weakList = document.getElementById('pf-overview-weaknesses');
+
+    if (resistances && resistances.trim()) {
+        if (resistSection) resistSection.style.display = 'block';
+        if (resistList) resistList.textContent = resistances;
+    } else {
+        if (resistSection) resistSection.style.display = 'none';
+    }
+
+    if (weaknesses && weaknesses.trim()) {
+        if (weakSection) weakSection.style.display = 'block';
+        if (weakList) weakList.textContent = weaknesses;
+    } else {
+        if (weakSection) weakSection.style.display = 'none';
+    }
+}
+
+// Update hero points display
+function updatePFHeroPointsDisplay(points) {
+    const dots = document.querySelectorAll('#pf-hero-points .hero-dot');
+    dots.forEach((dot, index) => {
+        dot.textContent = index < points ? '●' : '○';
+        dot.classList.toggle('filled', index < points);
+    });
+}
+
+// Set hero points from overview
+function setPFHeroPoints(points) {
+    const currentPoints = parseInt(document.getElementById('pf_hero_points')?.value) || 0;
+    const newPoints = (points === currentPoints) ? points - 1 : points;
+
+    const heroInput = document.getElementById('pf_hero_points');
+    if (heroInput) {
+        heroInput.value = Math.max(0, Math.min(3, newPoints));
+    }
+    updatePFOverview();
+}
+
+// Adjust HP from overview
+function adjustPFHP(delta) {
+    const hpInput = document.getElementById('pf_hp_current');
+    const maxHpInput = document.getElementById('pf_hp_max');
+
+    if (hpInput) {
+        const current = parseInt(hpInput.value) || 0;
+        const max = parseInt(maxHpInput?.value) || 999;
+        const newValue = Math.max(0, Math.min(max, current + delta));
+        hpInput.value = newValue;
+        updatePFOverview();
+    }
+}
+
+// Adjust Focus from overview
+function adjustPFFocus(delta) {
+    const focusInput = document.getElementById('pf_focus_current');
+    const maxFocusInput = document.getElementById('pf_focus_max');
+
+    if (focusInput) {
+        const current = parseInt(focusInput.value) || 0;
+        const max = parseInt(maxFocusInput?.value) || 3;
+        const newValue = Math.max(0, Math.min(max, current + delta));
+        focusInput.value = newValue;
+        updatePFOverview();
+    }
+}
+
+// Refocus action
+function pfRefocus() {
+    const focusInput = document.getElementById('pf_focus_current');
+    const maxFocusInput = document.getElementById('pf_focus_max');
+
+    if (focusInput && maxFocusInput) {
+        const current = parseInt(focusInput.value) || 0;
+        const max = parseInt(maxFocusInput.value) || 0;
+
+        if (current < max) {
+            focusInput.value = Math.min(max, current + 1);
+            updatePFOverview();
+            alert('Refocus: Regained 1 Focus Point.\n\nYou can Refocus during exploration by spending 10 minutes.');
+        } else {
+            alert('Focus Pool is already full!');
+        }
+    } else {
+        alert('No Focus Pool set up.\n\nAdd Focus Points in the Combat tab if your class uses them.');
+    }
+}
+
+// Treat Wounds
+function pfTreatWounds() {
+    alert('Treat Wounds (Medicine check):\n\n' +
+          '• DC 15: Heal 2d8\n' +
+          '• DC 20 (Expert): Heal 2d8+10\n' +
+          '• DC 30 (Master): Heal 2d8+30\n' +
+          '• DC 40 (Legendary): Heal 2d8+50\n\n' +
+          'Critical Success: Double healing\n' +
+          'Critical Failure: Deal 1d8 damage\n\n' +
+          'Takes 10 minutes. Target is immune for 1 hour.');
+}
+
+// Rest
+function pfRest() {
+    const hpMax = document.getElementById('pf_hp_max')?.value || '10';
+    const hpInput = document.getElementById('pf_hp_current');
+    const focusInput = document.getElementById('pf_focus_current');
+    const focusMax = document.getElementById('pf_focus_max')?.value || '0';
+
+    if (confirm('Take a full 8-hour rest?\n\n• Regain all HP\n• Regain all Focus Points\n• Regain all spell slots')) {
+        if (hpInput) hpInput.value = hpMax;
+        if (focusInput && parseInt(focusMax) > 0) focusInput.value = focusMax;
+
+        updatePFOverview();
+        alert('Rest complete!\n\nHP and Focus Points restored.');
+    }
+}
+
+// Set up overview listeners
+function setupPFOverviewListeners() {
+    const fieldsToWatch = [
+        'character_name', 'pf_ancestry', 'pf_class', 'pf_level',
+        'pf_hp_current', 'pf_hp_max', 'pf_hp_temp',
+        'pf_ac', 'pf_speed', 'pf_class_dc',
+        'pf_hero_points', 'pf_focus_current', 'pf_focus_max',
+        'pf_resistances', 'pf_weaknesses'
+    ];
+
+    fieldsToWatch.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.addEventListener('change', updatePFOverview);
+            field.addEventListener('input', updatePFOverview);
+        }
+    });
+}
+
+// Extend initializePF2e to include overview
+const originalInitializePF2e = initializePF2e;
+initializePF2e = function() {
+    originalInitializePF2e();
+    setupPFOverviewListeners();
+    setTimeout(updatePFOverview, 100);
+};
+
 // Export functions
 if (typeof window !== 'undefined') {
     window.renderPathfinder2eSheet = renderPathfinder2eSheet;
@@ -891,4 +1301,11 @@ if (typeof window !== 'undefined') {
     window.rollPFCheck = rollPFCheck;
     window.rollPFSaveCheck = rollPFSaveCheck;
     window.rollPFPerception = rollPFPerception;
+    window.updatePFOverview = updatePFOverview;
+    window.setPFHeroPoints = setPFHeroPoints;
+    window.adjustPFHP = adjustPFHP;
+    window.adjustPFFocus = adjustPFFocus;
+    window.pfRefocus = pfRefocus;
+    window.pfTreatWounds = pfTreatWounds;
+    window.pfRest = pfRest;
 }

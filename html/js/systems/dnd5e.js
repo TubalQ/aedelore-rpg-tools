@@ -4,8 +4,160 @@
 
 function renderDnD5eSheet(config) {
     return `
+        <!-- OVERVIEW TAB -->
+        <div class="tab-content active" id="system-overview" style="display: block;">
+            <div class="system-dashboard dnd5e-dashboard">
+                <!-- Character Summary -->
+                <div class="dashboard-card character-summary">
+                    <div class="summary-avatar" id="dnd-avatar">
+                        <span class="avatar-initial">?</span>
+                    </div>
+                    <div class="summary-info">
+                        <h2 class="summary-name" id="dnd-summary-name">New Character</h2>
+                        <div class="summary-details">
+                            <span id="dnd-summary-race">-</span>
+                            <span id="dnd-summary-class">-</span>
+                            <span class="summary-level">Lvl <span id="dnd-summary-level">1</span></span>
+                        </div>
+                    </div>
+                    <div class="inspiration-toggle" title="Inspiration">
+                        <input type="checkbox" id="dnd-overview-inspiration" onchange="syncDnDInspiration(this)">
+                        <label for="dnd-overview-inspiration">✨</label>
+                    </div>
+                </div>
+
+                <!-- Combat Stats Grid -->
+                <div class="dashboard-row combat-row">
+                    <div class="dashboard-stat hp-stat">
+                        <div class="stat-label">HP</div>
+                        <div class="stat-adjuster">
+                            <button class="adj-btn" onclick="adjustDnDHP(-1)">−</button>
+                            <span class="stat-value">
+                                <span id="dnd-overview-hp">10</span>/<span id="dnd-overview-hp-max">10</span>
+                            </span>
+                            <button class="adj-btn" onclick="adjustDnDHP(1)">+</button>
+                        </div>
+                        <div class="temp-hp" id="dnd-temp-hp-display" style="display: none;">
+                            +<span id="dnd-overview-temp-hp">0</span> temp
+                        </div>
+                    </div>
+                    <div class="dashboard-stat">
+                        <div class="stat-label">AC</div>
+                        <div class="stat-value-large" id="dnd-overview-ac">10</div>
+                    </div>
+                    <div class="dashboard-stat">
+                        <div class="stat-label">Init</div>
+                        <div class="stat-value-large" id="dnd-overview-init">+0</div>
+                    </div>
+                    <div class="dashboard-stat">
+                        <div class="stat-label">Speed</div>
+                        <div class="stat-value-large" id="dnd-overview-speed">30</div>
+                    </div>
+                    <div class="dashboard-stat">
+                        <div class="stat-label">Prof</div>
+                        <div class="stat-value-large" id="dnd-overview-prof">+2</div>
+                    </div>
+                </div>
+
+                <!-- Ability Scores -->
+                <div class="dashboard-section">
+                    <h3 class="section-header">Ability Scores</h3>
+                    <div class="ability-grid">
+                        ${config.attributes.map(attr => `
+                            <div class="ability-card" onclick="rollDnDCheck('${attr.id}')">
+                                <div class="ability-abbr">${attr.abbr}</div>
+                                <div class="ability-mod" id="dnd-overview-mod-${attr.id}">+0</div>
+                                <div class="ability-score" id="dnd-overview-score-${attr.id}">10</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Saving Throws -->
+                <div class="dashboard-section">
+                    <h3 class="section-header">Saving Throws</h3>
+                    <div class="saves-grid">
+                        ${config.attributes.map(attr => `
+                            <div class="save-item" onclick="rollDnDSave('${attr.id}')">
+                                <span class="save-prof" id="dnd-overview-save-prof-${attr.id}">○</span>
+                                <span class="save-abbr">${attr.abbr}</span>
+                                <span class="save-mod" id="dnd-overview-save-${attr.id}">+0</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Death Saves & Hit Dice -->
+                <div class="dashboard-row">
+                    <div class="dashboard-section compact">
+                        <h3 class="section-header">Death Saves</h3>
+                        <div class="death-saves-compact">
+                            <div class="death-row">
+                                <span class="death-label">✓</span>
+                                <span class="death-boxes-compact" id="dnd-overview-death-success">○○○</span>
+                            </div>
+                            <div class="death-row">
+                                <span class="death-label">✗</span>
+                                <span class="death-boxes-compact" id="dnd-overview-death-fail">○○○</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dashboard-section compact">
+                        <h3 class="section-header">Hit Dice</h3>
+                        <div class="hit-dice-compact">
+                            <span id="dnd-overview-hit-dice">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spell Slots (if caster) -->
+                <div class="dashboard-section spell-slots-section" id="dnd-spell-slots-overview">
+                    <h3 class="section-header">Spell Slots</h3>
+                    <div class="spell-slots-compact">
+                        ${[1,2,3,4,5,6,7,8,9].map(level => `
+                            <div class="slot-level-compact" id="dnd-slot-${level}-container" style="display: none;">
+                                <span class="slot-lvl">${level}</span>
+                                <span class="slot-boxes" id="dnd-overview-slots-${level}">-</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Conditions -->
+                <div class="dashboard-section conditions-section">
+                    <h3 class="section-header">Conditions</h3>
+                    <div class="conditions-compact" id="dnd-overview-conditions">
+                        <span class="no-conditions">None</span>
+                    </div>
+                    <div class="exhaustion-display" id="dnd-exhaustion-display" style="display: none;">
+                        <span class="exhaustion-label">Exhaustion:</span>
+                        <span class="exhaustion-level" id="dnd-overview-exhaustion">0</span>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="dashboard-section">
+                    <h3 class="section-header">Quick Actions</h3>
+                    <div class="quick-actions-grid">
+                        <button class="quick-action-btn" onclick="rollDnDDice(20)">
+                            <span class="action-icon">🎲</span>
+                            <span class="action-label">d20</span>
+                        </button>
+                        <button class="quick-action-btn" onclick="dndShortRest()">
+                            <span class="action-icon">☕</span>
+                            <span class="action-label">Short Rest</span>
+                        </button>
+                        <button class="quick-action-btn" onclick="dndLongRest()">
+                            <span class="action-icon">🛏️</span>
+                            <span class="action-label">Long Rest</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- INFO TAB -->
-        <div class="tab-content active" id="system-info" style="display: block;">
+        <div class="tab-content" id="system-info" style="display: none;">
             <div class="section">
                 <h2 class="section-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -759,8 +911,14 @@ function initializeDnD5e() {
     config.attributes.forEach(attr => {
         const input = document.getElementById(`attr_${attr.id}`);
         if (input) {
-            input.addEventListener('change', () => updateDnDModifier(attr.id));
-            input.addEventListener('input', () => updateDnDModifier(attr.id));
+            input.addEventListener('change', () => {
+                updateDnDModifier(attr.id);
+                updateDnDOverview();
+            });
+            input.addEventListener('input', () => {
+                updateDnDModifier(attr.id);
+                updateDnDOverview();
+            });
             // Initial update
             updateDnDModifier(attr.id);
         }
@@ -774,7 +932,302 @@ function initializeDnD5e() {
                 updateDnDSave(attr.id);
                 updateDnDSkillsForAttribute(attr.id);
             });
+            updateDnDOverview();
         });
+    }
+
+    // Set up other field listeners for overview sync
+    setupDnDOverviewListeners();
+
+    // Initial overview update
+    setTimeout(updateDnDOverview, 100);
+}
+
+// Set up listeners for overview sync
+function setupDnDOverviewListeners() {
+    const fieldsToWatch = [
+        'character_name', 'dnd_race', 'dnd_class', 'dnd_level',
+        'dnd_hp_current', 'dnd_hp_max', 'dnd_hp_temp',
+        'dnd_ac', 'dnd_speed', 'dnd_proficiency',
+        'dnd_hit_dice_total', 'dnd_hit_dice_remaining',
+        'dnd_exhaustion', 'dnd_inspiration'
+    ];
+
+    fieldsToWatch.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.addEventListener('change', updateDnDOverview);
+            field.addEventListener('input', updateDnDOverview);
+        }
+    });
+
+    // Watch death saves
+    for (let i = 1; i <= 3; i++) {
+        const success = document.getElementById(`death_success_${i}`);
+        const failure = document.getElementById(`death_failure_${i}`);
+        if (success) success.addEventListener('change', updateDnDOverview);
+        if (failure) failure.addEventListener('change', updateDnDOverview);
+    }
+
+    // Watch spell slots
+    for (let level = 1; level <= 9; level++) {
+        const used = document.getElementById(`spell_slots_${level}_used`);
+        const max = document.getElementById(`spell_slots_${level}_max`);
+        if (used) used.addEventListener('change', updateDnDOverview);
+        if (max) max.addEventListener('change', updateDnDOverview);
+    }
+
+    // Watch conditions
+    const config = SYSTEM_CONFIGS.dnd5e;
+    config.conditions.forEach(c => {
+        const checkbox = document.getElementById(`condition_${c.toLowerCase().replace(/\s+/g, '_')}`);
+        if (checkbox) checkbox.addEventListener('change', updateDnDOverview);
+    });
+
+    // Watch save proficiencies
+    config.attributes.forEach(attr => {
+        const saveProfCheckbox = document.getElementById(`save_prof_${attr.id}`);
+        if (saveProfCheckbox) {
+            saveProfCheckbox.addEventListener('change', updateDnDOverview);
+        }
+    });
+}
+
+// Update the overview tab with current values
+function updateDnDOverview() {
+    const config = SYSTEM_CONFIGS.dnd5e;
+
+    // Character summary
+    const nameEl = document.getElementById('dnd-summary-name');
+    const raceEl = document.getElementById('dnd-summary-race');
+    const classEl = document.getElementById('dnd-summary-class');
+    const levelEl = document.getElementById('dnd-summary-level');
+    const avatarEl = document.getElementById('dnd-avatar');
+
+    const name = document.getElementById('character_name')?.value || 'New Character';
+    const race = document.getElementById('dnd_race')?.value || '-';
+    const charClass = document.getElementById('dnd_class')?.value || '-';
+    const level = document.getElementById('dnd_level')?.value || '1';
+
+    if (nameEl) nameEl.textContent = name || 'New Character';
+    if (raceEl) raceEl.textContent = race || '-';
+    if (classEl) classEl.textContent = charClass || '-';
+    if (levelEl) levelEl.textContent = level;
+    if (avatarEl) {
+        const initial = name ? name.charAt(0).toUpperCase() : '?';
+        avatarEl.querySelector('.avatar-initial').textContent = initial;
+    }
+
+    // Combat stats
+    const hp = document.getElementById('dnd_hp_current')?.value || '10';
+    const hpMax = document.getElementById('dnd_hp_max')?.value || '10';
+    const tempHp = document.getElementById('dnd_hp_temp')?.value || '0';
+    const ac = document.getElementById('dnd_ac')?.value || '10';
+    const speed = document.getElementById('dnd_speed')?.value || '30 ft';
+    const prof = document.getElementById('dnd_proficiency')?.value || '+2';
+
+    document.getElementById('dnd-overview-hp').textContent = hp;
+    document.getElementById('dnd-overview-hp-max').textContent = hpMax;
+    document.getElementById('dnd-overview-ac').textContent = ac;
+    document.getElementById('dnd-overview-speed').textContent = speed.replace(' ft', '');
+    document.getElementById('dnd-overview-prof').textContent = prof;
+
+    // Temp HP
+    const tempHpDisplay = document.getElementById('dnd-temp-hp-display');
+    const tempHpValue = document.getElementById('dnd-overview-temp-hp');
+    if (tempHpDisplay && tempHpValue) {
+        if (parseInt(tempHp) > 0) {
+            tempHpDisplay.style.display = 'block';
+            tempHpValue.textContent = tempHp;
+        } else {
+            tempHpDisplay.style.display = 'none';
+        }
+    }
+
+    // Initiative (from DEX)
+    const dexScore = parseInt(document.getElementById('attr_dexterity')?.value) || 10;
+    const dexMod = Math.floor((dexScore - 10) / 2);
+    document.getElementById('dnd-overview-init').textContent = formatModifier(dexMod);
+
+    // Ability scores and mods
+    config.attributes.forEach(attr => {
+        const score = parseInt(document.getElementById(`attr_${attr.id}`)?.value) || 10;
+        const mod = Math.floor((score - 10) / 2);
+
+        const scoreEl = document.getElementById(`dnd-overview-score-${attr.id}`);
+        const modEl = document.getElementById(`dnd-overview-mod-${attr.id}`);
+
+        if (scoreEl) scoreEl.textContent = score;
+        if (modEl) modEl.textContent = formatModifier(mod);
+
+        // Saving throws
+        const saveProfCheckbox = document.getElementById(`save_prof_${attr.id}`);
+        const isProficient = saveProfCheckbox?.checked || false;
+        const profBonus = parseInt(prof) || 2;
+        const saveTotal = mod + (isProficient ? profBonus : 0);
+
+        const saveProfEl = document.getElementById(`dnd-overview-save-prof-${attr.id}`);
+        const saveModEl = document.getElementById(`dnd-overview-save-${attr.id}`);
+
+        if (saveProfEl) saveProfEl.textContent = isProficient ? '●' : '○';
+        if (saveModEl) saveModEl.textContent = formatModifier(saveTotal);
+    });
+
+    // Death saves
+    let successCount = 0;
+    let failCount = 0;
+    for (let i = 1; i <= 3; i++) {
+        if (document.getElementById(`death_success_${i}`)?.checked) successCount++;
+        if (document.getElementById(`death_failure_${i}`)?.checked) failCount++;
+    }
+    document.getElementById('dnd-overview-death-success').textContent = '●'.repeat(successCount) + '○'.repeat(3 - successCount);
+    document.getElementById('dnd-overview-death-fail').textContent = '●'.repeat(failCount) + '○'.repeat(3 - failCount);
+
+    // Hit dice
+    const hitDiceTotal = document.getElementById('dnd_hit_dice_total')?.value || '-';
+    const hitDiceRemaining = document.getElementById('dnd_hit_dice_remaining')?.value || '-';
+    document.getElementById('dnd-overview-hit-dice').textContent = hitDiceRemaining ? `${hitDiceRemaining} / ${hitDiceTotal}` : hitDiceTotal;
+
+    // Spell slots
+    let hasSpellSlots = false;
+    for (let level = 1; level <= 9; level++) {
+        const max = parseInt(document.getElementById(`spell_slots_${level}_max`)?.value) || 0;
+        const used = parseInt(document.getElementById(`spell_slots_${level}_used`)?.value) || 0;
+        const container = document.getElementById(`dnd-slot-${level}-container`);
+        const slotsEl = document.getElementById(`dnd-overview-slots-${level}`);
+
+        if (max > 0) {
+            hasSpellSlots = true;
+            if (container) container.style.display = 'flex';
+            if (slotsEl) slotsEl.textContent = `${max - used}/${max}`;
+        } else {
+            if (container) container.style.display = 'none';
+        }
+    }
+    const spellSection = document.getElementById('dnd-spell-slots-overview');
+    if (spellSection) spellSection.style.display = hasSpellSlots ? 'block' : 'none';
+
+    // Conditions
+    const activeConditions = [];
+    config.conditions.forEach(c => {
+        const checkbox = document.getElementById(`condition_${c.toLowerCase().replace(/\s+/g, '_')}`);
+        if (checkbox?.checked) activeConditions.push(c);
+    });
+
+    const conditionsEl = document.getElementById('dnd-overview-conditions');
+    if (conditionsEl) {
+        if (activeConditions.length > 0) {
+            conditionsEl.innerHTML = activeConditions.map(c => `<span class="condition-tag">${c}</span>`).join('');
+        } else {
+            conditionsEl.innerHTML = '<span class="no-conditions">None</span>';
+        }
+    }
+
+    // Exhaustion
+    const exhaustion = parseInt(document.getElementById('dnd_exhaustion')?.value) || 0;
+    const exhaustionDisplay = document.getElementById('dnd-exhaustion-display');
+    const exhaustionLevel = document.getElementById('dnd-overview-exhaustion');
+    if (exhaustionDisplay && exhaustionLevel) {
+        if (exhaustion > 0) {
+            exhaustionDisplay.style.display = 'flex';
+            exhaustionLevel.textContent = exhaustion;
+        } else {
+            exhaustionDisplay.style.display = 'none';
+        }
+    }
+
+    // Inspiration
+    const inspirationMain = document.getElementById('dnd_inspiration');
+    const inspirationOverview = document.getElementById('dnd-overview-inspiration');
+    if (inspirationMain && inspirationOverview) {
+        inspirationOverview.checked = inspirationMain.checked;
+    }
+}
+
+// Sync inspiration from overview to main form
+function syncDnDInspiration(checkbox) {
+    const mainInspiration = document.getElementById('dnd_inspiration');
+    if (mainInspiration) {
+        mainInspiration.checked = checkbox.checked;
+    }
+}
+
+// Adjust HP from overview
+function adjustDnDHP(delta) {
+    const hpInput = document.getElementById('dnd_hp_current');
+    const maxHpInput = document.getElementById('dnd_hp_max');
+
+    if (hpInput) {
+        const current = parseInt(hpInput.value) || 0;
+        const max = parseInt(maxHpInput?.value) || 999;
+        const newValue = Math.max(0, Math.min(max, current + delta));
+        hpInput.value = newValue;
+        updateDnDOverview();
+    }
+}
+
+// Roll a saving throw
+function rollDnDSave(attrId) {
+    const scoreInput = document.getElementById(`attr_${attrId}`);
+    const profCheckbox = document.getElementById(`save_prof_${attrId}`);
+    const profInput = document.getElementById('dnd_proficiency');
+    const config = SYSTEM_CONFIGS.dnd5e;
+    const attr = config.attributes.find(a => a.id === attrId);
+
+    if (scoreInput && attr) {
+        const score = parseInt(scoreInput.value) || 10;
+        const mod = Math.floor((score - 10) / 2);
+        const profBonus = profCheckbox?.checked ? (parseInt(profInput?.value) || 2) : 0;
+        const totalMod = mod + profBonus;
+
+        const roll = Math.floor(Math.random() * 20) + 1;
+        const total = roll + totalMod;
+
+        let resultClass = '';
+        if (roll === 20) resultClass = 'crit-success';
+        else if (roll === 1) resultClass = 'crit-fail';
+
+        displayDnDRoll(`${attr.name} Save (d20${formatModifier(totalMod)})`, [roll], total, totalMod, resultClass);
+    }
+}
+
+// Short rest
+function dndShortRest() {
+    alert('Short Rest: You can spend Hit Dice to heal.\nSelect Hit Dice in the Combat tab to roll for healing.');
+}
+
+// Long rest
+function dndLongRest() {
+    const hpMax = document.getElementById('dnd_hp_max')?.value || '10';
+    const hpInput = document.getElementById('dnd_hp_current');
+
+    if (confirm('Take a Long Rest?\n\n• Restore all HP\n• Regain half total Hit Dice\n• Regain all spell slots\n• Reduce exhaustion by 1')) {
+        // Restore HP
+        if (hpInput) hpInput.value = hpMax;
+
+        // Restore spell slots
+        for (let level = 1; level <= 9; level++) {
+            const usedInput = document.getElementById(`spell_slots_${level}_used`);
+            if (usedInput) usedInput.value = 0;
+        }
+
+        // Reduce exhaustion
+        const exhaustionInput = document.getElementById('dnd_exhaustion');
+        if (exhaustionInput) {
+            const current = parseInt(exhaustionInput.value) || 0;
+            exhaustionInput.value = Math.max(0, current - 1);
+        }
+
+        // Clear death saves
+        for (let i = 1; i <= 3; i++) {
+            const success = document.getElementById(`death_success_${i}`);
+            const failure = document.getElementById(`death_failure_${i}`);
+            if (success) success.checked = false;
+            if (failure) failure.checked = false;
+        }
+
+        updateDnDOverview();
+        alert('Long Rest complete!\n\nHP restored. Spell slots restored. Exhaustion reduced by 1.');
     }
 }
 
@@ -788,4 +1241,10 @@ if (typeof window !== 'undefined') {
     window.rollDnDDice = rollDnDDice;
     window.rollDnDCustom = rollDnDCustom;
     window.rollDnDCheck = rollDnDCheck;
+    window.updateDnDOverview = updateDnDOverview;
+    window.syncDnDInspiration = syncDnDInspiration;
+    window.adjustDnDHP = adjustDnDHP;
+    window.rollDnDSave = rollDnDSave;
+    window.dndShortRest = dndShortRest;
+    window.dndLongRest = dndLongRest;
 }

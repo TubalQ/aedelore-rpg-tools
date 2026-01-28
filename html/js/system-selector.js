@@ -195,7 +195,8 @@
         switch (systemId) {
             case 'dnd5e':
                 tabs = `
-                    <button class="tab active" data-tab="info">Info</button>
+                    <button class="tab active" data-tab="overview">Overview</button>
+                    <button class="tab" data-tab="info">Info</button>
                     <button class="tab" data-tab="attributes">Attributes</button>
                     <button class="tab" data-tab="combat">Combat</button>
                     <button class="tab" data-tab="spells">Spells</button>
@@ -208,7 +209,8 @@
 
             case 'pathfinder2e':
                 tabs = `
-                    <button class="tab active" data-tab="info">Info</button>
+                    <button class="tab active" data-tab="overview">Overview</button>
+                    <button class="tab" data-tab="info">Info</button>
                     <button class="tab" data-tab="attributes">Attributes</button>
                     <button class="tab" data-tab="combat">Combat</button>
                     <button class="tab" data-tab="spells">Spells</button>
@@ -221,7 +223,8 @@
 
             case 'storyteller':
                 tabs = `
-                    <button class="tab active" data-tab="info">Info</button>
+                    <button class="tab active" data-tab="overview">Overview</button>
+                    <button class="tab" data-tab="info">Info</button>
                     <button class="tab" data-tab="attributes">Attributes</button>
                     <button class="tab" data-tab="abilities">Abilities</button>
                     <button class="tab" data-tab="combat">Combat</button>
@@ -234,7 +237,8 @@
 
             case 'cod':
                 tabs = `
-                    <button class="tab active" data-tab="info">Info</button>
+                    <button class="tab active" data-tab="overview">Overview</button>
+                    <button class="tab" data-tab="info">Info</button>
                     <button class="tab" data-tab="attributes">Attributes</button>
                     <button class="tab" data-tab="skills">Skills</button>
                     <button class="tab" data-tab="combat">Combat</button>
