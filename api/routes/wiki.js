@@ -3,6 +3,10 @@ const router = express.Router();
 const db = require('../db');
 const { authenticate } = require('../middleware/auth');
 const { loggers } = require('../logger');
+const multer = require('multer');
+const crypto = require('crypto');
+const path = require('path');
+const fs = require('fs');
 
 const log = loggers.routes;
 
@@ -35,6 +39,43 @@ function slugify(text) {
         .replace(/^-+/, '')
         .replace(/-+$/, '');
 }
+
+// ========================================
+// IMAGE UPLOAD CONFIGURATION
+// ========================================
+
+const UPLOAD_DIR = '/app/uploads/images/wiki';
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const yearMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+        const dir = path.join(UPLOAD_DIR, yearMonth);
+        fs.mkdirSync(dir, { recursive: true });
+        cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname).toLowerCase();
+        const baseName = slugify(path.basename(file.originalname, ext)) || 'image';
+        const uniqueSuffix = crypto.randomBytes(6).toString('hex');
+        cb(null, `${baseName}-${uniqueSuffix}${ext}`);
+    }
+});
+
+const fileFilter = (req, file, cb) => {
+    if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new Error('Invalid file type. Allowed: jpg, jpeg, png, gif, webp'), false);
+    }
+};
+
+const upload = multer({
+    storage,
+    fileFilter,
+    limits: { fileSize: MAX_FILE_SIZE }
+});
 
 // ========================================
 // PUBLIC ENDPOINTS (No authentication)
@@ -261,6 +302,30 @@ router.get('/recent', async (req, res) => {
 // ========================================
 // ADMIN ENDPOINTS (Requires authentication + admin)
 // ========================================
+
+// POST /api/wiki/admin/upload-image - Upload image for TinyMCE
+router.post('/admin/upload-image', authenticate, requireAdmin, (req, res) => {
+    upload.single('file')(req, res, (err) => {
+        if (err) {
+            if (err instanceof multer.MulterError) {
+                if (err.code === 'LIMIT_FILE_SIZE') {
+                    return res.status(400).json({ error: 'File too large. Maximum size: 5MB' });
+                }
+                return res.status(400).json({ error: err.message });
+            }
+            return res.status(400).json({ error: err.message });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        // Build the public URL path (convert /app/uploads to /uploads)
+        const relativePath = req.file.path.replace('/app/uploads', '/uploads');
+        log.info({ path: relativePath, size: req.file.size }, 'Wiki image uploaded');
+        res.json({ location: relativePath });
+    });
+});
 
 // POST /api/wiki/admin/books - Create book
 router.post('/admin/books', authenticate, requireAdmin, async (req, res) => {

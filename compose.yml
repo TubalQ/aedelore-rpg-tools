@@ -55,6 +55,7 @@ services:
       APP_URL: ${APP_URL}
     volumes:
       - ./api/data:/app/data
+      - ./html/uploads:/app/uploads
     expose:
       - "3000"
     depends_on:
