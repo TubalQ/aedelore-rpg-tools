@@ -153,12 +153,9 @@ let pendingContent = '';
 
 // Initialize TinyMCE editor with image upload (called when modal opens)
 function initEditor(initialContent = '') {
-    console.log('initEditor called, content length:', initialContent?.length || 0);
-    console.log('editorInitialized:', editorInitialized, 'tinyEditor:', !!tinyEditor);
-
     // Check if TinyMCE is loaded
     if (typeof tinymce === 'undefined') {
-        console.error('TinyMCE not loaded! Falling back to textarea.');
+        // Fallback: TinyMCE not available (likely CSP blocking)
         // Fallback: just set content directly on textarea
         const textarea = document.getElementById('page-content');
         if (textarea) {
@@ -178,13 +175,11 @@ function initEditor(initialContent = '') {
 
     // If already initialized, just set content
     if (editorInitialized && tinyEditor) {
-        console.log('Setting content on existing editor');
         tinyEditor.setContent(initialContent);
         return;
     }
 
     pendingContent = initialContent;
-    console.log('Initializing TinyMCE with pending content length:', pendingContent?.length || 0);
 
     tinymce.init({
         selector: '#page-content',
@@ -235,10 +230,8 @@ function initEditor(initialContent = '') {
         setup: (editor) => {
             tinyEditor = editor;
             editor.on('init', () => {
-                console.log('TinyMCE init event fired, pendingContent length:', pendingContent?.length || 0);
                 editorInitialized = true;
                 if (pendingContent) {
-                    console.log('Setting pending content');
                     editor.setContent(pendingContent);
                     pendingContent = '';
                 }
@@ -644,7 +637,6 @@ function openPageModal(page = null) {
 
     // Initialize TinyMCE after modal is visible (needs visible element)
     setTimeout(() => {
-        console.log('openPageModal - calling initEditor with content length:', page?.content?.length || 0);
         initEditor(page?.content || '');
     }, 100);
 }
@@ -657,7 +649,6 @@ function openPageModalForChapter(chapterId) {
 async function editPage(id) {
     try {
         const page = await apiRequest('GET', `/pages/${id}`);
-        console.log('editPage - API response:', { id: page.id, title: page.title, contentLength: page.content?.length || 0, summaryLength: page.summary?.length || 0 });
         page.book_id = selectedBookId;
         // Find chapter_id from current book data
         if (currentBookData) {
