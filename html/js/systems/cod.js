@@ -120,11 +120,11 @@ function renderCoDSheet(config) {
                 <div class="dashboard-section">
                     <h3 class="section-header">Quick Actions</h3>
                     <div class="quick-actions-grid">
-                        <button class="quick-action-btn" onclick="rollCoDQuick(1)">
+                        <button class="quick-action-btn" onclick="rollCoDSimple(1)">
                             <span class="action-icon">🎲</span>
                             <span class="action-label">1 die</span>
                         </button>
-                        <button class="quick-action-btn" onclick="rollCoDQuick(3)">
+                        <button class="quick-action-btn" onclick="rollCoDSimple(3)">
                             <span class="action-icon">🎲</span>
                             <span class="action-label">3 dice</span>
                         </button>
@@ -242,7 +242,7 @@ function renderCoDSheet(config) {
 
             <div class="section">
                 <h2 class="section-title">Derived Traits</h2>
-                <div class="derived-stats-grid">
+                <div class="derived-stats-grid grid grid-3">
                     <div class="derived-stat">
                         <span class="derived-label">Willpower</span>
                         <span class="derived-value" id="willpower-display">2</span>
@@ -285,7 +285,7 @@ function renderCoDSheet(config) {
                 </h2>
                 <p class="section-hint">Unskilled penalties: Mental -3, Physical -1, Social -1</p>
 
-                <div class="skills-columns">
+                <div class="skills-columns grid grid-3">
                     <!-- Mental Skills -->
                     <div class="skill-category">
                         <h3 class="skill-category-title mental">Mental (-3 unskilled)</h3>
@@ -421,7 +421,7 @@ function renderCoDSheet(config) {
         <div class="tab-content" id="system-inventory" style="display: none;">
             <div class="section">
                 <h2 class="section-title">Merits</h2>
-                <div class="merits-list">
+                <div class="merits-list grid grid-2">
                     ${[1,2,3,4,5,6,7,8].map(i => `
                         <div class="merit-row">
                             <input type="text" id="cod_merit_${i}_name" placeholder="Merit name">
@@ -493,6 +493,10 @@ function renderCoDSheet(config) {
                                 <input type="checkbox" id="cod_no_again">
                                 <span>No 10-again</span>
                             </label>
+                        </div>
+                        <div class="cod-penalties-display" id="cod-penalties-display" style="display: none; margin: 8px 0; padding: 8px; background: rgba(255,100,100,0.1); border-radius: 4px;">
+                            <span class="penalties-label" style="color: var(--error-color, #ff6b6b);">Active Penalties: </span>
+                            <span id="cod-current-penalties">None</span>
                         </div>
                         <button class="dice-btn roll-pool" onclick="rollCoDPool()">Roll Dice Pool</button>
                     </div>
@@ -743,6 +747,22 @@ function renderCoDIntegrityTrack() {
     return track;
 }
 
+// Update penalties display
+function updateCoDPenaltiesDisplay() {
+    const woundPenalty = getCoDWoundPenalty();
+    const displayEl = document.getElementById('cod-penalties-display');
+    const penaltiesEl = document.getElementById('cod-current-penalties');
+
+    if (displayEl && penaltiesEl) {
+        if (woundPenalty < 0) {
+            displayEl.style.display = 'block';
+            penaltiesEl.textContent = `Wound penalty: ${woundPenalty}`;
+        } else {
+            displayEl.style.display = 'none';
+        }
+    }
+}
+
 // Cycle health box state (empty -> bashing -> lethal -> aggravated -> empty)
 function cycleHealthBox(box) {
     const state = parseInt(box.dataset.state) || 0;
@@ -752,17 +772,58 @@ function cycleHealthBox(box) {
     if (newState === 1) box.classList.add('bashing');
     else if (newState === 2) box.classList.add('lethal');
     else if (newState === 3) box.classList.add('aggravated');
+
+    // Update penalties display
+    updateCoDPenaltiesDisplay();
+
+    // Sync to Overview health track
+    syncCoDHealthToOverview();
 }
 
-// Set integrity level
-function setIntegrity(level) {
-    document.querySelectorAll('.integrity-dot').forEach(dot => {
-        const dotLevel = parseInt(dot.dataset.value);
-        if (dotLevel <= level) {
-            dot.classList.add('filled');
-        } else {
-            dot.classList.remove('filled');
+// Sync Combat health boxes to Overview
+function syncCoDHealthToOverview() {
+    const combatBoxes = document.querySelectorAll('#cod_health_boxes .health-box');
+    const overviewContainer = document.getElementById('cod-overview-health');
+    if (!overviewContainer) return;
+
+    const overviewBoxes = overviewContainer.querySelectorAll('.health-box-mini');
+
+    combatBoxes.forEach((combatBox, idx) => {
+        if (overviewBoxes[idx]) {
+            const state = parseInt(combatBox.dataset.state) || 0;
+            const overviewBox = overviewBoxes[idx];
+            overviewBox.className = 'health-box-mini';
+            if (state === 0) {
+                overviewBox.textContent = '☐';
+            } else if (state === 1) {
+                overviewBox.textContent = '/';
+                overviewBox.classList.add('bashing');
+            } else if (state === 2) {
+                overviewBox.textContent = 'X';
+                overviewBox.classList.add('lethal');
+            } else if (state === 3) {
+                overviewBox.textContent = '*';
+                overviewBox.classList.add('aggravated');
+            }
         }
+    });
+}
+
+// Set integrity level (syncs both Combat and Overview displays)
+function setIntegrity(level) {
+    // Update all integrity dots in Combat tab
+    document.querySelectorAll('.integrity-track .integrity-dot').forEach(dot => {
+        const dotLevel = parseInt(dot.dataset.value);
+        dot.classList.toggle('filled', dotLevel <= level);
+    });
+
+    // Update Overview integrity display
+    const integrityValue = document.getElementById('cod-overview-integrity');
+    if (integrityValue) integrityValue.textContent = level;
+
+    document.querySelectorAll('.cod-integrity-track .integrity-dot').forEach(dot => {
+        const dotValue = parseInt(dot.dataset.value);
+        dot.classList.toggle('filled', dotValue <= level);
     });
 }
 
@@ -834,6 +895,12 @@ function rollCoDPool() {
     displayCoDResult(successes, allRolls, poolSize);
 }
 
+// Roll simple dice pool (for quick actions)
+function rollCoDSimple(poolSize) {
+    document.getElementById('cod_dice_pool').value = poolSize;
+    rollCoDPool();
+}
+
 // Roll chance die
 function rollCoDChance() {
     const roll = Math.floor(Math.random() * 10) + 1;
@@ -852,13 +919,35 @@ function rollCoDChance() {
     displayCoDResult(successes, [{ original: roll, final: roll, chance: true }], 0, outcome);
 }
 
-// Roll quick pool
+// Roll quick pool with automatic penalties
 function rollCoDQuick(attr1, attr2) {
     const attrValue = getCoDAttributeValue(attr1);
     const skillValue = getCoDSkillValue(attr2);
-    const pool = attrValue + skillValue;
+    let pool = attrValue + skillValue;
 
-    document.getElementById('cod_dice_pool').value = pool;
+    let penalties = [];
+
+    // Apply unskilled penalty if skill is 0
+    if (skillValue === 0) {
+        const unskilledPenalty = getCoDUnskilledPenalty(attr2);
+        pool += unskilledPenalty;
+        const category = getCoDSkillCategory(attr2);
+        penalties.push(`Unskilled ${category} (${unskilledPenalty})`);
+    }
+
+    // Apply wound penalty
+    const woundPenalty = getCoDWoundPenalty();
+    if (woundPenalty < 0) {
+        pool += woundPenalty;
+        penalties.push(`Wounds (${woundPenalty})`);
+    }
+
+    // Show penalty notification if any
+    if (penalties.length > 0) {
+        console.log(`CoD Roll: ${attr1} + ${attr2}, Penalties: ${penalties.join(', ')}, Final pool: ${pool}`);
+    }
+
+    document.getElementById('cod_dice_pool').value = Math.max(0, pool);
     rollCoDPool();
 }
 
@@ -874,6 +963,55 @@ function getCoDSkillValue(skillName) {
     const id = 'skill_' + skillName.toLowerCase().replace(/\s+/g, '_');
     const dots = document.querySelector(`.wod-dots[data-id="${id}"]`);
     return dots ? parseInt(dots.dataset.value) || 0 : 0;
+}
+
+// Get skill category for unskilled penalty
+function getCoDSkillCategory(skillName) {
+    const config = SYSTEM_CONFIGS.cod;
+    const normalizedName = skillName.toLowerCase().replace(/\s+/g, '_');
+
+    if (config.skillCategories.mental.some(s => s.toLowerCase().replace(/\s+/g, '_') === normalizedName)) {
+        return 'mental';
+    }
+    if (config.skillCategories.physical.some(s => s.toLowerCase().replace(/\s+/g, '_') === normalizedName)) {
+        return 'physical';
+    }
+    if (config.skillCategories.social.some(s => s.toLowerCase().replace(/\s+/g, '_') === normalizedName)) {
+        return 'social';
+    }
+    return 'physical'; // Default
+}
+
+// Get unskilled penalty based on skill category
+function getCoDUnskilledPenalty(skillName) {
+    const category = getCoDSkillCategory(skillName);
+    // Mental: -3, Physical/Social: -1
+    return category === 'mental' ? -3 : -1;
+}
+
+// Calculate wound penalty based on health boxes
+function getCoDWoundPenalty() {
+    const healthContainer = document.getElementById('cod_health_boxes');
+    if (!healthContainer) return 0;
+
+    const boxes = healthContainer.querySelectorAll('.health-box');
+    const totalBoxes = boxes.length;
+
+    // Count filled boxes (any damage state > 0)
+    let filledCount = 0;
+    boxes.forEach(box => {
+        const state = parseInt(box.dataset.state) || 0;
+        if (state > 0) filledCount++;
+    });
+
+    // Calculate remaining empty boxes
+    const emptyBoxes = totalBoxes - filledCount;
+
+    // Wound penalties: last 3 boxes = -1, last 2 = -2, last 1 = -3
+    if (emptyBoxes <= 1) return -3;
+    if (emptyBoxes <= 2) return -2;
+    if (emptyBoxes <= 3) return -1;
+    return 0;
 }
 
 // Display CoD roll result
@@ -1076,6 +1214,9 @@ function initializeCoD() {
 
     // Initial derived stats calculation
     setTimeout(updateCoDDerivedStats, 100);
+
+    // Initial penalties display
+    setTimeout(updateCoDPenaltiesDisplay, 150);
 }
 
 // Update overview with current values
@@ -1106,12 +1247,14 @@ function updateCoDOverview() {
         avatarEl.querySelector('.avatar-initial').textContent = initial;
     }
 
-    // Derived stats
-    const defense = document.getElementById('derived_defense')?.textContent || '1';
-    const initiative = document.getElementById('derived_initiative')?.textContent || '1';
-    const speed = document.getElementById('derived_speed')?.textContent || '5';
+    // Derived stats (read from Attributes tab display elements)
+    const defense = document.getElementById('defense-display')?.textContent || '1';
+    const initiative = document.getElementById('initiative-display')?.textContent || '1';
+    const speed = document.getElementById('speed-display')?.textContent || '7';
     const size = document.getElementById('cod_size')?.value || '5';
-    const armor = document.getElementById('cod_armor')?.value || '0';
+    const armorGeneral = parseInt(document.getElementById('cod_armor_general')?.value) || 0;
+    const armorBallistic = parseInt(document.getElementById('cod_armor_ballistic')?.value) || 0;
+    const armor = armorGeneral + '/' + armorBallistic;
 
     const defenseEl = document.getElementById('cod-overview-defense');
     const initEl = document.getElementById('cod-overview-initiative');
@@ -1159,16 +1302,23 @@ function updateCoDOverview() {
     const resolve = resolveContainer ? parseInt(resolveContainer.dataset.value) || 1 : 1;
     const composure = composureContainer ? parseInt(composureContainer.dataset.value) || 1 : 1;
     const maxWP = resolve + composure;
+    const currentWP = parseInt(document.getElementById('cod_willpower_current')?.value) || maxWP;
+    const spentWP = maxWP - currentWP;
 
     const wpDotsEl = document.getElementById('cod-overview-wp-dots');
     if (wpDotsEl) {
         wpDotsEl.innerHTML = '';
         for (let i = 0; i < maxWP; i++) {
             const dot = document.createElement('span');
-            dot.className = 'wp-dot-mini';
-            dot.textContent = '●';
+            dot.className = 'wp-dot-mini' + (i >= currentWP ? ' spent' : '');
+            dot.textContent = i < currentWP ? '●' : '○';
             wpDotsEl.appendChild(dot);
         }
+    }
+
+    const wpSpentEl = document.getElementById('cod-overview-wp-spent');
+    if (wpSpentEl) {
+        wpSpentEl.textContent = spentWP > 0 ? `(${spentWP} spent)` : '';
     }
 
     // Integrity
@@ -1182,16 +1332,19 @@ function updateCoDOverview() {
         dot.classList.toggle('filled', dotValue <= integrity);
     });
 
-    // Beats
-    const beatsContainer = document.querySelector('.wod-dots[data-id="beats"]');
-    const beats = beatsContainer ? parseInt(beatsContainer.dataset.value) || 0 : 0;
+    // Beats (count checked checkboxes)
+    let beats = 0;
+    for (let i = 1; i <= 5; i++) {
+        const checkbox = document.getElementById(`cod_beat_${i}`);
+        if (checkbox && checkbox.checked) beats++;
+    }
     const beatsDisplay = document.getElementById('cod-overview-beats');
     if (beatsDisplay) {
         beatsDisplay.textContent = '●'.repeat(beats) + '○'.repeat(5 - beats);
     }
 
     // XP
-    const xp = document.getElementById('cod_xp')?.value || '0';
+    const xp = document.getElementById('cod_experiences')?.value || '0';
     const xpEl = document.getElementById('cod-overview-xp');
     if (xpEl) xpEl.textContent = xp;
 
@@ -1205,39 +1358,68 @@ function updateCoDOverview() {
     } else {
         if (conditionsSection) conditionsSection.style.display = 'none';
     }
+
+    // Sync health state from Combat tab to Overview
+    syncCoDHealthToOverview();
 }
 
-// Cycle overview health box
+// Cycle overview health box (syncs to Combat tab)
 function cycleOverviewHealth(index) {
     const container = document.getElementById('cod-overview-health');
+    if (!container) return;
+
     const boxes = container.querySelectorAll('.health-box-mini');
     const box = boxes[index];
+    if (!box) return; // Bounds check
 
+    let newState = 0;
     if (box.textContent === '☐') {
         box.textContent = '/';
         box.className = 'health-box-mini bashing';
+        newState = 1;
     } else if (box.textContent === '/') {
         box.textContent = 'X';
         box.className = 'health-box-mini lethal';
+        newState = 2;
     } else if (box.textContent === 'X') {
         box.textContent = '*';
         box.className = 'health-box-mini aggravated';
+        newState = 3;
     } else {
         box.textContent = '☐';
         box.className = 'health-box-mini';
+        newState = 0;
     }
+
+    // Sync to Combat tab health box
+    const combatBoxes = document.querySelectorAll('#cod_health_boxes .health-box');
+    if (combatBoxes[index]) {
+        const combatBox = combatBoxes[index];
+        combatBox.dataset.state = newState;
+        combatBox.className = 'health-box';
+        if (newState === 1) combatBox.classList.add('bashing');
+        else if (newState === 2) combatBox.classList.add('lethal');
+        else if (newState === 3) combatBox.classList.add('aggravated');
+    }
+
+    // Update penalties display
+    updateCoDPenaltiesDisplay();
 }
 
-// Set integrity from overview
+// Set integrity from overview (syncs to all integrity displays)
 function setCoDIntegrity(value) {
-    const integrityContainer = document.querySelector('.wod-dots[data-id="integrity"]');
-    if (integrityContainer) {
-        integrityContainer.dataset.value = value;
-        integrityContainer.querySelectorAll('.wod-dot').forEach((dot, idx) => {
-            dot.classList.toggle('filled', idx < value);
-        });
-    }
-    updateCoDOverview();
+    // Update all integrity dots (Overview and Combat tabs)
+    setIntegrity(value);
+
+    // Update Overview integrity value display
+    const integrityValue = document.getElementById('cod-overview-integrity');
+    if (integrityValue) integrityValue.textContent = value;
+
+    // Update Overview integrity dots highlight
+    document.querySelectorAll('.cod-integrity-track .integrity-dot').forEach(dot => {
+        const dotValue = parseInt(dot.dataset.value);
+        dot.classList.toggle('filled', dotValue <= value);
+    });
 }
 
 // Roll an attribute
@@ -1258,8 +1440,10 @@ function codSpendWillpower() {
 function setupCoDOverviewListeners() {
     const fieldsToWatch = [
         'character_name', 'cod_concept', 'cod_faction',
-        'cod_virtue', 'cod_vice', 'cod_size', 'cod_armor',
-        'cod_xp', 'cod_conditions'
+        'cod_virtue', 'cod_vice', 'cod_size',
+        'cod_armor_general', 'cod_armor_ballistic',
+        'cod_experiences', 'cod_conditions',
+        'cod_willpower_current'
     ];
     fieldsToWatch.forEach(fieldId => {
         const field = document.getElementById(fieldId);
@@ -1268,6 +1452,14 @@ function setupCoDOverviewListeners() {
             field.addEventListener('input', updateCoDOverview);
         }
     });
+
+    // Watch beat checkboxes
+    for (let i = 1; i <= 5; i++) {
+        const checkbox = document.getElementById(`cod_beat_${i}`);
+        if (checkbox) {
+            checkbox.addEventListener('change', updateCoDOverview);
+        }
+    }
 
     // Watch dot ratings
     document.addEventListener('click', function(e) {
@@ -1292,12 +1484,17 @@ if (typeof window !== 'undefined') {
     window.cycleHealthBox = cycleHealthBox;
     window.setIntegrity = setIntegrity;
     window.rollCoDPool = rollCoDPool;
+    window.rollCoDSimple = rollCoDSimple;
     window.rollCoDChance = rollCoDChance;
     window.rollCoDQuick = rollCoDQuick;
+    window.getCoDWoundPenalty = getCoDWoundPenalty;
+    window.getCoDUnskilledPenalty = getCoDUnskilledPenalty;
+    window.updateCoDPenaltiesDisplay = updateCoDPenaltiesDisplay;
     window.updateCoDDerivedStats = updateCoDDerivedStats;
     window.updateCoDOverview = updateCoDOverview;
     window.setCoDIntegrity = setCoDIntegrity;
     window.rollCoDAttribute = rollCoDAttribute;
     window.codSpendWillpower = codSpendWillpower;
     window.cycleOverviewHealth = cycleOverviewHealth;
+    window.syncCoDHealthToOverview = syncCoDHealthToOverview;
 }

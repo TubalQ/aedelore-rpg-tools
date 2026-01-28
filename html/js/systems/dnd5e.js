@@ -76,7 +76,7 @@ function renderDnD5eSheet(config) {
                 <!-- Saving Throws -->
                 <div class="dashboard-section">
                     <h3 class="section-header">Saving Throws</h3>
-                    <div class="saves-grid">
+                    <div class="saves-grid grid grid-3">
                         ${config.attributes.map(attr => `
                             <div class="save-item" onclick="rollDnDSave('${attr.id}')">
                                 <span class="save-prof" id="dnd-overview-save-prof-${attr.id}">○</span>
@@ -193,7 +193,7 @@ function renderDnD5eSheet(config) {
                         <input type="number" id="dnd_level" min="1" max="20" value="1">
                     </div>
                 </div>
-                <div class="grid-2">
+                <div class="grid-3">
                     <div class="field-group">
                         <label for="dnd_background">Background</label>
                         <input type="text" id="dnd_background" placeholder="e.g., Soldier, Sage">
@@ -213,10 +213,10 @@ function renderDnD5eSheet(config) {
                             <option value="CE">Chaotic Evil</option>
                         </select>
                     </div>
-                </div>
-                <div class="field-group">
-                    <label for="dnd_xp">Experience Points</label>
-                    <input type="number" id="dnd_xp" min="0" value="0">
+                    <div class="field-group">
+                        <label for="dnd_xp">Experience Points</label>
+                        <input type="number" id="dnd_xp" min="0" value="0">
+                    </div>
                 </div>
             </div>
 
@@ -255,7 +255,7 @@ function renderDnD5eSheet(config) {
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                     Ability Scores
                 </h2>
-                <div class="dnd-attributes-grid">
+                <div class="dnd-attributes-grid grid grid-3">
                     ${config.attributes.map(attr => `
                         <div class="dnd-attribute-card" data-attr="${attr.id}">
                             <div class="attr-name">${attr.abbr}</div>
@@ -310,7 +310,7 @@ function renderDnD5eSheet(config) {
                     </div>
                     <div class="combat-stat-card">
                         <label>Proficiency Bonus</label>
-                        <input type="text" id="dnd_proficiency" value="+2">
+                        <input type="text" id="dnd_proficiency" value="+2" readonly title="Auto-calculated from level">
                     </div>
                 </div>
             </div>
@@ -372,6 +372,7 @@ function renderDnD5eSheet(config) {
                             <input type="checkbox" id="death_failure_3" class="death-checkbox failure">
                         </div>
                     </div>
+                    <button class="dice-btn death-save-roll" onclick="rollDnDDeathSave()" style="margin-top: 12px;">Roll Death Save</button>
                 </div>
             </div>
 
@@ -385,9 +386,17 @@ function renderDnD5eSheet(config) {
                         </label>
                     `).join('')}
                 </div>
-                <div class="field-group" style="margin-top: 16px;">
-                    <label>Exhaustion Level (0-6)</label>
-                    <input type="number" id="dnd_exhaustion" min="0" max="6" value="0">
+                <div class="grid-2" style="margin-top: 16px;">
+                    <div class="field-group">
+                        <label>Exhaustion Level (0-6)</label>
+                        <input type="number" id="dnd_exhaustion" min="0" max="6" value="0">
+                    </div>
+                    <div class="field-group">
+                        <label class="condition-checkbox" style="margin-top: 24px;">
+                            <input type="checkbox" id="dnd_inspiration">
+                            <span>Inspiration</span>
+                        </label>
+                    </div>
                 </div>
             </div>
 
@@ -732,6 +741,31 @@ function getOrdinalSuffix(n) {
     return s[(v - 20) % 10] || s[v] || s[0];
 }
 
+// Calculate proficiency bonus based on level
+function calculateDnDProficiency(level) {
+    // Level 1-4: +2, 5-8: +3, 9-12: +4, 13-16: +5, 17-20: +6
+    return Math.floor((level - 1) / 4) + 2;
+}
+
+// Update proficiency bonus from level
+function updateDnDProficiency() {
+    const levelInput = document.getElementById('dnd_level');
+    const profInput = document.getElementById('dnd_proficiency');
+
+    if (levelInput && profInput) {
+        const level = parseInt(levelInput.value) || 1;
+        const profBonus = calculateDnDProficiency(level);
+        profInput.value = formatModifier(profBonus);
+
+        // Update all saves and skills that use proficiency
+        const config = SYSTEM_CONFIGS.dnd5e;
+        config.attributes.forEach(attr => {
+            updateDnDSave(attr.id);
+            updateDnDSkillsForAttribute(attr.id);
+        });
+    }
+}
+
 // Update D&D modifier display
 function updateDnDModifier(attrId) {
     const scoreInput = document.getElementById(`attr_${attrId}`);
@@ -924,17 +958,21 @@ function initializeDnD5e() {
         }
     });
 
-    // Set up proficiency bonus listener
-    const profInput = document.getElementById('dnd_proficiency');
-    if (profInput) {
-        profInput.addEventListener('change', () => {
-            config.attributes.forEach(attr => {
-                updateDnDSave(attr.id);
-                updateDnDSkillsForAttribute(attr.id);
-            });
+    // Set up level listener for auto-proficiency calculation
+    const levelInput = document.getElementById('dnd_level');
+    if (levelInput) {
+        levelInput.addEventListener('change', () => {
+            updateDnDProficiency();
+            updateDnDOverview();
+        });
+        levelInput.addEventListener('input', () => {
+            updateDnDProficiency();
             updateDnDOverview();
         });
     }
+
+    // Initial proficiency calculation
+    updateDnDProficiency();
 
     // Set up other field listeners for overview sync
     setupDnDOverviewListeners();
@@ -1191,6 +1229,105 @@ function rollDnDSave(attrId) {
     }
 }
 
+// Roll death save with nat 1/20 handling
+function rollDnDDeathSave() {
+    const roll = Math.floor(Math.random() * 20) + 1;
+
+    // Natural 20: Regain 1 HP and wake up
+    if (roll === 20) {
+        const hpInput = document.getElementById('dnd_hp_current');
+        if (hpInput) hpInput.value = 1;
+
+        // Clear all death saves
+        for (let i = 1; i <= 3; i++) {
+            const success = document.getElementById(`death_success_${i}`);
+            const failure = document.getElementById(`death_failure_${i}`);
+            if (success) success.checked = false;
+            if (failure) failure.checked = false;
+        }
+
+        updateDnDOverview();
+        alert(`Death Save: Natural 20!\n\nYou regain 1 HP and wake up!`);
+        return;
+    }
+
+    // Natural 1: Count as 2 failures
+    if (roll === 1) {
+        let failuresAdded = 0;
+        for (let i = 1; i <= 3 && failuresAdded < 2; i++) {
+            const failure = document.getElementById(`death_failure_${i}`);
+            if (failure && !failure.checked) {
+                failure.checked = true;
+                failuresAdded++;
+            }
+        }
+
+        updateDnDOverview();
+
+        // Check if dead
+        let totalFails = 0;
+        for (let i = 1; i <= 3; i++) {
+            if (document.getElementById(`death_failure_${i}`)?.checked) totalFails++;
+        }
+
+        if (totalFails >= 3) {
+            alert(`Death Save: Natural 1! (2 failures)\n\nRoll: ${roll}\n\n💀 You have died.`);
+        } else {
+            alert(`Death Save: Natural 1! (2 failures)\n\nRoll: ${roll}\nTotal failures: ${totalFails}/3`);
+        }
+        return;
+    }
+
+    // Normal roll: 10+ = success, <10 = failure
+    if (roll >= 10) {
+        // Add a success
+        for (let i = 1; i <= 3; i++) {
+            const success = document.getElementById(`death_success_${i}`);
+            if (success && !success.checked) {
+                success.checked = true;
+                break;
+            }
+        }
+
+        updateDnDOverview();
+
+        // Check if stabilized
+        let totalSuccesses = 0;
+        for (let i = 1; i <= 3; i++) {
+            if (document.getElementById(`death_success_${i}`)?.checked) totalSuccesses++;
+        }
+
+        if (totalSuccesses >= 3) {
+            alert(`Death Save: Success!\n\nRoll: ${roll}\n\n🛡️ You are stabilized!`);
+        } else {
+            alert(`Death Save: Success!\n\nRoll: ${roll}\nTotal successes: ${totalSuccesses}/3`);
+        }
+    } else {
+        // Add a failure
+        for (let i = 1; i <= 3; i++) {
+            const failure = document.getElementById(`death_failure_${i}`);
+            if (failure && !failure.checked) {
+                failure.checked = true;
+                break;
+            }
+        }
+
+        updateDnDOverview();
+
+        // Check if dead
+        let totalFails = 0;
+        for (let i = 1; i <= 3; i++) {
+            if (document.getElementById(`death_failure_${i}`)?.checked) totalFails++;
+        }
+
+        if (totalFails >= 3) {
+            alert(`Death Save: Failure\n\nRoll: ${roll}\n\n💀 You have died.`);
+        } else {
+            alert(`Death Save: Failure\n\nRoll: ${roll}\nTotal failures: ${totalFails}/3`);
+        }
+    }
+}
+
 // Short rest
 function dndShortRest() {
     alert('Short Rest: You can spend Hit Dice to heal.\nSelect Hit Dice in the Combat tab to roll for healing.');
@@ -1200,10 +1337,21 @@ function dndShortRest() {
 function dndLongRest() {
     const hpMax = document.getElementById('dnd_hp_max')?.value || '10';
     const hpInput = document.getElementById('dnd_hp_current');
+    const hdTotalInput = document.getElementById('dnd_hit_dice_total');
+    const hdRemainingInput = document.getElementById('dnd_hit_dice_remaining');
 
-    if (confirm('Take a Long Rest?\n\n• Restore all HP\n• Regain half total Hit Dice\n• Regain all spell slots\n• Reduce exhaustion by 1')) {
+    if (confirm('Take a Long Rest?\n\n• Restore all HP\n• Regain half total Hit Dice (minimum 1)\n• Regain all spell slots\n• Reduce exhaustion by 1')) {
         // Restore HP
         if (hpInput) hpInput.value = hpMax;
+
+        // Restore Hit Dice (regain half total, minimum 1)
+        if (hdTotalInput && hdRemainingInput) {
+            const total = parseInt(hdTotalInput.value) || 1;
+            const remaining = parseInt(hdRemainingInput.value) || 0;
+            const regain = Math.max(1, Math.floor(total / 2));
+            const newRemaining = Math.min(total, remaining + regain);
+            hdRemainingInput.value = newRemaining;
+        }
 
         // Restore spell slots
         for (let level = 1; level <= 9; level++) {
@@ -1227,7 +1375,9 @@ function dndLongRest() {
         }
 
         updateDnDOverview();
-        alert('Long Rest complete!\n\nHP restored. Spell slots restored. Exhaustion reduced by 1.');
+
+        const regained = hdTotalInput ? Math.max(1, Math.floor(parseInt(hdTotalInput.value) / 2)) : 0;
+        alert(`Long Rest complete!\n\n• HP restored to ${hpMax}\n• Regained ${regained} Hit Dice\n• Spell slots restored\n• Exhaustion reduced by 1`);
     }
 }
 
@@ -1236,6 +1386,7 @@ if (typeof window !== 'undefined') {
     window.renderDnD5eSheet = renderDnD5eSheet;
     window.initializeDnD5e = initializeDnD5e;
     window.updateDnDModifier = updateDnDModifier;
+    window.updateDnDProficiency = updateDnDProficiency;
     window.updateDnDSave = updateDnDSave;
     window.updateDnDSkill = updateDnDSkill;
     window.rollDnDDice = rollDnDDice;
@@ -1245,6 +1396,7 @@ if (typeof window !== 'undefined') {
     window.syncDnDInspiration = syncDnDInspiration;
     window.adjustDnDHP = adjustDnDHP;
     window.rollDnDSave = rollDnDSave;
+    window.rollDnDDeathSave = rollDnDDeathSave;
     window.dndShortRest = dndShortRest;
     window.dndLongRest = dndLongRest;
 }

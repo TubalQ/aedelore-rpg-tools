@@ -4833,8 +4833,7 @@ input[type="range"]::-moz-range-thumb {
     flex-direction: column;
     gap: var(--space-4);
     padding: var(--space-4);
-    max-width: 800px;
-    margin: 0 auto;
+    max-width: 100%;
 }
 
 /* Character Summary Card */

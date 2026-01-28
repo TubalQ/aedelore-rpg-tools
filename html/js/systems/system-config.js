@@ -12,7 +12,7 @@ const SYSTEM_CONFIGS = {
         description: 'Fantasy RPG med D10-system',
         icon: '🎲',
         color: '#a855f7', // Purple
-        rulesUrl: 'https://wiki.aedelore.nu/books/miscs-of-aedelore/chapter/rules',
+        rulesUrl: '/wiki#rules-and-reference',
         dice: {
             primary: 'd10',
             pool: true,
@@ -158,7 +158,7 @@ const SYSTEM_CONFIGS = {
         dice: {
             primary: 'd10',
             pool: true,
-            difficulty: { min: 6, max: 9, default: 6 },
+            difficulty: { min: 3, max: 10, default: 6 },
             successOn: 'difficulty+',
             botchOn: 1
         },
