@@ -4,8 +4,156 @@
 
 function renderCoDSheet(config) {
     return `
+        <!-- OVERVIEW TAB -->
+        <div class="tab-content active" id="system-overview" style="display: block;">
+            <div class="system-dashboard cod-dashboard">
+                <!-- Character Summary -->
+                <div class="dashboard-card character-summary cod-summary">
+                    <div class="summary-avatar cod-avatar" id="cod-avatar">
+                        <span class="avatar-initial">?</span>
+                    </div>
+                    <div class="summary-info">
+                        <h2 class="summary-name" id="cod-summary-name">New Character</h2>
+                        <div class="summary-details">
+                            <span id="cod-summary-concept">-</span>
+                            <span id="cod-summary-faction">-</span>
+                        </div>
+                        <div class="cod-anchors">
+                            <span class="virtue-badge" id="cod-summary-virtue">Virtue: -</span>
+                            <span class="vice-badge" id="cod-summary-vice">Vice: -</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Health & Willpower -->
+                <div class="dashboard-row">
+                    <div class="dashboard-section compact">
+                        <h3 class="section-header">Health</h3>
+                        <div class="cod-health-track" id="cod-overview-health">
+                            <!-- Filled by JS based on Stamina + Size -->
+                        </div>
+                    </div>
+                    <div class="dashboard-section compact">
+                        <h3 class="section-header">Willpower</h3>
+                        <div class="cod-willpower-track">
+                            <div class="wp-dots" id="cod-overview-wp-dots"></div>
+                            <div class="wp-spent" id="cod-overview-wp-spent"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Derived Stats -->
+                <div class="dashboard-row combat-row cod-derived">
+                    <div class="dashboard-stat">
+                        <div class="stat-label">Defense</div>
+                        <div class="stat-value-large" id="cod-overview-defense">1</div>
+                    </div>
+                    <div class="dashboard-stat">
+                        <div class="stat-label">Initiative</div>
+                        <div class="stat-value-large" id="cod-overview-initiative">1</div>
+                    </div>
+                    <div class="dashboard-stat">
+                        <div class="stat-label">Speed</div>
+                        <div class="stat-value-large" id="cod-overview-speed">5</div>
+                    </div>
+                    <div class="dashboard-stat">
+                        <div class="stat-label">Armor</div>
+                        <div class="stat-value-large" id="cod-overview-armor">0</div>
+                    </div>
+                    <div class="dashboard-stat">
+                        <div class="stat-label">Size</div>
+                        <div class="stat-value-large" id="cod-overview-size">5</div>
+                    </div>
+                </div>
+
+                <!-- Integrity -->
+                <div class="dashboard-section">
+                    <h3 class="section-header">Integrity</h3>
+                    <div class="cod-integrity-track">
+                        ${[...Array(10)].map((_, i) => `
+                            <span class="integrity-dot ${i < 7 ? 'filled' : ''}" data-value="${10-i}" onclick="setCoDIntegrity(${10-i})">${10-i}</span>
+                        `).join('')}
+                    </div>
+                    <div class="integrity-value">Current: <span id="cod-overview-integrity">7</span></div>
+                </div>
+
+                <!-- Attributes -->
+                <div class="dashboard-section">
+                    <h3 class="section-header">Attributes</h3>
+                    <div class="cod-attributes-grid">
+                        ${['Mental', 'Physical', 'Social'].map(cat => `
+                            <div class="attr-category">
+                                <div class="cat-header">${cat}</div>
+                                ${config.attributes.filter(a => a.category === cat).map(attr => `
+                                    <div class="attr-row" onclick="rollCoDAttribute('${attr.id}')">
+                                        <span class="attr-name">${attr.name}</span>
+                                        <span class="attr-dots" id="cod-overview-${attr.id}">○○○○○</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Beats / Experiences -->
+                <div class="dashboard-row">
+                    <div class="dashboard-section compact">
+                        <h3 class="section-header">Beats</h3>
+                        <div class="beats-track">
+                            <div class="beat-dots" id="cod-overview-beats">○○○○○</div>
+                            <span class="beat-hint">(5 beats = 1 XP)</span>
+                        </div>
+                    </div>
+                    <div class="dashboard-section compact">
+                        <h3 class="section-header">Experiences</h3>
+                        <div class="xp-value" id="cod-overview-xp">0</div>
+                    </div>
+                </div>
+
+                <!-- Conditions -->
+                <div class="dashboard-section" id="cod-conditions-section" style="display: none;">
+                    <h3 class="section-header">Conditions</h3>
+                    <div class="conditions-list" id="cod-overview-conditions">-</div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="dashboard-section">
+                    <h3 class="section-header">Quick Actions</h3>
+                    <div class="quick-actions-grid">
+                        <button class="quick-action-btn" onclick="rollCoDQuick(1)">
+                            <span class="action-icon">🎲</span>
+                            <span class="action-label">1 die</span>
+                        </button>
+                        <button class="quick-action-btn" onclick="rollCoDQuick(3)">
+                            <span class="action-icon">🎲</span>
+                            <span class="action-label">3 dice</span>
+                        </button>
+                        <button class="quick-action-btn" onclick="rollCoDChance()">
+                            <span class="action-icon">🍀</span>
+                            <span class="action-label">Chance</span>
+                        </button>
+                        <button class="quick-action-btn" onclick="codSpendWillpower()">
+                            <span class="action-icon">💪</span>
+                            <span class="action-label">Spend WP</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Success Reference -->
+                <div class="dashboard-section">
+                    <h3 class="section-header">Success Reference</h3>
+                    <div class="cod-reference">
+                        <div class="ref-item">Target: <strong>8+</strong></div>
+                        <div class="ref-item">10s explode (roll again)</div>
+                        <div class="ref-item">5+ successes = Exceptional</div>
+                        <div class="ref-item">Chance die: only 10 succeeds, 1 = dramatic failure</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- INFO TAB -->
-        <div class="tab-content active" id="system-info" style="display: block;">
+        <div class="tab-content" id="system-info" style="display: none;">
             <div class="section">
                 <h2 class="section-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -930,6 +1078,213 @@ function initializeCoD() {
     setTimeout(updateCoDDerivedStats, 100);
 }
 
+// Update overview with current values
+function updateCoDOverview() {
+    const config = SYSTEM_CONFIGS.cod;
+
+    // Character summary
+    const name = document.getElementById('character_name')?.value || 'New Character';
+    const concept = document.getElementById('cod_concept')?.value || '-';
+    const faction = document.getElementById('cod_faction')?.value || '-';
+    const virtue = document.getElementById('cod_virtue')?.value || '-';
+    const vice = document.getElementById('cod_vice')?.value || '-';
+
+    const nameEl = document.getElementById('cod-summary-name');
+    const conceptEl = document.getElementById('cod-summary-concept');
+    const factionEl = document.getElementById('cod-summary-faction');
+    const virtueEl = document.getElementById('cod-summary-virtue');
+    const viceEl = document.getElementById('cod-summary-vice');
+    const avatarEl = document.getElementById('cod-avatar');
+
+    if (nameEl) nameEl.textContent = name || 'New Character';
+    if (conceptEl) conceptEl.textContent = concept || '-';
+    if (factionEl) factionEl.textContent = faction || '-';
+    if (virtueEl) virtueEl.textContent = 'Virtue: ' + (virtue || '-');
+    if (viceEl) viceEl.textContent = 'Vice: ' + (vice || '-');
+    if (avatarEl) {
+        const initial = name ? name.charAt(0).toUpperCase() : '?';
+        avatarEl.querySelector('.avatar-initial').textContent = initial;
+    }
+
+    // Derived stats
+    const defense = document.getElementById('derived_defense')?.textContent || '1';
+    const initiative = document.getElementById('derived_initiative')?.textContent || '1';
+    const speed = document.getElementById('derived_speed')?.textContent || '5';
+    const size = document.getElementById('cod_size')?.value || '5';
+    const armor = document.getElementById('cod_armor')?.value || '0';
+
+    const defenseEl = document.getElementById('cod-overview-defense');
+    const initEl = document.getElementById('cod-overview-initiative');
+    const speedEl = document.getElementById('cod-overview-speed');
+    const sizeEl = document.getElementById('cod-overview-size');
+    const armorEl = document.getElementById('cod-overview-armor');
+
+    if (defenseEl) defenseEl.textContent = defense;
+    if (initEl) initEl.textContent = initiative;
+    if (speedEl) speedEl.textContent = speed;
+    if (sizeEl) sizeEl.textContent = size;
+    if (armorEl) armorEl.textContent = armor;
+
+    // Attributes
+    config.attributes.forEach(attr => {
+        const dotsContainer = document.querySelector(`.wod-dots[data-id="${attr.id}"]`);
+        const overviewEl = document.getElementById(`cod-overview-${attr.id}`);
+        if (dotsContainer && overviewEl) {
+            const value = parseInt(dotsContainer.dataset.value) || 1;
+            overviewEl.textContent = '●'.repeat(value) + '○'.repeat(5 - value);
+        }
+    });
+
+    // Health track
+    const healthContainer = document.getElementById('cod-overview-health');
+    const staminaContainer = document.querySelector('.wod-dots[data-id="stamina"]');
+    const stamina = staminaContainer ? parseInt(staminaContainer.dataset.value) || 1 : 1;
+    const sizeVal = parseInt(size) || 5;
+    const maxHealth = stamina + sizeVal;
+
+    if (healthContainer) {
+        healthContainer.innerHTML = '';
+        for (let i = 0; i < maxHealth; i++) {
+            const box = document.createElement('span');
+            box.className = 'health-box-mini';
+            box.textContent = '☐';
+            box.onclick = () => cycleOverviewHealth(i);
+            healthContainer.appendChild(box);
+        }
+    }
+
+    // Willpower
+    const resolveContainer = document.querySelector('.wod-dots[data-id="resolve"]');
+    const composureContainer = document.querySelector('.wod-dots[data-id="composure"]');
+    const resolve = resolveContainer ? parseInt(resolveContainer.dataset.value) || 1 : 1;
+    const composure = composureContainer ? parseInt(composureContainer.dataset.value) || 1 : 1;
+    const maxWP = resolve + composure;
+
+    const wpDotsEl = document.getElementById('cod-overview-wp-dots');
+    if (wpDotsEl) {
+        wpDotsEl.innerHTML = '';
+        for (let i = 0; i < maxWP; i++) {
+            const dot = document.createElement('span');
+            dot.className = 'wp-dot-mini';
+            dot.textContent = '●';
+            wpDotsEl.appendChild(dot);
+        }
+    }
+
+    // Integrity
+    const integrityContainer = document.querySelector('.wod-dots[data-id="integrity"]');
+    const integrity = integrityContainer ? parseInt(integrityContainer.dataset.value) || 7 : 7;
+    const integrityValue = document.getElementById('cod-overview-integrity');
+    if (integrityValue) integrityValue.textContent = integrity;
+
+    document.querySelectorAll('.cod-integrity-track .integrity-dot').forEach(dot => {
+        const dotValue = parseInt(dot.dataset.value);
+        dot.classList.toggle('filled', dotValue <= integrity);
+    });
+
+    // Beats
+    const beatsContainer = document.querySelector('.wod-dots[data-id="beats"]');
+    const beats = beatsContainer ? parseInt(beatsContainer.dataset.value) || 0 : 0;
+    const beatsDisplay = document.getElementById('cod-overview-beats');
+    if (beatsDisplay) {
+        beatsDisplay.textContent = '●'.repeat(beats) + '○'.repeat(5 - beats);
+    }
+
+    // XP
+    const xp = document.getElementById('cod_xp')?.value || '0';
+    const xpEl = document.getElementById('cod-overview-xp');
+    if (xpEl) xpEl.textContent = xp;
+
+    // Conditions
+    const conditions = document.getElementById('cod_conditions')?.value || '';
+    const conditionsSection = document.getElementById('cod-conditions-section');
+    const conditionsList = document.getElementById('cod-overview-conditions');
+    if (conditions.trim()) {
+        if (conditionsSection) conditionsSection.style.display = 'block';
+        if (conditionsList) conditionsList.textContent = conditions;
+    } else {
+        if (conditionsSection) conditionsSection.style.display = 'none';
+    }
+}
+
+// Cycle overview health box
+function cycleOverviewHealth(index) {
+    const container = document.getElementById('cod-overview-health');
+    const boxes = container.querySelectorAll('.health-box-mini');
+    const box = boxes[index];
+
+    if (box.textContent === '☐') {
+        box.textContent = '/';
+        box.className = 'health-box-mini bashing';
+    } else if (box.textContent === '/') {
+        box.textContent = 'X';
+        box.className = 'health-box-mini lethal';
+    } else if (box.textContent === 'X') {
+        box.textContent = '*';
+        box.className = 'health-box-mini aggravated';
+    } else {
+        box.textContent = '☐';
+        box.className = 'health-box-mini';
+    }
+}
+
+// Set integrity from overview
+function setCoDIntegrity(value) {
+    const integrityContainer = document.querySelector('.wod-dots[data-id="integrity"]');
+    if (integrityContainer) {
+        integrityContainer.dataset.value = value;
+        integrityContainer.querySelectorAll('.wod-dot').forEach((dot, idx) => {
+            dot.classList.toggle('filled', idx < value);
+        });
+    }
+    updateCoDOverview();
+}
+
+// Roll an attribute
+function rollCoDAttribute(attrId) {
+    const dotsContainer = document.querySelector(`.wod-dots[data-id="${attrId}"]`);
+    if (dotsContainer) {
+        const pool = parseInt(dotsContainer.dataset.value) || 1;
+        rollCoDPool(pool);
+    }
+}
+
+// Spend willpower
+function codSpendWillpower() {
+    alert('Willpower spent!\n\n+3 dice to your next roll.\n\n(Track spent WP manually in the Combat tab)');
+}
+
+// Set up overview listeners
+function setupCoDOverviewListeners() {
+    const fieldsToWatch = [
+        'character_name', 'cod_concept', 'cod_faction',
+        'cod_virtue', 'cod_vice', 'cod_size', 'cod_armor',
+        'cod_xp', 'cod_conditions'
+    ];
+    fieldsToWatch.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.addEventListener('change', updateCoDOverview);
+            field.addEventListener('input', updateCoDOverview);
+        }
+    });
+
+    // Watch dot ratings
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('wod-dot')) {
+            setTimeout(updateCoDOverview, 50);
+        }
+    });
+}
+
+// Extend initializeCoD
+const originalInitializeCoD = initializeCoD;
+initializeCoD = function() {
+    originalInitializeCoD();
+    setupCoDOverviewListeners();
+    setTimeout(updateCoDOverview, 100);
+};
+
 // Export functions
 if (typeof window !== 'undefined') {
     window.renderCoDSheet = renderCoDSheet;
@@ -940,4 +1295,9 @@ if (typeof window !== 'undefined') {
     window.rollCoDChance = rollCoDChance;
     window.rollCoDQuick = rollCoDQuick;
     window.updateCoDDerivedStats = updateCoDDerivedStats;
+    window.updateCoDOverview = updateCoDOverview;
+    window.setCoDIntegrity = setCoDIntegrity;
+    window.rollCoDAttribute = rollCoDAttribute;
+    window.codSpendWillpower = codSpendWillpower;
+    window.cycleOverviewHealth = cycleOverviewHealth;
 }

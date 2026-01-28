@@ -4,8 +4,153 @@
 
 function renderStorytellerSheet(config) {
     return `
+        <!-- OVERVIEW TAB -->
+        <div class="tab-content active" id="system-overview" style="display: block;">
+            <div class="system-dashboard storyteller-dashboard">
+                <!-- Character Summary -->
+                <div class="dashboard-card character-summary wod-summary">
+                    <div class="summary-avatar wod-avatar" id="st-avatar">
+                        <span class="avatar-initial">?</span>
+                    </div>
+                    <div class="summary-info">
+                        <h2 class="summary-name" id="st-summary-name">New Character</h2>
+                        <div class="summary-details">
+                            <span id="st-summary-clan">-</span>
+                            <span id="st-summary-concept">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Health Track -->
+                <div class="dashboard-section">
+                    <h3 class="section-header">Health</h3>
+                    <div class="wod-health-track" id="st-health-track">
+                        ${config.healthLevels.map((level, idx) => `
+                            <div class="health-level" data-level="${idx}">
+                                <span class="health-box" onclick="toggleSTHealth(${idx})">☐</span>
+                                <span class="health-name">${level.name}</span>
+                                <span class="health-penalty">${level.penalty !== null ? level.penalty : '-'}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Willpower -->
+                <div class="dashboard-section">
+                    <h3 class="section-header">Willpower</h3>
+                    <div class="wod-resource-track">
+                        <div class="resource-row">
+                            <span class="resource-label">Permanent</span>
+                            <div class="wod-dots-display" id="st-willpower-perm">○○○○○○○○○○</div>
+                        </div>
+                        <div class="resource-row">
+                            <span class="resource-label">Current</span>
+                            <div class="wod-boxes-display" id="st-willpower-curr">
+                                ${[...Array(10)].map((_, i) => `<span class="wp-box" onclick="toggleSTWillpower(${i})">☐</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Blood Pool / Gnosis / Quintessence -->
+                <div class="dashboard-section">
+                    <h3 class="section-header" id="st-pool-label">Blood Pool</h3>
+                    <div class="wod-pool-track">
+                        <div class="pool-adjuster">
+                            <button class="adj-btn" onclick="adjustSTPool(-1)">−</button>
+                            <span class="pool-value">
+                                <span id="st-pool-current">10</span>/<span id="st-pool-max">10</span>
+                            </span>
+                            <button class="adj-btn" onclick="adjustSTPool(1)">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Humanity/Path -->
+                <div class="dashboard-section">
+                    <h3 class="section-header">Humanity / Path</h3>
+                    <div class="wod-morality-track">
+                        <div class="morality-dots" id="st-humanity-dots">
+                            ${[...Array(10)].map((_, i) => `<span class="morality-dot" data-value="${10-i}" onclick="setSTHumanity(${10-i})">${10-i}</span>`).join('')}
+                        </div>
+                        <div class="morality-value">
+                            Current: <span id="st-humanity-value">7</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attributes Overview -->
+                <div class="dashboard-section">
+                    <h3 class="section-header">Attributes</h3>
+                    <div class="wod-attributes-grid">
+                        ${['Physical', 'Social', 'Mental'].map(cat => `
+                            <div class="attr-category">
+                                <div class="cat-header">${cat}</div>
+                                ${config.attributes.filter(a => a.category === cat).map(attr => `
+                                    <div class="attr-row" onclick="rollSTAttribute('${attr.id}')">
+                                        <span class="attr-name">${attr.name}</span>
+                                        <span class="attr-dots" id="st-overview-${attr.id}">○○○○○</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Virtues -->
+                <div class="dashboard-section">
+                    <h3 class="section-header">Virtues</h3>
+                    <div class="wod-virtues-row">
+                        ${config.virtues.map(v => `
+                            <div class="virtue-item">
+                                <span class="virtue-name">${v.name}</span>
+                                <span class="virtue-dots" id="st-virtue-${v.id}">○○○○○</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="dashboard-section">
+                    <h3 class="section-header">Quick Actions</h3>
+                    <div class="quick-actions-grid">
+                        <button class="quick-action-btn" onclick="rollSTQuick(1)">
+                            <span class="action-icon">🎲</span>
+                            <span class="action-label">1 die</span>
+                        </button>
+                        <button class="quick-action-btn" onclick="rollSTQuick(3)">
+                            <span class="action-icon">🎲</span>
+                            <span class="action-label">3 dice</span>
+                        </button>
+                        <button class="quick-action-btn" onclick="rollSTQuick(5)">
+                            <span class="action-icon">🎲</span>
+                            <span class="action-label">5 dice</span>
+                        </button>
+                        <button class="quick-action-btn" onclick="stSpendWillpower()">
+                            <span class="action-icon">💪</span>
+                            <span class="action-label">Spend WP</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Difficulty Reference -->
+                <div class="dashboard-section">
+                    <h3 class="section-header">Difficulty Reference</h3>
+                    <div class="difficulty-reference">
+                        <div class="diff-item"><span class="diff-num">3</span> Trivial</div>
+                        <div class="diff-item"><span class="diff-num">4</span> Easy</div>
+                        <div class="diff-item"><span class="diff-num">5</span> Straightforward</div>
+                        <div class="diff-item"><span class="diff-num">6</span> Standard</div>
+                        <div class="diff-item"><span class="diff-num">7</span> Challenging</div>
+                        <div class="diff-item"><span class="diff-num">8</span> Difficult</div>
+                        <div class="diff-item"><span class="diff-num">9</span> Extremely Difficult</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- INFO TAB -->
-        <div class="tab-content active" id="system-info" style="display: block;">
+        <div class="tab-content" id="system-info" style="display: none;">
             <div class="section">
                 <h2 class="section-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -730,10 +875,221 @@ function initializeST() {
     });
 }
 
+// Update overview with current values
+function updateSTOverview() {
+    const config = SYSTEM_CONFIGS.storyteller;
+
+    // Character summary
+    const name = document.getElementById('character_name')?.value || 'New Character';
+    const clan = document.getElementById('st_clan')?.value || '-';
+    const concept = document.getElementById('st_concept')?.value || '-';
+
+    const nameEl = document.getElementById('st-summary-name');
+    const clanEl = document.getElementById('st-summary-clan');
+    const conceptEl = document.getElementById('st-summary-concept');
+    const avatarEl = document.getElementById('st-avatar');
+
+    if (nameEl) nameEl.textContent = name || 'New Character';
+    if (clanEl) clanEl.textContent = clan || '-';
+    if (conceptEl) conceptEl.textContent = concept || '-';
+    if (avatarEl) {
+        const initial = name ? name.charAt(0).toUpperCase() : '?';
+        avatarEl.querySelector('.avatar-initial').textContent = initial;
+    }
+
+    // Attributes
+    config.attributes.forEach(attr => {
+        const dotsContainer = document.querySelector(`.wod-dots[data-id="${attr.id}"]`);
+        const overviewEl = document.getElementById(`st-overview-${attr.id}`);
+        if (dotsContainer && overviewEl) {
+            const value = parseInt(dotsContainer.dataset.value) || 0;
+            overviewEl.textContent = '●'.repeat(value) + '○'.repeat(5 - value);
+        }
+    });
+
+    // Willpower permanent
+    const wpPermContainer = document.querySelector('.wod-dots[data-id="willpower_permanent"]');
+    const wpPermDisplay = document.getElementById('st-willpower-perm');
+    if (wpPermContainer && wpPermDisplay) {
+        const value = parseInt(wpPermContainer.dataset.value) || 0;
+        wpPermDisplay.textContent = '●'.repeat(value) + '○'.repeat(10 - value);
+    }
+
+    // Virtues
+    config.virtues.forEach(v => {
+        const dotsContainer = document.querySelector(`.wod-dots[data-id="${v.id}"]`);
+        const overviewEl = document.getElementById(`st-virtue-${v.id}`);
+        if (dotsContainer && overviewEl) {
+            const value = parseInt(dotsContainer.dataset.value) || 0;
+            overviewEl.textContent = '●'.repeat(value) + '○'.repeat(5 - value);
+        }
+    });
+
+    // Humanity
+    const humanityContainer = document.querySelector('.wod-dots[data-id="humanity"]');
+    if (humanityContainer) {
+        const value = parseInt(humanityContainer.dataset.value) || 7;
+        const humanityValue = document.getElementById('st-humanity-value');
+        if (humanityValue) humanityValue.textContent = value;
+
+        // Update morality dots
+        document.querySelectorAll('#st-humanity-dots .morality-dot').forEach(dot => {
+            const dotValue = parseInt(dot.dataset.value);
+            dot.classList.toggle('filled', dotValue <= value);
+        });
+    }
+
+    // Blood pool
+    const poolCurrent = document.getElementById('st_blood_current')?.value || '10';
+    const poolMax = document.getElementById('st_blood_max')?.value || '10';
+    const poolCurrentEl = document.getElementById('st-pool-current');
+    const poolMaxEl = document.getElementById('st-pool-max');
+    if (poolCurrentEl) poolCurrentEl.textContent = poolCurrent;
+    if (poolMaxEl) poolMaxEl.textContent = poolMax;
+}
+
+// Toggle health level
+function toggleSTHealth(level) {
+    const healthTrack = document.getElementById('st-health-track');
+    const boxes = healthTrack.querySelectorAll('.health-box');
+
+    // Get current damage
+    let currentDamage = 0;
+    boxes.forEach((box, idx) => {
+        if (box.textContent !== '☐') currentDamage = idx + 1;
+    });
+
+    // Toggle: if clicking current damage level, reduce; otherwise set to that level
+    const newDamage = (level + 1 === currentDamage) ? level : level + 1;
+
+    boxes.forEach((box, idx) => {
+        if (idx < newDamage) {
+            box.textContent = '✘';
+            box.classList.add('damaged');
+        } else {
+            box.textContent = '☐';
+            box.classList.remove('damaged');
+        }
+    });
+}
+
+// Toggle willpower box
+function toggleSTWillpower(index) {
+    const boxes = document.querySelectorAll('#st-willpower-curr .wp-box');
+    const wpPerm = document.querySelector('.wod-dots[data-id="willpower_permanent"]');
+    const maxWP = wpPerm ? parseInt(wpPerm.dataset.value) || 10 : 10;
+
+    // Count current spent
+    let spent = 0;
+    boxes.forEach(box => {
+        if (box.textContent === '✘') spent++;
+    });
+
+    // Toggle this box
+    const box = boxes[index];
+    if (index < maxWP) {
+        if (box.textContent === '✘') {
+            box.textContent = '☐';
+            box.classList.remove('spent');
+        } else {
+            box.textContent = '✘';
+            box.classList.add('spent');
+        }
+    }
+}
+
+// Adjust blood pool
+function adjustSTPool(delta) {
+    const currentInput = document.getElementById('st_blood_current');
+    const maxInput = document.getElementById('st_blood_max');
+
+    if (currentInput) {
+        const current = parseInt(currentInput.value) || 0;
+        const max = parseInt(maxInput?.value) || 20;
+        const newValue = Math.max(0, Math.min(max, current + delta));
+        currentInput.value = newValue;
+        updateSTOverview();
+    }
+}
+
+// Set humanity
+function setSTHumanity(value) {
+    const humanityContainer = document.querySelector('.wod-dots[data-id="humanity"]');
+    if (humanityContainer) {
+        humanityContainer.dataset.value = value;
+        // Update visual dots
+        humanityContainer.querySelectorAll('.wod-dot').forEach((dot, idx) => {
+            dot.classList.toggle('filled', idx < value);
+        });
+    }
+    updateSTOverview();
+}
+
+// Roll an attribute
+function rollSTAttribute(attrId) {
+    const dotsContainer = document.querySelector(`.wod-dots[data-id="${attrId}"]`);
+    if (dotsContainer) {
+        const pool = parseInt(dotsContainer.dataset.value) || 1;
+        rollSTPool(pool);
+    }
+}
+
+// Spend willpower
+function stSpendWillpower() {
+    const boxes = document.querySelectorAll('#st-willpower-curr .wp-box');
+    const wpPerm = document.querySelector('.wod-dots[data-id="willpower_permanent"]');
+    const maxWP = wpPerm ? parseInt(wpPerm.dataset.value) || 10 : 10;
+
+    // Find first unspent box
+    for (let i = 0; i < maxWP; i++) {
+        if (boxes[i].textContent === '☐') {
+            boxes[i].textContent = '✘';
+            boxes[i].classList.add('spent');
+            alert('Willpower spent!\n\n+1 automatic success on your next roll.');
+            return;
+        }
+    }
+    alert('No Willpower remaining!');
+}
+
+// Set up overview listeners
+function setupSTOverviewListeners() {
+    const fieldsToWatch = ['character_name', 'st_clan', 'st_concept', 'st_blood_current', 'st_blood_max'];
+    fieldsToWatch.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.addEventListener('change', updateSTOverview);
+            field.addEventListener('input', updateSTOverview);
+        }
+    });
+
+    // Watch dot ratings
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('wod-dot')) {
+            setTimeout(updateSTOverview, 50);
+        }
+    });
+}
+
+// Extend initializeST
+const originalInitializeST = initializeST;
+initializeST = function() {
+    originalInitializeST();
+    setupSTOverviewListeners();
+    setTimeout(updateSTOverview, 100);
+};
+
 // Export functions
 if (typeof window !== 'undefined') {
     window.renderStorytellerSheet = renderStorytellerSheet;
     window.initializeST = initializeST;
     window.rollSTPool = rollSTPool;
     window.rollSTQuick = rollSTQuick;
+    window.updateSTOverview = updateSTOverview;
+    window.toggleSTHealth = toggleSTHealth;
+    window.toggleSTWillpower = toggleSTWillpower;
+    window.adjustSTPool = adjustSTPool;
+    window.setSTHumanity = setSTHumanity;
+    window.rollSTAttribute = rollSTAttribute;
+    window.stSpendWillpower = stSpendWillpower;
 }
