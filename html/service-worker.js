@@ -1,5 +1,5 @@
 // Aedelore Character Sheet Service Worker
-const CACHE_NAME = 'aedelore-v318';
+const CACHE_NAME = 'aedelore-v319';
 
 // Files to cache for offline use
 const STATIC_ASSETS = [
@@ -9,6 +9,15 @@ const STATIC_ASSETS = [
   '/js/wiki.js',
   '/js/wiki-admin.js',
   '/css/styles.css',
+  '/css/fonts.css',
+  '/fonts/inter/inter-300.woff2',
+  '/fonts/inter/inter-400.woff2',
+  '/fonts/inter/inter-500.woff2',
+  '/fonts/inter/inter-600.woff2',
+  '/fonts/inter/inter-700.woff2',
+  '/fonts/crimson-text/crimson-400.woff2',
+  '/fonts/crimson-text/crimson-400-italic.woff2',
+  '/fonts/crimson-text/crimson-600.woff2',
   '/js/main.js',
   '/js/error-logger.js',
   '/js/dashboard.js',
