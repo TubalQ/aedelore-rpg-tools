@@ -1,5 +1,6 @@
 /**
  * Aedelore Wiki Admin - Client-side JavaScript
+ * Book-focused UI with tree view and image upload
  */
 
 // API base
@@ -9,16 +10,13 @@ const API_BASE = '/api/wiki';
 let authToken = null;
 let csrfToken = null;
 let books = [];
-let chapters = [];
-let pages = [];
+let selectedBookId = null;
+let currentBookData = null; // chapters and pages for selected book
 let tinyEditor = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
-    // Setup login form handler
     setupLoginForm();
-
-    // Check authentication
     authToken = localStorage.getItem('aedelore_auth_token');
 
     if (!authToken) {
@@ -53,7 +51,6 @@ function setupLoginForm() {
                     return;
                 }
 
-                // Save token and initialize
                 authToken = data.token;
                 localStorage.setItem('aedelore_auth_token', authToken);
                 errorEl.style.display = 'none';
@@ -78,14 +75,14 @@ async function initializeAdmin() {
         console.error('Failed to get CSRF token:', e);
     }
 
-    // Verify user is admin (ID = 1)
+    // Verify user is admin (ID = 6)
     try {
         const meResponse = await fetch('/api/me', {
             headers: { 'Authorization': `Bearer ${authToken}` }
         });
 
         if (!meResponse.ok) {
-            return; // Not logged in
+            return;
         }
 
         const user = await meResponse.json();
@@ -110,11 +107,10 @@ async function initializeAdmin() {
         // Setup tabs
         setupTabs();
 
-        // Load initial data
+        // Load books
         await loadBooks();
 
-        // Initialize TinyMCE
-        initEditor();
+        // TinyMCE is initialized lazily when page modal opens
 
     } catch (error) {
         console.error('Auth check failed:', error);
@@ -142,31 +138,86 @@ async function logout() {
 function setupTabs() {
     document.querySelectorAll('.admin-tab').forEach(tab => {
         tab.addEventListener('click', () => {
-            // Update active tab
             document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
 
-            // Update active panel
             document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
             document.getElementById(`panel-${tab.dataset.tab}`).classList.add('active');
-
-            // Load data for the tab
-            if (tab.dataset.tab === 'chapters') loadChapters();
-            if (tab.dataset.tab === 'pages') loadPages();
         });
     });
 }
 
-// Initialize TinyMCE editor
-function initEditor() {
+// TinyMCE state
+let editorInitialized = false;
+let pendingContent = '';
+
+// Initialize TinyMCE editor with image upload (called when modal opens)
+function initEditor(initialContent = '') {
+    console.log('initEditor called, content length:', initialContent?.length || 0);
+    console.log('editorInitialized:', editorInitialized, 'tinyEditor:', !!tinyEditor);
+
+    // Check if TinyMCE is loaded
+    if (typeof tinymce === 'undefined') {
+        console.error('TinyMCE not loaded! Falling back to textarea.');
+        // Fallback: just set content directly on textarea
+        const textarea = document.getElementById('page-content');
+        if (textarea) {
+            textarea.value = initialContent || '';
+            textarea.style.display = 'block';
+            textarea.style.width = '100%';
+            textarea.style.minHeight = '400px';
+            textarea.style.background = '#141420';
+            textarea.style.color = '#e0e0e0';
+            textarea.style.padding = '16px';
+            textarea.style.border = '1px solid rgba(255,255,255,0.12)';
+            textarea.style.borderRadius = '8px';
+            textarea.style.fontFamily = 'monospace';
+        }
+        return;
+    }
+
+    // If already initialized, just set content
+    if (editorInitialized && tinyEditor) {
+        console.log('Setting content on existing editor');
+        tinyEditor.setContent(initialContent);
+        return;
+    }
+
+    pendingContent = initialContent;
+    console.log('Initializing TinyMCE with pending content length:', pendingContent?.length || 0);
+
     tinymce.init({
         selector: '#page-content',
         height: 400,
         menubar: false,
-        plugins: 'lists link code table hr',
-        toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | link | hr | code',
+        plugins: 'lists link code table image',
+        toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | link image | code',
         content_css: false,
         skin: 'oxide-dark',
+        // Image upload configuration
+        images_upload_credentials: true,
+        automatic_uploads: true,
+        images_upload_handler: async (blobInfo, progress) => {
+            const formData = new FormData();
+            formData.append('file', blobInfo.blob(), blobInfo.filename());
+
+            const response = await fetch('/api/wiki/admin/upload-image', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'X-CSRF-Token': csrfToken
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Upload failed');
+            }
+
+            const data = await response.json();
+            return data.location;
+        },
         content_style: `
             body {
                 font-family: Inter, sans-serif;
@@ -179,9 +230,19 @@ function initEditor() {
             h2 { color: #f0c040; margin: 24px 0 12px; }
             h3 { color: #22d3ee; margin: 16px 0 8px; }
             blockquote { border-left: 3px solid #a855f7; padding-left: 16px; color: #888; }
+            img { max-width: 100%; height: auto; border-radius: 8px; }
         `,
         setup: (editor) => {
             tinyEditor = editor;
+            editor.on('init', () => {
+                console.log('TinyMCE init event fired, pendingContent length:', pendingContent?.length || 0);
+                editorInitialized = true;
+                if (pendingContent) {
+                    console.log('Setting pending content');
+                    editor.setContent(pendingContent);
+                    pendingContent = '';
+                }
+            });
         }
     });
 }
@@ -234,49 +295,188 @@ function closeModal(id) {
 async function loadBooks() {
     try {
         books = await apiRequest('GET', '/books');
-        renderBooksList();
+        populateBookSelector();
+
+        // If a book was previously selected, reload its content
+        if (selectedBookId) {
+            const bookStillExists = books.find(b => b.id === selectedBookId);
+            if (bookStillExists) {
+                await loadBookContent(selectedBookId);
+            } else {
+                selectBook(null);
+            }
+        }
     } catch (error) {
         showStatus('Failed to load books: ' + error.message, true);
     }
 }
 
-function renderBooksList() {
-    const container = document.getElementById('books-list');
+function populateBookSelector() {
+    const select = document.getElementById('book-select');
+    select.innerHTML = '<option value="">Select a book...</option>' +
+        books.map(book =>
+            `<option value="${book.id}" ${book.id === selectedBookId ? 'selected' : ''}>
+                ${escapeHtml(book.title)} (${book.chapter_count} chapters, ${book.page_count} pages)
+            </option>`
+        ).join('');
+}
 
-    if (books.length === 0) {
-        container.innerHTML = '<div class="empty-state">No books yet. Create your first book!</div>';
+// Select a book and load its content
+async function selectBook(bookId) {
+    if (!bookId) {
+        selectedBookId = null;
+        currentBookData = null;
+        document.getElementById('no-book-selected').style.display = 'block';
+        document.getElementById('book-tree').style.display = 'none';
+        document.getElementById('edit-book-btn').disabled = true;
+        document.getElementById('delete-book-btn').disabled = true;
         return;
     }
 
-    container.innerHTML = `
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Slug</th>
-                    <th>Chapters</th>
-                    <th>Pages</th>
-                    <th>Sort</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${books.map(book => `
-                    <tr>
-                        <td><strong>${escapeHtml(book.title)}</strong></td>
-                        <td style="color: var(--text-muted);">${book.slug}</td>
-                        <td>${book.chapter_count}</td>
-                        <td>${book.page_count}</td>
-                        <td>${book.sort_order}</td>
-                        <td class="actions">
-                            <button class="btn btn-secondary btn-sm" onclick="editBook(${book.id})">Edit</button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteBook(${book.id}, '${escapeHtml(book.title)}')">Delete</button>
-                        </td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
+    selectedBookId = parseInt(bookId);
+    document.getElementById('edit-book-btn').disabled = false;
+    document.getElementById('delete-book-btn').disabled = false;
+
+    await loadBookContent(selectedBookId);
+}
+
+// Load book content and render tree
+async function loadBookContent(bookId) {
+    try {
+        const book = books.find(b => b.id === bookId);
+        if (!book) return;
+
+        currentBookData = await apiRequest('GET', `/books/${book.slug}`);
+
+        document.getElementById('no-book-selected').style.display = 'none';
+        document.getElementById('book-tree').style.display = 'block';
+
+        renderBookTree();
+    } catch (error) {
+        showStatus('Failed to load book content: ' + error.message, true);
+    }
+}
+
+// Render hierarchical tree view
+function renderBookTree() {
+    if (!currentBookData) return;
+
+    const container = document.getElementById('book-tree');
+    const chapters = currentBookData.chapters || [];
+    const pages = currentBookData.pages || [];
+
+    // Group pages by chapter
+    const chapterPages = {};
+    const standalonePages = [];
+
+    pages.forEach(page => {
+        if (page.chapter_id) {
+            if (!chapterPages[page.chapter_id]) {
+                chapterPages[page.chapter_id] = [];
+            }
+            chapterPages[page.chapter_id].push(page);
+        } else {
+            standalonePages.push(page);
+        }
+    });
+
+    let html = '<div class="wiki-tree">';
+
+    // Render chapters with their pages
+    if (chapters.length > 0) {
+        chapters.forEach(chapter => {
+            const chapterPageList = chapterPages[chapter.id] || [];
+            const pageCount = chapterPageList.length;
+
+            html += `
+                <div class="tree-chapter" data-chapter-id="${chapter.id}">
+                    <div class="tree-chapter-header" onclick="toggleChapter(${chapter.id})">
+                        <div class="tree-chapter-title">
+                            <span class="icon">&#9654;</span>
+                            &#128193; ${escapeHtml(chapter.title)}
+                            <span class="page-count">(${pageCount} pages)</span>
+                        </div>
+                        <div class="tree-actions">
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); editChapter(${chapter.id})">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteChapter(${chapter.id}, '${escapeHtml(chapter.title).replace(/'/g, "\\'")}')">Delete</button>
+                        </div>
+                    </div>
+                    <div class="tree-chapter-pages">
+                        ${chapterPageList.map(page => `
+                            <div class="tree-page">
+                                <div class="tree-page-title">
+                                    &#128196; ${escapeHtml(page.title)}
+                                </div>
+                                <div class="tree-actions">
+                                    <button class="btn btn-secondary btn-sm" onclick="editPage(${page.id})">Edit</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deletePage(${page.id}, '${escapeHtml(page.title).replace(/'/g, "\\'")}')">Delete</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                        <button class="add-item-btn" onclick="openPageModalForChapter(${chapter.id})">
+                            + Add Page to Chapter
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    // Add chapter button
+    html += `
+        <button class="add-item-btn" style="margin: 12px 0;" onclick="openChapterModal()">
+            + New Chapter
+        </button>
     `;
+
+    // Standalone pages section
+    html += `
+        <div class="standalone-section">
+            <div class="standalone-header">Standalone Pages</div>
+            ${standalonePages.map(page => `
+                <div class="tree-page">
+                    <div class="tree-page-title">
+                        &#128196; ${escapeHtml(page.title)}
+                    </div>
+                    <div class="tree-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="editPage(${page.id})">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deletePage(${page.id}, '${escapeHtml(page.title).replace(/'/g, "\\'")}')">Delete</button>
+                    </div>
+                </div>
+            `).join('')}
+            <button class="add-item-btn" onclick="openPageModal()">
+                + Add Standalone Page
+            </button>
+        </div>
+    `;
+
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// Toggle chapter expand/collapse
+function toggleChapter(chapterId) {
+    const chapter = document.querySelector(`.tree-chapter[data-chapter-id="${chapterId}"]`);
+    if (chapter) {
+        chapter.classList.toggle('expanded');
+    }
+}
+
+// Edit selected book
+function editSelectedBook() {
+    if (selectedBookId) {
+        editBook(selectedBookId);
+    }
+}
+
+// Delete selected book
+function deleteSelectedBook() {
+    if (selectedBookId) {
+        const book = books.find(b => b.id === selectedBookId);
+        if (book) {
+            deleteBook(selectedBookId, book.title);
+        }
+    }
 }
 
 function openBookModal(book = null) {
@@ -333,6 +533,9 @@ async function deleteBook(id, title) {
     try {
         await apiRequest('DELETE', `/admin/books/${id}`);
         showStatus('Book deleted successfully');
+        if (selectedBookId === id) {
+            selectBook(null);
+        }
         await loadBooks();
     } catch (error) {
         showStatus('Failed to delete book: ' + error.message, true);
@@ -343,85 +546,32 @@ async function deleteBook(id, title) {
 // CHAPTERS
 // ========================================
 
-async function loadChapters() {
-    try {
-        // Load chapters from all books
-        chapters = [];
-        for (const book of books) {
-            const bookData = await apiRequest('GET', `/books/${book.slug}`);
-            bookData.chapters.forEach(ch => {
-                chapters.push({ ...ch, book_id: book.id, book_title: book.title, book_slug: book.slug });
-            });
-        }
-        renderChaptersList();
-    } catch (error) {
-        showStatus('Failed to load chapters: ' + error.message, true);
-    }
-}
-
-function renderChaptersList() {
-    const container = document.getElementById('chapters-list');
-
-    if (chapters.length === 0) {
-        container.innerHTML = '<div class="empty-state">No chapters yet. Create chapters within books.</div>';
-        return;
-    }
-
-    container.innerHTML = `
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Book</th>
-                    <th>Slug</th>
-                    <th>Sort</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${chapters.map(ch => `
-                    <tr>
-                        <td><strong>${escapeHtml(ch.title)}</strong></td>
-                        <td style="color: var(--accent-purple);">${escapeHtml(ch.book_title)}</td>
-                        <td style="color: var(--text-muted);">${ch.slug}</td>
-                        <td>${ch.sort_order}</td>
-                        <td class="actions">
-                            <button class="btn btn-secondary btn-sm" onclick="editChapter(${ch.id})">Edit</button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteChapter(${ch.id}, '${escapeHtml(ch.title)}')">Delete</button>
-                        </td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
-}
-
 function openChapterModal(chapter = null) {
     document.getElementById('chapter-modal-title').textContent = chapter ? 'Edit Chapter' : 'New Chapter';
     document.getElementById('chapter-id').value = chapter?.id || '';
+    document.getElementById('chapter-book-id').value = chapter?.book_id || selectedBookId || '';
     document.getElementById('chapter-title').value = chapter?.title || '';
     document.getElementById('chapter-description').value = chapter?.description || '';
     document.getElementById('chapter-sort').value = chapter?.sort_order || 0;
     document.getElementById('chapter-author-note').value = chapter?.author_note || '';
-
-    // Populate book select
-    const bookSelect = document.getElementById('chapter-book');
-    bookSelect.innerHTML = books.map(b =>
-        `<option value="${b.id}" ${chapter?.book_id === b.id ? 'selected' : ''}>${escapeHtml(b.title)}</option>`
-    ).join('');
-
     openModal('chapter-modal');
 }
 
 async function editChapter(id) {
-    const chapter = chapters.find(c => c.id === id);
-    if (chapter) openChapterModal(chapter);
+    if (!currentBookData) return;
+    const chapter = currentBookData.chapters.find(c => c.id === id);
+    if (chapter) {
+        chapter.book_id = selectedBookId;
+        openChapterModal(chapter);
+    }
 }
 
 async function saveChapter() {
     const id = document.getElementById('chapter-id').value;
+    const bookId = document.getElementById('chapter-book-id').value;
+
     const data = {
-        book_id: parseInt(document.getElementById('chapter-book').value),
+        book_id: parseInt(bookId),
         title: document.getElementById('chapter-title').value.trim(),
         description: document.getElementById('chapter-description').value.trim(),
         sort_order: parseInt(document.getElementById('chapter-sort').value) || 0,
@@ -442,7 +592,10 @@ async function saveChapter() {
             showStatus('Chapter created successfully');
         }
         closeModal('chapter-modal');
-        await loadChapters();
+        await loadBooks();
+        if (selectedBookId) {
+            await loadBookContent(selectedBookId);
+        }
     } catch (error) {
         showStatus('Failed to save chapter: ' + error.message, true);
     }
@@ -456,7 +609,10 @@ async function deleteChapter(id, title) {
     try {
         await apiRequest('DELETE', `/admin/chapters/${id}`);
         showStatus('Chapter deleted successfully');
-        await loadChapters();
+        await loadBooks();
+        if (selectedBookId) {
+            await loadBookContent(selectedBookId);
+        }
     } catch (error) {
         showStatus('Failed to delete chapter: ' + error.message, true);
     }
@@ -466,111 +622,48 @@ async function deleteChapter(id, title) {
 // PAGES
 // ========================================
 
-async function loadPages() {
-    try {
-        // Load pages from all books
-        pages = [];
-        for (const book of books) {
-            const bookData = await apiRequest('GET', `/books/${book.slug}`);
-            bookData.pages.forEach(p => {
-                const chapter = bookData.chapters.find(c => c.id === p.chapter_id);
-                pages.push({
-                    ...p,
-                    book_id: book.id,
-                    book_title: book.title,
-                    book_slug: book.slug,
-                    chapter_title: chapter?.title || ''
-                });
-            });
-        }
-        renderPagesList();
-    } catch (error) {
-        showStatus('Failed to load pages: ' + error.message, true);
-    }
-}
-
-function renderPagesList() {
-    const container = document.getElementById('pages-list');
-
-    if (pages.length === 0) {
-        container.innerHTML = '<div class="empty-state">No pages yet. Create your first page!</div>';
-        return;
-    }
-
-    container.innerHTML = `
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Book</th>
-                    <th>Chapter</th>
-                    <th>Sort</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${pages.map(p => `
-                    <tr>
-                        <td><strong>${escapeHtml(p.title)}</strong></td>
-                        <td style="color: var(--accent-purple);">${escapeHtml(p.book_title)}</td>
-                        <td style="color: var(--text-muted);">${escapeHtml(p.chapter_title) || '—'}</td>
-                        <td>${p.sort_order}</td>
-                        <td class="actions">
-                            <button class="btn btn-secondary btn-sm" onclick="editPage(${p.id})">Edit</button>
-                            <button class="btn btn-danger btn-sm" onclick="deletePage(${p.id}, '${escapeHtml(p.title)}')">Delete</button>
-                        </td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
-}
-
 function openPageModal(page = null) {
     document.getElementById('page-modal-title').textContent = page ? 'Edit Page' : 'New Page';
     document.getElementById('page-id').value = page?.id || '';
+    document.getElementById('page-book-id').value = page?.book_id || selectedBookId || '';
     document.getElementById('page-title').value = page?.title || '';
     document.getElementById('page-summary').value = page?.summary || '';
     document.getElementById('page-sort').value = page?.sort_order || 0;
     document.getElementById('page-tags').value = (page?.tags || []).join(', ');
     document.getElementById('page-author-note').value = page?.author_note || '';
 
-    // Set content in TinyMCE
-    if (tinyEditor) {
-        tinyEditor.setContent(page?.content || '');
-    }
-
-    // Populate book select
-    const bookSelect = document.getElementById('page-book');
-    bookSelect.innerHTML = books.map(b =>
-        `<option value="${b.id}" ${page?.book_id === b.id ? 'selected' : ''}>${escapeHtml(b.title)}</option>`
-    ).join('');
-
-    // Update chapter select based on book
-    updateChapterSelect(page?.chapter_id);
+    // Populate chapter select
+    const chapterSelect = document.getElementById('page-chapter');
+    const chapters = currentBookData?.chapters || [];
+    chapterSelect.innerHTML = '<option value="">No chapter (standalone page)</option>' +
+        chapters.map(c =>
+            `<option value="${c.id}" ${page?.chapter_id === c.id ? 'selected' : ''}>${escapeHtml(c.title)}</option>`
+        ).join('');
 
     openModal('page-modal');
+
+    // Initialize TinyMCE after modal is visible (needs visible element)
+    setTimeout(() => {
+        console.log('openPageModal - calling initEditor with content length:', page?.content?.length || 0);
+        initEditor(page?.content || '');
+    }, 100);
 }
 
-async function updateChapterSelect(selectedChapterId = null) {
-    const bookId = parseInt(document.getElementById('page-book').value);
-    const chapterSelect = document.getElementById('page-chapter');
-
-    // Get chapters for selected book
-    const bookChapters = chapters.filter(c => c.book_id === bookId);
-
-    chapterSelect.innerHTML = '<option value="">No chapter</option>' +
-        bookChapters.map(c =>
-            `<option value="${c.id}" ${c.id === selectedChapterId ? 'selected' : ''}>${escapeHtml(c.title)}</option>`
-        ).join('');
+function openPageModalForChapter(chapterId) {
+    openPageModal();
+    document.getElementById('page-chapter').value = chapterId;
 }
 
 async function editPage(id) {
     try {
-        // Fetch full page data
         const page = await apiRequest('GET', `/pages/${id}`);
-        page.book_id = books.find(b => b.slug === page.book_slug)?.id;
-        page.chapter_id = chapters.find(c => c.slug === page.chapter_slug && c.book_slug === page.book_slug)?.id;
+        console.log('editPage - API response:', { id: page.id, title: page.title, contentLength: page.content?.length || 0, summaryLength: page.summary?.length || 0 });
+        page.book_id = selectedBookId;
+        // Find chapter_id from current book data
+        if (currentBookData) {
+            const chapter = currentBookData.chapters.find(c => c.slug === page.chapter_slug);
+            page.chapter_id = chapter?.id || null;
+        }
         openPageModal(page);
     } catch (error) {
         showStatus('Failed to load page: ' + error.message, true);
@@ -579,15 +672,16 @@ async function editPage(id) {
 
 async function savePage() {
     const id = document.getElementById('page-id').value;
+    const bookId = document.getElementById('page-book-id').value;
     const tagsStr = document.getElementById('page-tags').value;
     const tags = tagsStr.split(',').map(t => t.trim()).filter(t => t.length > 0);
 
     const data = {
-        book_id: parseInt(document.getElementById('page-book').value),
+        book_id: parseInt(bookId),
         chapter_id: document.getElementById('page-chapter').value ? parseInt(document.getElementById('page-chapter').value) : null,
         title: document.getElementById('page-title').value.trim(),
         summary: document.getElementById('page-summary').value.trim(),
-        content: tinyEditor ? tinyEditor.getContent() : '',
+        content: tinyEditor ? tinyEditor.getContent() : (document.getElementById('page-content')?.value || ''),
         sort_order: parseInt(document.getElementById('page-sort').value) || 0,
         tags: tags,
         author_note: document.getElementById('page-author-note').value.trim()
@@ -607,7 +701,10 @@ async function savePage() {
             showStatus('Page created successfully');
         }
         closeModal('page-modal');
-        await loadPages();
+        await loadBooks();
+        if (selectedBookId) {
+            await loadBookContent(selectedBookId);
+        }
     } catch (error) {
         showStatus('Failed to save page: ' + error.message, true);
     }
@@ -621,7 +718,10 @@ async function deletePage(id, title) {
     try {
         await apiRequest('DELETE', `/admin/pages/${id}`);
         showStatus('Page deleted successfully');
-        await loadPages();
+        await loadBooks();
+        if (selectedBookId) {
+            await loadBookContent(selectedBookId);
+        }
     } catch (error) {
         showStatus('Failed to delete page: ' + error.message, true);
     }
