@@ -194,7 +194,7 @@ function renderPathfinder2eSheet(config) {
                         <input type="number" id="pf_level" min="1" max="20" value="1">
                     </div>
                 </div>
-                <div class="grid-2">
+                <div class="grid-3">
                     <div class="field-group">
                         <label for="pf_deity">Deity</label>
                         <input type="text" id="pf_deity" placeholder="e.g., Sarenrae">
@@ -203,10 +203,10 @@ function renderPathfinder2eSheet(config) {
                         <label for="pf_alignment">Alignment/Edicts</label>
                         <input type="text" id="pf_alignment" placeholder="e.g., NG, Edicts: Help others">
                     </div>
-                </div>
-                <div class="field-group">
-                    <label for="pf_xp">Experience Points</label>
-                    <input type="number" id="pf_xp" min="0" value="0">
+                    <div class="field-group">
+                        <label for="pf_xp">Experience Points</label>
+                        <input type="number" id="pf_xp" min="0" value="0">
+                    </div>
                 </div>
             </div>
         </div>
@@ -219,7 +219,7 @@ function renderPathfinder2eSheet(config) {
                     Ability Scores
                 </h2>
                 <p class="section-hint">Modifier = (Score - 10) / 2</p>
-                <div class="pf-attributes-grid">
+                <div class="pf-attributes-grid grid grid-3">
                     ${config.attributes.map(attr => `
                         <div class="pf-attribute-card" data-attr="${attr.id}">
                             <div class="attr-name">${attr.abbr}</div>
@@ -233,9 +233,9 @@ function renderPathfinder2eSheet(config) {
 
             <div class="section">
                 <h2 class="section-title">Saving Throws</h2>
-                <div class="saves-grid">
+                <div class="saves-grid grid grid-3">
                     ${config.savingThrows.map(save => `
-                        <div class="save-row">
+                        <div class="save-card">
                             <span class="save-name">${save.name}</span>
                             <span class="save-attr">(${save.attribute.substring(0,3).toUpperCase()})</span>
                             <select id="pf_save_${save.id}_prof" class="prof-select" onchange="updatePFSave('${save.id}', '${save.attribute}')">
@@ -870,47 +870,57 @@ function rollPFDice(sides) {
 }
 
 // Roll PF check with degrees of success
-function rollPFCheck() {
-    const mod = parseInt(document.getElementById('pf_check_mod').value) || 0;
+// attrId is optional - if provided, uses that attribute's modifier
+function rollPFCheck(attrId) {
+    let mod;
+    if (attrId) {
+        // Get modifier from overview display
+        const modEl = document.getElementById(`pf-overview-mod-${attrId}`);
+        mod = modEl ? parseInt(modEl.textContent) || 0 : 0;
+        // Set the modifier in the dice roller for display
+        const modInput = document.getElementById('pf_check_mod');
+        if (modInput) modInput.value = mod;
+    } else {
+        mod = parseInt(document.getElementById('pf_check_mod').value) || 0;
+    }
     const dc = parseInt(document.getElementById('pf_check_dc').value) || 15;
 
     const roll = Math.floor(Math.random() * 20) + 1;
     const total = roll + mod;
-
-    // Determine degree of success
-    let outcome = '';
-    let outcomeClass = '';
-
     const diff = total - dc;
 
-    if (roll === 20 && diff >= 0) {
-        outcome = 'Critical Success!';
-        outcomeClass = 'crit-success';
-    } else if (roll === 1 && diff < 0) {
-        outcome = 'Critical Failure!';
-        outcomeClass = 'crit-fail';
-    } else if (diff >= 10) {
-        outcome = 'Critical Success!';
-        outcomeClass = 'crit-success';
+    // Step 1: Determine base degree (0=crit fail, 1=fail, 2=success, 3=crit success)
+    let degree;
+    if (diff >= 10) {
+        degree = 3; // Critical Success (beat by 10+)
     } else if (diff >= 0) {
-        outcome = 'Success';
-        outcomeClass = 'success';
+        degree = 2; // Success (meet or beat DC)
     } else if (diff >= -9) {
-        outcome = 'Failure';
-        outcomeClass = 'failure';
+        degree = 1; // Failure (below DC)
     } else {
-        outcome = 'Critical Failure!';
-        outcomeClass = 'crit-fail';
+        degree = 0; // Critical Failure (below DC by 10+)
     }
 
-    // Natural 20/1 upgrade/downgrade
-    if (roll === 20 && outcomeClass === 'success') {
-        outcome = 'Critical Success! (nat 20)';
-        outcomeClass = 'crit-success';
-    } else if (roll === 1 && outcomeClass === 'failure') {
-        outcome = 'Critical Failure! (nat 1)';
-        outcomeClass = 'crit-fail';
+    // Step 2: Apply nat 20/1 - ALWAYS upgrades/downgrades one level
+    let natIndicator = '';
+    if (roll === 20) {
+        degree = Math.min(3, degree + 1);
+        natIndicator = ' (nat 20)';
+    } else if (roll === 1) {
+        degree = Math.max(0, degree - 1);
+        natIndicator = ' (nat 1)';
     }
+
+    // Step 3: Map degree to outcome
+    const outcomes = [
+        { text: 'Critical Failure!', class: 'crit-fail' },
+        { text: 'Failure', class: 'failure' },
+        { text: 'Success', class: 'success' },
+        { text: 'Critical Success!', class: 'crit-success' }
+    ];
+
+    const outcome = outcomes[degree].text + natIndicator;
+    const outcomeClass = outcomes[degree].class;
 
     displayPFRoll(`d20${formatModifier(mod)} vs DC ${dc}`, total, roll, outcome, outcomeClass);
 }
@@ -1123,8 +1133,12 @@ function updatePFOverview() {
         }
     });
 
-    // Hero points
-    const heroPoints = parseInt(document.getElementById('pf_hero_points')?.value) || 0;
+    // Hero points (count checked checkboxes)
+    let heroPoints = 0;
+    for (let i = 1; i <= 3; i++) {
+        const cb = document.getElementById(`pf_hero_point_${i}`);
+        if (cb && cb.checked) heroPoints++;
+    }
     updatePFHeroPointsDisplay(heroPoints);
 
     // Focus points
@@ -1174,15 +1188,24 @@ function updatePFHeroPointsDisplay(points) {
     });
 }
 
-// Set hero points from overview
+// Set hero points from overview (updates checkboxes in Combat tab)
 function setPFHeroPoints(points) {
-    const currentPoints = parseInt(document.getElementById('pf_hero_points')?.value) || 0;
-    const newPoints = (points === currentPoints) ? points - 1 : points;
-
-    const heroInput = document.getElementById('pf_hero_points');
-    if (heroInput) {
-        heroInput.value = Math.max(0, Math.min(3, newPoints));
+    // Count current hero points
+    let currentPoints = 0;
+    for (let i = 1; i <= 3; i++) {
+        const cb = document.getElementById(`pf_hero_point_${i}`);
+        if (cb && cb.checked) currentPoints++;
     }
+
+    // Toggle: if clicking current count, decrease by 1
+    const newPoints = (points === currentPoints) ? Math.max(0, points - 1) : points;
+
+    // Update checkboxes
+    for (let i = 1; i <= 3; i++) {
+        const cb = document.getElementById(`pf_hero_point_${i}`);
+        if (cb) cb.checked = i <= newPoints;
+    }
+
     updatePFOverview();
 }
 
@@ -1269,7 +1292,7 @@ function setupPFOverviewListeners() {
         'character_name', 'pf_ancestry', 'pf_class', 'pf_level',
         'pf_hp_current', 'pf_hp_max', 'pf_hp_temp',
         'pf_ac', 'pf_speed', 'pf_class_dc',
-        'pf_hero_points', 'pf_focus_current', 'pf_focus_max',
+        'pf_focus_current', 'pf_focus_max',
         'pf_resistances', 'pf_weaknesses'
     ];
 
@@ -1280,6 +1303,12 @@ function setupPFOverviewListeners() {
             field.addEventListener('input', updatePFOverview);
         }
     });
+
+    // Watch hero point checkboxes
+    for (let i = 1; i <= 3; i++) {
+        const cb = document.getElementById(`pf_hero_point_${i}`);
+        if (cb) cb.addEventListener('change', updatePFOverview);
+    }
 }
 
 // Extend initializePF2e to include overview

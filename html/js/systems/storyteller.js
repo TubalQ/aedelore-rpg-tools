@@ -114,15 +114,15 @@ function renderStorytellerSheet(config) {
                 <div class="dashboard-section">
                     <h3 class="section-header">Quick Actions</h3>
                     <div class="quick-actions-grid">
-                        <button class="quick-action-btn" onclick="rollSTQuick(1)">
+                        <button class="quick-action-btn" onclick="rollSTSimple(1)">
                             <span class="action-icon">🎲</span>
                             <span class="action-label">1 die</span>
                         </button>
-                        <button class="quick-action-btn" onclick="rollSTQuick(3)">
+                        <button class="quick-action-btn" onclick="rollSTSimple(3)">
                             <span class="action-icon">🎲</span>
                             <span class="action-label">3 dice</span>
                         </button>
-                        <button class="quick-action-btn" onclick="rollSTQuick(5)">
+                        <button class="quick-action-btn" onclick="rollSTSimple(5)">
                             <span class="action-icon">🎲</span>
                             <span class="action-label">5 dice</span>
                         </button>
@@ -194,9 +194,15 @@ function renderStorytellerSheet(config) {
                         <input type="text" id="st_sire" placeholder="Who made/taught you">
                     </div>
                 </div>
-                <div class="field-group">
-                    <label for="st_chronicle">Chronicle</label>
-                    <input type="text" id="st_chronicle" placeholder="Chronicle name">
+                <div class="grid-2">
+                    <div class="field-group">
+                        <label for="st_chronicle">Chronicle</label>
+                        <input type="text" id="st_chronicle" placeholder="Chronicle name">
+                    </div>
+                    <div class="field-group">
+                        <label for="st_haven">Haven/Domain</label>
+                        <input type="text" id="st_haven" placeholder="Where you rest">
+                    </div>
                 </div>
             </div>
         </div>
@@ -329,7 +335,7 @@ function renderStorytellerSheet(config) {
 
             <div class="section">
                 <h2 class="section-title">Virtues</h2>
-                <div class="virtues-grid">
+                <div class="virtues-grid grid grid-3">
                     ${renderSTVirtue('conscience', 'Conscience/Conviction')}
                     ${renderSTVirtue('self_control', 'Self-Control/Instinct')}
                     ${renderSTVirtue('courage', 'Courage')}
@@ -361,7 +367,7 @@ function renderStorytellerSheet(config) {
 
             <div class="section">
                 <h2 class="section-title">Disciplines / Gifts / Spheres</h2>
-                <div class="powers-list">
+                <div class="powers-list grid grid-2">
                     ${[1,2,3,4,5,6].map(i => `
                         <div class="power-row">
                             <input type="text" id="st_power_${i}_name" placeholder="Power name">
@@ -424,12 +430,14 @@ function renderStorytellerSheet(config) {
                             <div class="field-group">
                                 <label>Difficulty</label>
                                 <select id="st_difficulty">
+                                    <option value="3">3 (Trivial)</option>
                                     <option value="4">4 (Easy)</option>
                                     <option value="5">5 (Routine)</option>
                                     <option value="6" selected>6 (Standard)</option>
                                     <option value="7">7 (Challenging)</option>
                                     <option value="8">8 (Difficult)</option>
                                     <option value="9">9 (Extremely Difficult)</option>
+                                    <option value="10">10 (Nearly Impossible)</option>
                                 </select>
                             </div>
                         </div>
@@ -700,6 +708,12 @@ function renderSTBackgroundRow(bgName) {
     `;
 }
 
+// Roll simple dice pool (for quick actions)
+function rollSTSimple(poolSize) {
+    document.getElementById('st_dice_pool').value = poolSize;
+    rollSTPool();
+}
+
 // Roll Storyteller dice pool
 function rollSTPool() {
     const poolSize = parseInt(document.getElementById('st_dice_pool').value) || 1;
@@ -897,30 +911,30 @@ function updateSTOverview() {
         avatarEl.querySelector('.avatar-initial').textContent = initial;
     }
 
-    // Attributes
+    // Attributes (default to 1 per WoD rules - attributes minimum is 1)
     config.attributes.forEach(attr => {
         const dotsContainer = document.querySelector(`.wod-dots[data-id="${attr.id}"]`);
         const overviewEl = document.getElementById(`st-overview-${attr.id}`);
         if (dotsContainer && overviewEl) {
-            const value = parseInt(dotsContainer.dataset.value) || 0;
+            const value = parseInt(dotsContainer.dataset.value) || 1;
             overviewEl.textContent = '●'.repeat(value) + '○'.repeat(5 - value);
         }
     });
 
-    // Willpower permanent
+    // Willpower permanent (defaults to 1)
     const wpPermContainer = document.querySelector('.wod-dots[data-id="willpower_permanent"]');
     const wpPermDisplay = document.getElementById('st-willpower-perm');
     if (wpPermContainer && wpPermDisplay) {
-        const value = parseInt(wpPermContainer.dataset.value) || 0;
+        const value = parseInt(wpPermContainer.dataset.value) || 1;
         wpPermDisplay.textContent = '●'.repeat(value) + '○'.repeat(10 - value);
     }
 
-    // Virtues
+    // Virtues (default to 1)
     config.virtues.forEach(v => {
         const dotsContainer = document.querySelector(`.wod-dots[data-id="${v.id}"]`);
         const overviewEl = document.getElementById(`st-virtue-${v.id}`);
         if (dotsContainer && overviewEl) {
-            const value = parseInt(dotsContainer.dataset.value) || 0;
+            const value = parseInt(dotsContainer.dataset.value) || 1;
             overviewEl.textContent = '●'.repeat(value) + '○'.repeat(5 - value);
         }
     });
@@ -939,13 +953,16 @@ function updateSTOverview() {
         });
     }
 
-    // Blood pool
-    const poolCurrent = document.getElementById('st_blood_current')?.value || '10';
-    const poolMax = document.getElementById('st_blood_max')?.value || '10';
+    // Blood pool (Combat uses st_resource_*, sync to Overview)
+    const poolCurrent = document.getElementById('st_resource_current')?.value || '10';
+    const poolMax = document.getElementById('st_resource_max')?.value || '10';
     const poolCurrentEl = document.getElementById('st-pool-current');
     const poolMaxEl = document.getElementById('st-pool-max');
     if (poolCurrentEl) poolCurrentEl.textContent = poolCurrent;
     if (poolMaxEl) poolMaxEl.textContent = poolMax;
+
+    // Willpower current (sync checkboxes between Overview and Combat)
+    syncSTWillpowerToOverview();
 }
 
 // Toggle health level
@@ -971,9 +988,63 @@ function toggleSTHealth(level) {
             box.classList.remove('damaged');
         }
     });
+
+    // Sync to Combat tab
+    syncSTHealthToCombat();
 }
 
-// Toggle willpower box
+// Sync Overview health to Combat tab checkboxes
+function syncSTHealthToCombat() {
+    const overviewTrack = document.getElementById('st-health-track');
+    if (!overviewTrack) return;
+
+    const overviewBoxes = overviewTrack.querySelectorAll('.health-box');
+    const combatContainer = document.querySelector('.health-track-classic .health-levels');
+    if (!combatContainer) return;
+
+    overviewBoxes.forEach((box, idx) => {
+        const isDamaged = box.textContent !== '☐';
+        // Find Combat checkboxes for this level
+        const combatBoxes = combatContainer.querySelectorAll(`input.health-box[data-level="${idx}"]`);
+        combatBoxes.forEach(cb => {
+            // Set bashing if damaged, clear all if not
+            if (cb.dataset.type === 'bashing') {
+                cb.checked = isDamaged;
+            } else {
+                // Don't touch lethal/aggravated if just toggling from Overview
+            }
+        });
+    });
+}
+
+// Sync Combat health checkboxes to Overview
+function syncSTHealthToOverview() {
+    const overviewTrack = document.getElementById('st-health-track');
+    if (!overviewTrack) return;
+
+    const overviewBoxes = overviewTrack.querySelectorAll('.health-box');
+    const combatContainer = document.querySelector('.health-track-classic .health-levels');
+    if (!combatContainer) return;
+
+    overviewBoxes.forEach((box, idx) => {
+        // Check if any damage type is checked for this level
+        const combatBoxes = combatContainer.querySelectorAll(`input.health-box[data-level="${idx}"]`);
+        let hasDamage = false;
+        combatBoxes.forEach(cb => {
+            if (cb.checked) hasDamage = true;
+        });
+
+        if (hasDamage) {
+            box.textContent = '✘';
+            box.classList.add('damaged');
+        } else {
+            box.textContent = '☐';
+            box.classList.remove('damaged');
+        }
+    });
+}
+
+// Toggle willpower box (in Overview)
 function toggleSTWillpower(index) {
     const boxes = document.querySelectorAll('#st-willpower-curr .wp-box');
     const wpPerm = document.querySelector('.wod-dots[data-id="willpower_permanent"]');
@@ -996,12 +1067,15 @@ function toggleSTWillpower(index) {
             box.classList.add('spent');
         }
     }
+
+    // Sync to Combat tab
+    syncSTWillpowerToCombat();
 }
 
-// Adjust blood pool
+// Adjust blood pool (updates Combat tab input, then syncs to Overview)
 function adjustSTPool(delta) {
-    const currentInput = document.getElementById('st_blood_current');
-    const maxInput = document.getElementById('st_blood_max');
+    const currentInput = document.getElementById('st_resource_current');
+    const maxInput = document.getElementById('st_resource_max');
 
     if (currentInput) {
         const current = parseInt(currentInput.value) || 0;
@@ -1009,6 +1083,55 @@ function adjustSTPool(delta) {
         const newValue = Math.max(0, Math.min(max, current + delta));
         currentInput.value = newValue;
         updateSTOverview();
+    }
+}
+
+// Sync Willpower between Overview and Combat
+function syncSTWillpowerToOverview() {
+    const overviewBoxes = document.querySelectorAll('#st-willpower-curr .wp-box');
+    const wpPermContainer = document.querySelector('.wod-dots[data-id="willpower_permanent"]');
+    const maxWP = wpPermContainer ? parseInt(wpPermContainer.dataset.value) || 10 : 10;
+
+    // Count spent from Combat checkboxes
+    let spent = 0;
+    for (let i = 1; i <= 10; i++) {
+        const checkbox = document.getElementById(`st_willpower_${i}`);
+        if (checkbox && checkbox.checked) spent++;
+    }
+
+    // Update Overview boxes
+    overviewBoxes.forEach((box, idx) => {
+        if (idx < maxWP) {
+            if (idx < spent) {
+                box.textContent = '✘';
+                box.classList.add('spent');
+            } else {
+                box.textContent = '☐';
+                box.classList.remove('spent');
+            }
+            box.style.display = '';
+        } else {
+            box.style.display = 'none';
+        }
+    });
+}
+
+// Sync Willpower from Overview to Combat
+function syncSTWillpowerToCombat() {
+    const overviewBoxes = document.querySelectorAll('#st-willpower-curr .wp-box');
+
+    // Count spent from Overview
+    let spent = 0;
+    overviewBoxes.forEach(box => {
+        if (box.textContent === '✘') spent++;
+    });
+
+    // Update Combat checkboxes
+    for (let i = 1; i <= 10; i++) {
+        const checkbox = document.getElementById(`st_willpower_${i}`);
+        if (checkbox) {
+            checkbox.checked = i <= spent;
+        }
     }
 }
 
@@ -1054,7 +1177,11 @@ function stSpendWillpower() {
 
 // Set up overview listeners
 function setupSTOverviewListeners() {
-    const fieldsToWatch = ['character_name', 'st_clan', 'st_concept', 'st_blood_current', 'st_blood_max'];
+    // Watch text/number fields
+    const fieldsToWatch = [
+        'character_name', 'st_clan', 'st_concept',
+        'st_resource_current', 'st_resource_max'
+    ];
     fieldsToWatch.forEach(fieldId => {
         const field = document.getElementById(fieldId);
         if (field) {
@@ -1063,12 +1190,28 @@ function setupSTOverviewListeners() {
         }
     });
 
-    // Watch dot ratings
+    // Watch dot ratings (attributes, virtues, willpower permanent, etc.)
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('wod-dot')) {
             setTimeout(updateSTOverview, 50);
         }
     });
+
+    // Watch Combat health checkboxes
+    const combatContainer = document.querySelector('.health-track-classic .health-levels');
+    if (combatContainer) {
+        combatContainer.querySelectorAll('input.health-box').forEach(checkbox => {
+            checkbox.addEventListener('change', syncSTHealthToOverview);
+        });
+    }
+
+    // Watch Combat willpower checkboxes
+    for (let i = 1; i <= 10; i++) {
+        const checkbox = document.getElementById(`st_willpower_${i}`);
+        if (checkbox) {
+            checkbox.addEventListener('change', syncSTWillpowerToOverview);
+        }
+    }
 }
 
 // Extend initializeST
@@ -1084,6 +1227,7 @@ if (typeof window !== 'undefined') {
     window.renderStorytellerSheet = renderStorytellerSheet;
     window.initializeST = initializeST;
     window.rollSTPool = rollSTPool;
+    window.rollSTSimple = rollSTSimple;
     window.rollSTQuick = rollSTQuick;
     window.updateSTOverview = updateSTOverview;
     window.toggleSTHealth = toggleSTHealth;
@@ -1092,4 +1236,8 @@ if (typeof window !== 'undefined') {
     window.setSTHumanity = setSTHumanity;
     window.rollSTAttribute = rollSTAttribute;
     window.stSpendWillpower = stSpendWillpower;
+    window.syncSTHealthToCombat = syncSTHealthToCombat;
+    window.syncSTHealthToOverview = syncSTHealthToOverview;
+    window.syncSTWillpowerToOverview = syncSTWillpowerToOverview;
+    window.syncSTWillpowerToCombat = syncSTWillpowerToCombat;
 }

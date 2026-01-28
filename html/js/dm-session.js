@@ -6335,19 +6335,19 @@ Keep the tone fitting for Aedelore (dark fantasy with moral complexity).`;
 // ============================================
 
 const AI_WIKI_LINKS = {
-    races: 'https://wiki.aedelore.nu/books/aedelore/chapter/races',
-    classes: 'https://wiki.aedelore.nu/books/aedelore/chapter/classes',
-    religions: 'https://wiki.aedelore.nu/books/aedelore/chapter/religions',
-    folkLore: 'https://wiki.aedelore.nu/books/aedelore/chapter/folk-lore',
-    rivermountLibrary: 'https://wiki.aedelore.nu/books/aedelore/chapter/rivermount-library',
-    characters: 'https://wiki.aedelore.nu/books/characters-of-aedelore',
-    world: 'https://wiki.aedelore.nu/books/aedelore/chapter/the-world',
-    weapons: 'https://wiki.aedelore.nu/books/miscs-of-aedelore/page/weapons',
-    armor: 'https://wiki.aedelore.nu/books/miscs-of-aedelore/page/armor-shields',
-    bestiary: 'https://wiki.aedelore.nu/books/bestiary-of-aedelore',
-    artifacts: 'https://wiki.aedelore.nu/books/artifacts-and-relics',
-    nature: 'https://wiki.aedelore.nu/books/nature-of-aedelore',
-    societies: 'https://wiki.aedelore.nu/books/societies-and-secrets'
+    races: '/wiki#races-and-classes',
+    classes: '/wiki#races-and-classes',
+    religions: '/wiki#religion-and-culture',
+    folkLore: '/wiki#lore-and-history',
+    rivermountLibrary: '/wiki#lore-and-history',
+    characters: '/wiki',
+    world: '/wiki#the-world',
+    weapons: '/wiki#rules-and-reference/weapons',
+    armor: '/wiki#rules-and-reference/armor-shields',
+    bestiary: '/wiki#bestiary',
+    artifacts: '/wiki#artifacts-and-relics',
+    nature: '/wiki#nature',
+    societies: '/wiki#organizations'
 };
 
 const AI_TASK_DESCRIPTIONS = {
