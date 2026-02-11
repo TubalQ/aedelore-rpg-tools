@@ -1,5 +1,5 @@
 // Aedelore Character Sheet Service Worker
-const CACHE_NAME = 'aedelore-v331';
+const CACHE_NAME = 'aedelore-v346';
 
 // Files to cache for offline use
 const STATIC_ASSETS = [
@@ -29,11 +29,22 @@ const STATIC_ASSETS = [
   '/js/diceroller.js',
   '/js/system-selector.js',
   '/js/privacy.js',
+  // Character sheet modules
+  '/js/modules/core-api.js',
+  '/js/modules/character-data.js',
+  '/js/modules/ui-common.js',
+  '/js/modules/auth.js',
+  '/js/modules/persistence.js',
+  '/js/modules/campaigns.js',
+  '/js/modules/progression.js',
+  '/js/modules/onboarding.js',
+  // RPG system modules
   '/js/systems/system-config.js',
   '/js/systems/dnd5e.js',
   '/js/systems/pathfinder2e.js',
   '/js/systems/storyteller.js',
   '/js/systems/cod.js',
+  // Data files
   '/data/weapons.js',
   '/data/armor.js',
   '/data/spells.js',

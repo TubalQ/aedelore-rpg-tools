@@ -23,6 +23,41 @@ async function ensureCsrfToken() {
 }
 ensureCsrfToken();
 
+// Validate stored auth token on page load
+// If token is invalid/expired, clear it immediately to avoid 401 loops
+async function validateStoredToken() {
+    const token = localStorage.getItem('aedelore_auth_token');
+    if (!token) return false;
+
+    try {
+        const res = await fetch('/api/me', {
+            headers: { 'Authorization': `Bearer ${token}` },
+            credentials: 'include'
+        });
+
+        if (res.ok) {
+            return true;
+        } else {
+            // Token invalid - clear it
+            localStorage.removeItem('aedelore_auth_token');
+            authToken = null;
+            return false;
+        }
+    } catch (e) {
+        console.warn('Could not validate token (network error)');
+        return false;
+    }
+}
+
+// Validate token early
+validateStoredToken().then(valid => {
+    if (!valid && localStorage.getItem('aedelore_auth_token') === null) {
+        if (typeof updateAuthUI === 'function') {
+            updateAuthUI();
+        }
+    }
+});
+
 // API request helper with CSRF protection
 async function apiRequest(url, options = {}) {
     const csrfToken = getCsrfToken();
@@ -6335,19 +6370,19 @@ Keep the tone fitting for Aedelore (dark fantasy with moral complexity).`;
 // ============================================
 
 const AI_WIKI_LINKS = {
-    races: '/wiki#races-and-classes',
-    classes: '/wiki#races-and-classes',
-    religions: '/wiki#religion-and-culture',
-    folkLore: '/wiki#lore-and-history',
-    rivermountLibrary: '/wiki#lore-and-history',
-    characters: '/wiki',
-    world: '/wiki#the-world',
-    weapons: '/wiki#rules-and-reference/weapons',
-    armor: '/wiki#rules-and-reference/armor-shields',
-    bestiary: '/wiki#bestiary',
-    artifacts: '/wiki#artifacts-and-relics',
-    nature: '/wiki#nature',
-    societies: '/wiki#organizations'
+    races: 'https://aedelore.nu/ai-reference/',
+    classes: 'https://aedelore.nu/ai-reference/',
+    religions: 'https://aedelore.nu/ai-reference/religion',
+    folkLore: 'https://aedelore.nu/ai-reference/lore',
+    rivermountLibrary: 'https://aedelore.nu/ai-reference/lore',
+    characters: 'https://aedelore.nu/ai-reference/lore',
+    world: 'https://aedelore.nu/ai-reference/world',
+    weapons: 'https://aedelore.nu/ai-reference/',
+    armor: 'https://aedelore.nu/ai-reference/',
+    bestiary: 'https://aedelore.nu/ai-reference/bestiary',
+    artifacts: 'https://aedelore.nu/ai-reference/artifacts',
+    nature: 'https://aedelore.nu/ai-reference/nature',
+    societies: 'https://aedelore.nu/ai-reference/organizations'
 };
 
 const AI_TASK_DESCRIPTIONS = {

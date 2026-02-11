@@ -15,7 +15,7 @@
 
     // Get auth token if available
     function getAuthToken() {
-        return localStorage.getItem('authToken') || null;
+        return localStorage.getItem('aedelore_auth_token') || null;
     }
 
     // Create error fingerprint for deduplication

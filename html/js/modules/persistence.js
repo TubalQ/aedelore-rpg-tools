@@ -1,21 +1,154 @@
 // ============================================
 // Persistence Module
 // Handles localStorage and cloud save functionality
+// Supports dual-mode: local save (not logged in) and cloud save (logged in)
 // ============================================
 
 // Auto-save state
 let lastSavedData = null;
+let lastLocalSavedData = null;
 let autoSaveInterval = null;
 let debouncedSaveTimeout = null;
 
-// Save character to localStorage
+// Local storage keys
+const LOCAL_CHARACTER_KEY = 'aedelore_local_character';
+const LOCAL_NOTICE_DISMISSED_KEY = 'aedelore_sync_notice_dismissed';
+
+// ============================================
+// Local Save Functions (for non-logged-in users)
+// ============================================
+
+// Save character to localStorage (for non-logged-in users)
+function saveLocally() {
+    const data = window.getAllFields();
+    const currentData = JSON.stringify(data);
+
+    // Skip if no changes
+    if (currentData === lastLocalSavedData) return false;
+
+    localStorage.setItem(LOCAL_CHARACTER_KEY, currentData);
+    lastLocalSavedData = currentData;
+    return true;
+}
+
+// Load local character data
+function getLocalCharacter() {
+    const saved = localStorage.getItem(LOCAL_CHARACTER_KEY);
+    return saved ? JSON.parse(saved) : null;
+}
+
+// Check if local character exists
+function hasLocalCharacter() {
+    return localStorage.getItem(LOCAL_CHARACTER_KEY) !== null;
+}
+
+// Clear local character data
+function clearLocalCharacter() {
+    localStorage.removeItem(LOCAL_CHARACTER_KEY);
+    lastLocalSavedData = null;
+}
+
+// Show save indicator (works for both local and cloud)
+function showSaveIndicator(type, status) {
+    const indicator = document.getElementById('cloud-save-indicator');
+    if (!indicator) return;
+
+    const textSpan = indicator.querySelector('span');
+    const icon = type === 'cloud' ? '☁️' : '💾';
+
+    if (status === 'saving') {
+        indicator.classList.add('show', 'saving');
+        indicator.classList.remove('saved');
+        if (textSpan) textSpan.textContent = 'Saving...';
+    } else if (status === 'saved') {
+        indicator.classList.remove('saving');
+        indicator.classList.add('show', 'saved');
+        if (textSpan) textSpan.textContent = `${icon} Saved`;
+        setTimeout(() => {
+            indicator.classList.remove('show', 'saved');
+        }, 2000);
+    } else {
+        indicator.classList.remove('show', 'saving', 'saved');
+    }
+}
+
+// ============================================
+// Sync Notice (for non-logged-in users)
+// ============================================
+
+function showSyncNotice() {
+    // Don't show if logged in or already dismissed
+    if (window.authToken) return;
+    if (localStorage.getItem(LOCAL_NOTICE_DISMISSED_KEY) === 'true') return;
+
+    // Check if notice already exists
+    if (document.getElementById('sync-notice')) return;
+
+    const notice = document.createElement('div');
+    notice.id = 'sync-notice';
+    notice.className = 'sync-notice';
+    notice.innerHTML = `
+        <span>Log in to sync your character across devices</span>
+        <button onclick="dismissSyncNotice()" title="Dismiss">&times;</button>
+    `;
+    document.body.appendChild(notice);
+}
+
+function dismissSyncNotice() {
+    const notice = document.getElementById('sync-notice');
+    if (notice) {
+        notice.classList.add('hiding');
+        setTimeout(() => notice.remove(), 300);
+    }
+    localStorage.setItem(LOCAL_NOTICE_DISMISSED_KEY, 'true');
+}
+
+// ============================================
+// Migration (local to cloud on login)
+// ============================================
+
+async function migrateLocalToCloud() {
+    const localData = getLocalCharacter();
+    if (!localData || !window.authToken) return false;
+
+    try {
+        const characterName = localData.character_name || 'Unnamed Character';
+        const system = localStorage.getItem('aedelore_selected_system') || 'aedelore';
+
+        const res = await window.apiRequest('/api/characters', {
+            method: 'POST',
+            body: JSON.stringify({ name: characterName, data: localData, system })
+        });
+
+        if (res.ok) {
+            const result = await res.json();
+            window.currentCharacterId = result.id;
+            localStorage.setItem('aedelore_current_character_id', result.id);
+
+            // Clear local data after successful migration
+            clearLocalCharacter();
+
+            console.log('Local character migrated to cloud successfully');
+            return true;
+        }
+    } catch (error) {
+        console.error('Failed to migrate local character to cloud:', error);
+    }
+    return false;
+}
+
+// ============================================
+// Legacy functions (kept for compatibility)
+// ============================================
+
+// Save character to localStorage (manual save button)
 function saveCharacter() {
     const data = window.getAllFields();
     localStorage.setItem('aedelore_character', JSON.stringify(data));
     alert('✅ Character saved successfully!');
 }
 
-// Load character from localStorage
+// Load character from localStorage (manual load button)
 function loadCharacter() {
     const saved = localStorage.getItem('aedelore_character');
     if (saved) {
@@ -83,42 +216,37 @@ function clearCharacter() {
     }
 }
 
-// Auto-save to localStorage every 30 seconds
-setInterval(() => {
-    const data = window.getAllFields();
-    localStorage.setItem('aedelore_character_autosave', JSON.stringify(data));
-}, 30000);
+// Legacy 30-second backup autosave removed - now handled by unified 5-second autosave system
 
-// Cloud save indicator
+// Cloud save indicator (legacy wrapper)
 function showCloudSaveIndicator(status) {
-    const indicator = document.getElementById('cloud-save-indicator');
-    if (!indicator) return;
-
-    const textSpan = indicator.querySelector('span');
-
-    if (status === 'saving') {
-        indicator.classList.add('show', 'saving');
-        indicator.classList.remove('saved');
-        if (textSpan) textSpan.textContent = 'Saving...';
-    } else if (status === 'saved') {
-        indicator.classList.remove('saving');
-        indicator.classList.add('show', 'saved');
-        if (textSpan) textSpan.textContent = 'Saved ✓';
-        setTimeout(() => {
-            indicator.classList.remove('show', 'saved');
-        }, 2000);
-    } else {
-        indicator.classList.remove('show', 'saving', 'saved');
-    }
+    showSaveIndicator('cloud', status);
 }
 
+// ============================================
+// Unified Autosave System
+// ============================================
+
+// Check and save - works for both logged-in and not-logged-in users
+async function checkAndSave() {
+    if (window.authToken && window.currentCharacterId) {
+        // Logged in with existing character -> save to cloud
+        await checkAndSaveToCloud();
+    } else if (!window.authToken) {
+        // Not logged in -> save locally
+        checkAndSaveLocally();
+    }
+    // If logged in but no character ID, do nothing (need to create first)
+}
+
+// Save to cloud (for logged-in users)
 async function checkAndSaveToCloud() {
     if (!window.authToken || !window.currentCharacterId) return;
 
     const currentData = JSON.stringify(window.getAllFields());
     if (currentData === lastSavedData) return;
 
-    showCloudSaveIndicator('saving');
+    showSaveIndicator('cloud', 'saving');
 
     try {
         const data = window.getAllFields();
@@ -133,19 +261,31 @@ async function checkAndSaveToCloud() {
         if (res.ok) {
             lastSavedData = currentData;
             console.log('Cloud autosave completed');
-            showCloudSaveIndicator('saved');
+            showSaveIndicator('cloud', 'saved');
         } else {
-            showCloudSaveIndicator('hide');
+            showSaveIndicator('cloud', 'hide');
         }
     } catch (error) {
         console.error('Cloud autosave failed:', error);
-        showCloudSaveIndicator('hide');
+        showSaveIndicator('cloud', 'hide');
+    }
+}
+
+// Save locally (for non-logged-in users)
+function checkAndSaveLocally() {
+    if (window.authToken) return; // Don't save locally if logged in
+
+    const saved = saveLocally();
+    if (saved) {
+        showSaveIndicator('local', 'saved');
+        console.log('Local autosave completed');
     }
 }
 
 function startAutoSave() {
     if (autoSaveInterval) return;
-    autoSaveInterval = setInterval(checkAndSaveToCloud, 5000);
+    // Use unified checkAndSave that handles both modes
+    autoSaveInterval = setInterval(checkAndSave, 5000);
 }
 
 function stopAutoSave() {
@@ -169,12 +309,12 @@ async function refreshCharacterData() {
 }
 
 function triggerImmediateSave() {
+    // Always save to autosave backup
     const data = window.getAllFields();
     localStorage.setItem('aedelore_character_autosave', JSON.stringify(data));
 
-    if (window.authToken && window.currentCharacterId) {
-        checkAndSaveToCloud();
-    }
+    // Use unified save system
+    checkAndSave();
 }
 
 function debouncedSave() {
@@ -560,18 +700,34 @@ window.addEventListener('beforeunload', () => {
     }
 });
 
-// Load autosave on page load
+// Load character on page load
 window.addEventListener('load', async () => {
-    const autosave = localStorage.getItem('aedelore_character_autosave');
-    if (autosave) {
-        const data = JSON.parse(autosave);
-        window.setAllFields(data);
-    }
     window.updateAuthUI();
 
-    const pendingCharId = localStorage.getItem('aedelore_current_character_id');
-    if (pendingCharId && window.authToken) {
-        await loadCharacterById(parseInt(pendingCharId));
+    if (window.authToken) {
+        // Logged in: load from cloud
+        const pendingCharId = localStorage.getItem('aedelore_current_character_id');
+        if (pendingCharId) {
+            await loadCharacterById(parseInt(pendingCharId));
+        }
+    } else {
+        // Not logged in: load local character if exists
+        const localChar = getLocalCharacter();
+        if (localChar) {
+            window.setAllFields(localChar);
+            lastLocalSavedData = JSON.stringify(localChar);
+            console.log('Loaded local character');
+        } else {
+            // Fall back to autosave backup
+            const autosave = localStorage.getItem('aedelore_character_autosave');
+            if (autosave) {
+                const data = JSON.parse(autosave);
+                window.setAllFields(data);
+            }
+        }
+
+        // Show sync notice after a short delay
+        setTimeout(showSyncNotice, 2000);
     }
 
     if (window.updateCampaignDisplay) window.updateCampaignDisplay();
@@ -579,9 +735,8 @@ window.addEventListener('load', async () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (window.authToken && window.currentCharacterId) {
-        startAutoSave();
-    }
+    // Start autosave for ALL users (logged in or not)
+    startAutoSave();
 
     const characterForm = document.querySelector('.character-sheet') || document.body;
     characterForm.addEventListener('input', (e) => {
@@ -602,7 +757,9 @@ window.exportCharacter = exportCharacter;
 window.importCharacter = importCharacter;
 window.clearCharacter = clearCharacter;
 window.showCloudSaveIndicator = showCloudSaveIndicator;
+window.showSaveIndicator = showSaveIndicator;
 window.checkAndSaveToCloud = checkAndSaveToCloud;
+window.checkAndSave = checkAndSave;
 window.startAutoSave = startAutoSave;
 window.stopAutoSave = stopAutoSave;
 window.refreshCharacterData = refreshCharacterData;
@@ -619,3 +776,11 @@ window.hideTrashModal = hideTrashModal;
 window.loadTrashCharacters = loadTrashCharacters;
 window.restoreCharacter = restoreCharacter;
 window.permanentDeleteCharacter = permanentDeleteCharacter;
+// Dual autosave functions
+window.saveLocally = saveLocally;
+window.getLocalCharacter = getLocalCharacter;
+window.hasLocalCharacter = hasLocalCharacter;
+window.clearLocalCharacter = clearLocalCharacter;
+window.migrateLocalToCloud = migrateLocalToCloud;
+window.showSyncNotice = showSyncNotice;
+window.dismissSyncNotice = dismissSyncNotice;

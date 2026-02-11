@@ -108,6 +108,8 @@ async function authenticate(req, res, next) {
 
         if (!session) {
             await db.query('DELETE FROM auth_tokens WHERE token = $1', [token]);
+            // Clear stale auth cookie to prevent repeated 401 errors
+            res.clearCookie(AUTH_COOKIE_NAME, { path: '/' });
             return res.status(401).json({ error: 'Unauthorized' });
         }
 

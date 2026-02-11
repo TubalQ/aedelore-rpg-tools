@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aedelore - A World Born from Dragons | Fantasy RPG World</title>
+    <title>Aedelore - Where Light and Shadow Dance | Fantasy RPG World</title>
 
     <!-- SEO Meta Tags -->
     <meta name="description" content="Explore Aedelore, a fantasy RPG world born from dragons. Discover seven unique races, ancient magic, 40+ locations, and rich lore. Create characters and embark on epic adventures.">
@@ -15,7 +15,7 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://aedelore.nu/">
-    <meta property="og:title" content="Aedelore - A World Born from Dragons">
+    <meta property="og:title" content="Aedelore - Where Light and Shadow Dance">
     <meta property="og:description" content="Explore Aedelore, a fantasy RPG world shaped by Dragon Gods. Seven races, ancient magic, and endless adventures await.">
     <meta property="og:image" content="https://aedelore.nu/uploads/images/system/2025-09/world-of-aedelore.jpg">
     <meta property="og:site_name" content="World of Aedelore">
@@ -24,13 +24,14 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://aedelore.nu/">
-    <meta name="twitter:title" content="Aedelore - A World Born from Dragons">
+    <meta name="twitter:title" content="Aedelore - Where Light and Shadow Dance">
     <meta name="twitter:description" content="Explore Aedelore, a fantasy RPG world shaped by Dragon Gods. Seven races, ancient magic, and endless adventures await.">
     <meta name="twitter:image" content="https://aedelore.nu/uploads/images/system/2025-09/world-of-aedelore.jpg">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/jpeg" href="https://aedelore.nu/uploads/images/system/2025-09/world-of-aedelore.jpg">
-    <link rel="apple-touch-icon" href="https://aedelore.nu/uploads/images/system/2025-09/world-of-aedelore.jpg">
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
 
     <!-- Structured Data (JSON-LD) -->
     <script type="application/ld+json">
@@ -271,42 +272,24 @@
             animation: fadeIn 2s ease-out 1s both;
         }
 
-        .hero-quote {
-            font-family: 'Crimson Text', Georgia, serif;
-            font-size: 1.15rem;
-            font-style: italic;
-            color: var(--text-secondary);
-            max-width: 750px;
-            margin: 0 auto 50px;
-            text-align: center;
-            line-height: 1.9;
-            animation: fadeIn 2s ease-out 1s both;
-        }
-
-        .hero-quote p {
-            margin-bottom: 0.8em;
-        }
-
-        .hero-quote p:last-of-type {
-            margin-bottom: 1.5em;
-        }
-
-        .hero-quote cite {
-            display: block;
-            font-size: 0.95rem;
-            color: var(--accent-gold);
-            font-style: normal;
-            letter-spacing: 0.02em;
-        }
 
         .scroll-indicator {
             position: absolute;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            color: var(--text-secondary);
+            color: var(--accent-gold);
             font-size: 0.9rem;
             animation: bounce 2s infinite;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        .scroll-indicator span {
+            display: block;
+            margin-top: 8px;
+            font-size: 1.2rem;
         }
 
         @keyframes bounce {
@@ -317,6 +300,145 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Particle effect */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--accent-gold);
+            border-radius: 50%;
+            opacity: 0;
+            animation: float-up 15s infinite;
+        }
+
+        .particle:nth-child(odd) {
+            background: var(--accent-purple);
+            width: 3px;
+            height: 3px;
+        }
+
+        .particle:nth-child(3n) {
+            background: var(--accent-blue);
+            animation-duration: 20s;
+        }
+
+        @keyframes float-up {
+            0% {
+                opacity: 0;
+                transform: translateY(100vh) scale(0);
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.3;
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px) scale(1);
+            }
+        }
+
+        /* Hero quote rotation */
+        .hero-quote {
+            font-family: 'Crimson Text', Georgia, serif;
+            font-size: 1.15rem;
+            font-style: italic;
+            color: var(--text-secondary);
+            max-width: 750px;
+            margin: 0 auto 30px;
+            text-align: center;
+            line-height: 1.9;
+            animation: fadeIn 2s ease-out 1s both;
+            min-height: 180px;
+        }
+
+        .hero-quote .quote-text {
+            opacity: 1;
+            transition: opacity 0.8s ease;
+        }
+
+        .hero-quote .quote-text.fading {
+            opacity: 0;
+        }
+
+        .hero-quote cite {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--accent-gold);
+            font-style: normal;
+            letter-spacing: 0.02em;
+            margin-top: 1.5em;
+        }
+
+        /* Crisis hint */
+        .crisis-hint {
+            font-family: 'Crimson Text', Georgia, serif;
+            font-size: 1rem;
+            color: var(--accent-purple);
+            margin-bottom: 40px;
+            animation: fadeIn 2s ease-out 2s both;
+            letter-spacing: 0.05em;
+        }
+
+        .crisis-hint .seal-warning {
+            color: #ff6b6b;
+            font-weight: 500;
+        }
+
+        /* Verse format for history */
+        .verse-text {
+            font-family: 'Crimson Text', Georgia, serif;
+            font-size: 1.1rem;
+            line-height: 2.2;
+            color: var(--text-secondary);
+        }
+
+        .verse-text .verse {
+            margin-bottom: 1.5em;
+        }
+
+        .verse-text .verse-num {
+            color: var(--accent-purple);
+            font-weight: 600;
+            margin-right: 0.5em;
+        }
+
+        /* Mystery cards */
+        .mystery-card {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.08) 0%, rgba(59, 158, 255, 0.05) 100%);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            position: relative;
+        }
+
+        .mystery-card::before {
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-gold));
+        }
+
+        .mystery-card:hover {
+            border-color: var(--accent-gold);
+            box-shadow: 0 8px 24px var(--accent-gold-glow);
+        }
+
+        .mystery-card h4 {
+            color: var(--accent-gold);
+        }
+
+        .mystery-card p {
+            font-style: italic;
         }
 
         /* Content sections - book pages style */
@@ -859,10 +981,20 @@
             .hero-quote {
                 font-size: 1rem;
                 padding: 0 10px;
+                min-height: 220px;
             }
 
             .hero-quote cite {
                 font-size: 0.85rem;
+            }
+
+            .crisis-hint {
+                font-size: 0.9rem;
+                padding: 0 20px;
+            }
+
+            .verse-text .verse {
+                font-size: 1rem;
             }
         }
     </style>
@@ -889,14 +1021,6 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                 <span class="nav-label">World</span>
             </a>
-            <a href="#history" class="nav-icon" title="History">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
-                <span class="nav-label">History</span>
-            </a>
-            <a href="#races" class="nav-icon" title="Races">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                <span class="nav-label">Races</span>
-            </a>
             <a href="character-sheet" class="nav-icon" title="Character Sheet">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 <span class="nav-label">Sheet</span>
@@ -904,10 +1028,6 @@
             <a href="dm-session" class="nav-icon" title="DM Session">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
                 <span class="nav-label">DM</span>
-            </a>
-            <a href="#lore" class="nav-icon" title="Lore">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                <span class="nav-label">Lore</span>
             </a>
             <a href="wiki" class="nav-icon" title="Wiki">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
@@ -920,18 +1040,26 @@
     <main class="main-content">
         <!-- Hero Section -->
         <section class="hero-section">
+            <!-- Particle effect -->
+            <div class="particles" id="particles"></div>
+
             <div class="hero-content">
                 <h1 class="hero-title">Aedelore</h1>
-                <p class="hero-subtitle">A World Born from Dragons</p>
-                <blockquote class="hero-quote">
-                    <p>Herein lies the sacred history of Aedelore, transcribed from the whispers of the Eternal and the memories of stone.</p>
-                    <p>Let those who seek wisdom read with open hearts, for in these words are hidden the keys to understanding the Great Mystery.</p>
-                    <p>As it was spoken by the ancients, so it is written here: that which is above reflects that which is below, and through the sacred dance of light and shadow, all things find their purpose.</p>
-                    <cite>— Set down by Aelindor the Ageless, First Keeper of the Great Tree, in the time before counting</cite>
+                <p class="hero-subtitle">Where Light and Shadow Dance</p>
+                <blockquote class="hero-quote" id="hero-quote">
+                    <div class="quote-text" id="quote-text">
+                        <p>Herein lies the sacred history of Aedelore, transcribed from the whispers of the Eternal and the memories of stone.</p>
+                        <p>As it was spoken by the ancients, so it is written here: that which is above reflects that which is below, and through the sacred dance of light and shadow, all things find their purpose.</p>
+                        <cite>— The Primordial Truth</cite>
+                    </div>
                 </blockquote>
+                <p class="crisis-hint">
+                    <span class="seal-warning">One seal is broken.</span> The sleeper stirs. The hour grows late.
+                </p>
             </div>
             <div class="scroll-indicator">
-                ↓ Scroll to explore
+                Seek the Light
+                <span>↓</span>
             </div>
         </section>
 
@@ -941,67 +1069,38 @@
                 <div class="section-number">Chapter I</div>
                 <h2 class="section-title">The World</h2>
                 <div class="decorative-line"></div>
-                
-                <div class="two-column">
-                    <div class="column-content">
-                        <h3>The Dragon Gods</h3>
-                        <p>
-                            Aedelore was shaped by the Dragon Aspects in the wake of the Black Sun's birth. 
-                            Taninsam brought fire and creation. Tiamat embodied earth and stability. 
-                            Leviathan commanded air and storms. Tanin'iver offered water and healing. 
-                            Tatsu governed souls and rebirth. Tohu wielded magic and transformation.
-                        </p>
-                        <p>
-                            Their influence echoes through every corner of the realm, from the highest peaks 
-                            to the deepest oceans. The races they created still honor them through various creeds and faiths.
-                        </p>
 
-                        <h3>Lands & Cities</h3>
-                        <p>
-                            Tyralia stands as the grand capital of humanity. Lorenzia shimmers with High Elven magic. 
-                            The dwarven fortress of Amber's Call endures in frozen mountains. Moon Elves guard their 
-                            secrets in Feldale. The Sunken City lies in ruin beneath the waves.
-                        </p>
+                <div class="verse-text" style="max-width: 800px; margin: 0 auto;">
+                    <div class="verse">
+                        <span class="verse-num">I.</span> Six flames fell from the Black Sun, and where they touched the void, form crystallized. This was the first shaping - light becoming matter, potential becoming place.
                     </div>
-                    <div class="column-content">
-                        <h3>The Floating Isles</h3>
-                        <p>
-                            During the First War, the very fabric of reality tore. Entire landmasses were ripped 
-                            from the ground and suspended in the sky. These Floating Isles remain—monuments to the 
-                            devastating power unleashed when the races turned against each other.
-                        </p>
-
-                        <h3>Faith & Power</h3>
-                        <p>
-                            Fourteen distinct religions guide the faithful. The Flame of Taninsam teaches that trials forge the soul. The Silent Hunt follows the Groove Guardian through wild places. 
-                            The Shattered Path offers solace to outcasts. Each creed shapes how its followers 
-                            understand their place in Aedelore.
-                        </p>
-
-                        <div class="quote-block">
-                            "From the void came fire, from fire came life, and from life came Aedelore."
-                        </div>
+                    <div class="verse">
+                        <span class="verse-num">II.</span> Taninsam's fire beats at the world's heart, giving warmth to stone and passion to blood. Tanin'iver's waters flow through every vein, carrying memory and healing.
+                    </div>
+                    <div class="verse">
+                        <span class="verse-num">III.</span> Leviathan's breath fills the sky, stirring change where stillness would breed stagnation. Tiamat's bones form the mountains, patient and eternal beneath all that moves.
+                    </div>
+                    <div class="verse">
+                        <span class="verse-num">IV.</span> Tatsu shepherds the spark within each living thing - that fragment of divine light called soul. Tohu weaves the invisible threads that bind all to all.
+                    </div>
+                    <div class="verse">
+                        <span class="verse-num">V.</span> In Lorenzia, the Elves remember starlight. In Tyralia, Humans build toward futures they will not live to see. In the deep halls, Dwarves speak to stone, and stone answers.
+                    </div>
+                    <div class="verse">
+                        <span class="verse-num">VI.</span> Above the clouds drift the Floating Isles - wounds in the sky where reality itself was torn. Below the waves sleeps the Sunken City, dreaming of what it was and what it might become.
+                    </div>
+                    <div class="verse">
+                        <span class="verse-num">VII.</span> Seven peoples walk the land. Six gods dream beneath. Fourteen faiths seek the light. And in every shadow, something watches, waiting for the seals to weaken further.
                     </div>
                 </div>
 
-                <div class="stats-display">
-                    <div class="stat-item">
-                        <div class="stat-number">40+</div>
-                        <div class="stat-label">Locations</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">7</div>
-                        <div class="stat-label">Races</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">6</div>
-                        <div class="stat-label">Paths</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">14</div>
-                        <div class="stat-label">Religions</div>
-                    </div>
-                </div>
+                <p style="margin-top: 50px; text-align: center; font-size: 1.1rem; font-family: 'Inter', sans-serif;">
+                    Explore the lands in the
+                    <a href="/wiki#the-world"
+                       style="color: var(--accent-gold); text-decoration: none; border-bottom: 2px solid var(--accent-gold);">
+                        Atlas of Aedelore
+                    </a>
+                </p>
             </div>
         </section>
 
@@ -1012,47 +1111,32 @@
                 <h2 class="section-title">Ages Past</h2>
                 <div class="decorative-line"></div>
 
-                <div class="column-content" style="max-width: 800px; margin: 0 auto;">
-                    <h3>The Fourth Birth</h3>
-                    <p>
-                        In the time before counting, the Black Sun dreamed within the Void—gathering
-                        the essence of three fallen worlds, three great cycles of creation and dissolution.
-                        When at last it awakened, six Divine Aspects emerged as vessels of the Eternal Light.
-                        Upon a barren world they descended, and through their sacred union was born Aedelore,
-                        the Land of Divine Light.
-                    </p>
+                <div class="verse-text" style="max-width: 800px; margin: 0 auto;">
+                    <div class="verse">
+                        <span class="verse-num">I.</span> In the time before counting, the Black Sun dreamed within the Void - gathering the essence of three fallen worlds, three great cycles of creation and dissolution.
+                    </div>
+                    <div class="verse">
+                        <span class="verse-num">II.</span> When at last it released its gathered light, six Divine Aspects emerged as vessels of the Eternal Fire. They named this world Aedelore - the Land of Divine Light.
+                    </div>
+                    <div class="verse">
+                        <span class="verse-num">III.</span> For an age, the veil between mortal and divine was thin, and wonders walked openly upon the land. Yet know that peace among the unenlightened is but a fleeting shadow.
+                    </div>
+                    <div class="verse">
+                        <span class="verse-num">IV.</span> Pride kindled flames of war. For fifty years the races bled. When mortal hands refused to stay their violence, the Dragon Gods stirred from slumber and judged them with sacred fire.
+                    </div>
+                    <div class="verse">
+                        <span class="verse-num">V.</span> As punishment, Tohu withdrew magic from the world. The divine light dimmed. Some Elves, touched by mortality, became the first Humans. This was the Age of Silence.
+                    </div>
+                    <div class="verse">
+                        <span class="verse-num">VI.</span> Now ancient forces stir once more. At Rivermount, the First Seal was broken. Blood flowed into the Lake of Shadows, and that which sleeps beneath began to remember that it exists.
+                    </div>
+                    <div class="verse">
+                        <span class="verse-num">VII.</span> This is the Age of Awakening. The light returns - but so does the shadow. Those who would stand against the darkness are sought. The hour grows late.
+                    </div>
 
-                    <h3>The Fall from Grace</h3>
-                    <p>
-                        For an age, the veil between mortal and divine was thin, and wonders walked openly
-                        upon the land. Yet peace among the unenlightened is but a fleeting shadow.
-                        Pride and resentment kindled flames of war, and for fifty years the races bled.
-                        When mortal hands refused to stay their violence, the Dragon Gods stirred from slumber.
-                        At Nortaq, the priest Lordean offered himself to Taninsam's sacred fire—and from that sacrifice,
-                        the very earth was torn skyward, giving birth to the Floating Isles.
-                    </p>
-
-                    <h3>The Age of Silence</h3>
-                    <p>
-                        As punishment for the sins of the unworthy, Tohu withdrew magic from the world.
-                        The divine light dimmed; what once flowed freely became but a whisper.
-                        In the quiet centuries that followed, wounds healed and new truths emerged—some Elves,
-                        touched by mortality, became the first Humans. The world rebuilt itself in shadow,
-                        awaiting the day when the light might return.
-                    </p>
-
-                    <h3>The Rising Shadow</h3>
-                    <p>
-                        Now ancient forces stir once more. The Orcs and Trolls, hardened by centuries of exile
-                        in the outer darkness, have emerged from the Barrowhills. At Rivermount they tested
-                        the elven watch—and though the siege was broken, darker whispers spread.
-                        Forgotten knowledge resurfaces. The Void grows restless. This is Aedelore as it stands:
-                        a world shaped by cycles of light and shadow, awaiting those who would choose which to serve.
-                    </p>
-                    
-                    <p style="margin-top: 40px; text-align: center; font-size: 1.2rem;">
-                        Want to dive into the full story? Explore the
-                        <a href="/wiki#lore-and-history"
+                    <p style="margin-top: 50px; text-align: center; font-size: 1.1rem; font-family: 'Inter', sans-serif;">
+                        Seek the full chronicle in the
+                        <a href="/wiki#lore-and-history/i-the-primordial-truth"
                            style="color: var(--accent-gold); text-decoration: none; border-bottom: 2px solid var(--accent-gold);">
                             Rivermount Library
                         </a>
@@ -1152,60 +1236,92 @@
             </div>
         </section>
 
-        <!-- Explore the Lore Section -->
-        <section id="lore" class="content-section" style="background: rgba(30, 41, 59, 0.2);">
+        <!-- The Mysteries Section -->
+        <section id="mysteries" class="content-section" style="background: rgba(30, 41, 59, 0.2);">
             <div class="section-inner">
                 <div class="section-number">Chapter IV</div>
-                <h2 class="section-title">Explore the Lore</h2>
+                <h2 class="section-title">The Hidden Teachings</h2>
                 <div class="decorative-line"></div>
 
-                <p style="color: var(--text-secondary); font-size: 1.1rem; max-width: 700px; margin-bottom: 50px; line-height: 1.8;">
-                    Dive deeper into the world with these collections of knowledge, recently added to the archives.
-                </p>
+                <div class="quote-block" style="max-width: 700px; margin: 0 auto 50px; border-left-color: var(--accent-gold); background: rgba(240, 192, 64, 0.05);">
+                    "There are truths that cannot be spoken plainly, for the uninitiated mind may shatter like glass before a storm. Read only if you are prepared to see the world as it truly is."
+                </div>
 
                 <div class="info-grid">
-                    <a href="/wiki#bestiary" class="info-card">
-                        <h4>Bestiary</h4>
-                        <p>
-                            A comprehensive collection documenting the creatures that inhabit Aedelore,
-                            from common beasts to legendary monsters of myth.
-                        </p>
+                    <a href="/wiki#lore-and-history/doctrine-of-emanations" class="info-card mystery-card">
+                        <h4>The Doctrine of Emanations</h4>
+                        <p>"All things flow from the One, and the One is the Black Sun - that which gathers and releases, that which creates through destruction..."</p>
                     </a>
-                    <a href="/wiki#artifacts-and-relics" class="info-card">
-                        <h4>Artifacts & Relics</h4>
-                        <p>
-                            Legendary items of power scattered across the realm, each with its own
-                            history and purpose waiting to be discovered.
-                        </p>
+                    <a href="/wiki#lore-and-history/eleven-seals" class="info-card mystery-card">
+                        <h4>The Eleven Seals</h4>
+                        <p>"That which is bound reflects that which binds. The seal and the sealed are one substance, divided by intention..."</p>
                     </a>
-                    <a href="/wiki#nature" class="info-card">
-                        <h4>Nature of Aedelore</h4>
-                        <p>
-                            Documentation of flora and fauna, from ordinary plants to magical species
-                            that thrive in the wild places of the world.
-                        </p>
+                    <a href="/wiki#lore-and-history/forbidden-arts" class="info-card mystery-card">
+                        <h4>The Forbidden Arts</h4>
+                        <p>"There are arts that the wise do not practice, not because they lack power, but because they possess too much..."</p>
                     </a>
-                    <a href="/wiki#organizations" class="info-card">
-                        <h4>Societies & Secrets</h4>
-                        <p>
-                            The organizations and guilds that shape the world's politics, trade,
-                            and hidden power structures across all races.
-                        </p>
+                    <a href="/wiki#lore-and-history/nature-of-souls" class="info-card mystery-card">
+                        <h4>The Nature of Souls</h4>
+                        <p>"You believe you have a soul. This is imprecise. You do not have a soul - you ARE a soul. You have a body..."</p>
+                    </a>
+                    <a href="/wiki#lore-and-history/mystery-of-the-void" class="info-card mystery-card">
+                        <h4>The Mystery of the Void</h4>
+                        <p>"The Void is not emptiness - it is fullness beyond measure, potential so vast that it appears as nothing..."</p>
+                    </a>
+                    <a href="/wiki#lore-and-history/seven-veils" class="info-card mystery-card">
+                        <h4>The Seven Veils</h4>
+                        <p>"Between the mortal world and the Divine Light lie seven veils - barriers of perception that separate the sleeping soul..."</p>
                     </a>
                 </div>
 
-                <p style="margin-top: 60px; text-align: center; font-size: 1.1rem; color: var(--text-secondary);">
-                    New to Aedelore? Start with the
-                    <a href="/wiki#rules-and-reference/first-time-guide"
+                <p style="margin-top: 50px; text-align: center; font-size: 1.1rem;">
+                    <a href="/wiki#lore-and-history"
                        style="color: var(--accent-gold); text-decoration: none; border-bottom: 2px solid var(--accent-gold);">
-                        First Time Guide
-                    </a>
-                    or explore the
-                    <a href="/wiki#rules-and-reference/part-1core-system"
-                       style="color: var(--accent-gold); text-decoration: none; border-bottom: 2px solid var(--accent-gold);">
-                        Game Rules
+                        Enter the Mysteries →
                     </a>
                 </p>
+            </div>
+        </section>
+
+        <!-- For the Seeker Section -->
+        <section id="tools" class="content-section">
+            <div class="section-inner">
+                <div class="section-number">Chapter V</div>
+                <h2 class="section-title">For the Seeker</h2>
+                <div class="decorative-line"></div>
+
+                <div class="verse-text" style="max-width: 600px; margin: 0 auto 50px; text-align: center;">
+                    <div class="verse" style="margin-bottom: 0;">
+                        Every journey begins with a single step. Every hero begins with a choice.
+                    </div>
+                </div>
+
+                <div class="info-grid" style="max-width: 900px; margin: 0 auto;">
+                    <a href="/character-sheet" class="info-card">
+                        <h4>Forge Your Soul</h4>
+                        <p>
+                            The character sheet awaits. Give form to the hero within - name, race, path, and purpose.
+                        </p>
+                    </a>
+                    <a href="/dm-session" class="info-card">
+                        <h4>Guide the Tale</h4>
+                        <p>
+                            Tools for the Dungeon Master. Shape the story, track the journey, reveal the mysteries.
+                        </p>
+                    </a>
+                    <a href="/wiki#rules-and-reference/first-time-guide" class="info-card">
+                        <h4>First Steps</h4>
+                        <p>
+                            New to Aedelore? Begin here. The path will reveal itself to those who seek.
+                        </p>
+                    </a>
+                    <a href="/wiki#rules-and-reference/part-1-core-system" class="info-card">
+                        <h4>The Rules</h4>
+                        <p>
+                            Laws that govern the game. Not restrictions, but the language through which stories are told.
+                        </p>
+                    </a>
+                </div>
             </div>
         </section>
 
@@ -1301,5 +1417,80 @@
     <!-- Error Logger -->
     <script src="js/error-logger.js"></script>
     <script src="js/privacy.js"></script>
+
+    <!-- Hero animations -->
+    <script>
+        // Create particles
+        (function() {
+            const container = document.getElementById('particles');
+            if (!container) return;
+
+            const particleCount = 30;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                container.appendChild(particle);
+            }
+        })();
+
+        // Rotating quotes
+        (function() {
+            const quotes = [
+                {
+                    text: '<p>Herein lies the sacred history of Aedelore, transcribed from the whispers of the Eternal and the memories of stone.</p><p>As it was spoken by the ancients, so it is written here: that which is above reflects that which is below, and through the sacred dance of light and shadow, all things find their purpose.</p>',
+                    cite: 'The Primordial Truth'
+                },
+                {
+                    text: '<p>Know that all things flow from the One, and the One is the Black Sun - that which gathers and releases, that which creates through destruction and destroys through creation.</p>',
+                    cite: 'The Doctrine of Emanations'
+                },
+                {
+                    text: '<p>That which is bound reflects that which binds. The seal and the sealed are one substance, divided by intention.</p><p>Eleven seals were placed. One has broken. The count has begun.</p>',
+                    cite: 'The Eleven Seals'
+                },
+                {
+                    text: '<p>You believe you have a soul. This is imprecise. You do not have a soul - you ARE a soul. You have a body.</p><p>This distinction, seemingly small, changes everything.</p>',
+                    cite: 'The Nature of Souls'
+                },
+                {
+                    text: '<p>The Void is not emptiness - it is fullness beyond measure, potential so vast that it appears as nothing to eyes trained only to see what already exists.</p>',
+                    cite: 'The Mystery of the Void'
+                },
+                {
+                    text: '<p>There are arts that the wise do not practice, not because they lack power, but because they possess too much.</p><p>Blood remembers. The souls whose blood is stolen do not forget.</p>',
+                    cite: 'The Forbidden Arts'
+                },
+                {
+                    text: '<p>Between the mortal world and the Divine Light lie seven veils - barriers of perception that separate the sleeping soul from full awareness of its own nature.</p>',
+                    cite: 'The Seven Veils'
+                },
+                {
+                    text: '<p>When the body sleeps, the soul does not sleep with it. It loosens its grip on flesh and wanders - sometimes nearby, sometimes across vast distances, sometimes into realms that have no physical location at all.</p>',
+                    cite: 'The Language of Dreams'
+                }
+            ];
+
+            let currentIndex = 0;
+            const quoteText = document.getElementById('quote-text');
+            if (!quoteText) return;
+
+            function changeQuote() {
+                quoteText.classList.add('fading');
+
+                setTimeout(() => {
+                    currentIndex = (currentIndex + 1) % quotes.length;
+                    const quote = quotes[currentIndex];
+                    quoteText.innerHTML = quote.text + '<cite>— ' + quote.cite + '</cite>';
+                    quoteText.classList.remove('fading');
+                }, 800);
+            }
+
+            // Change quote every 12 seconds
+            setInterval(changeQuote, 12000);
+        })();
+    </script>
 </body>
 </html>
