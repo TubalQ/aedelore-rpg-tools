@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aedelore AI Reference - Complete Game Data</title>
+    <meta name="description" content="Complete reference data for the Aedelore RPG system. Races, classes, weapons, armor, spells, and game rules.">
+    <meta name="robots" content="noindex">
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: #1a1a2e;
+            color: #e0e0e0;
+        }
+        h1 { color: #ffd700; border-bottom: 2px solid #ffd700; padding-bottom: 10px; }
+        h2 { color: #00bcd4; margin-top: 40px; border-bottom: 1px solid #00bcd4; }
+        h3 { color: #9c27b0; }
+        h4 { color: #4caf50; }
+        table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+        th, td { border: 1px solid #444; padding: 8px; text-align: left; }
+        th { background: #2a2a4e; color: #ffd700; }
+        tr:nth-child(even) { background: #252545; }
+        pre { background: #252545; padding: 15px; overflow-x: auto; border-radius: 5px; }
+        code { background: #252545; padding: 2px 6px; border-radius: 3px; }
+        .section { margin-bottom: 50px; }
+        .note { background: #3a2a4e; padding: 10px; border-left: 3px solid #9c27b0; margin: 10px 0; }
+        ul { padding-left: 20px; }
+        li { margin: 5px 0; }
+    </style>
+</head>
+<body>
+
+<h1>Aedelore RPG - AI Reference Guide</h1>
+
+<p><strong>Version:</strong> 1.0 | <strong>System:</strong> D10 Pool-Based | <strong>Setting:</strong> Fantasy World of Aedelore</p>
+
+<div class="note">
+<strong>For AI Assistants:</strong> This page contains game rules and character creation data. For world lore, see the specialized pages below.
+</div>
+
+<h3>AI Reference Pages</h3>
+<ul>
+<li><strong><a href="/ai-reference/">Game Rules & Character Creation</a></strong> (this page) - Dice system, races, classes, weapons, armor, spells</li>
+<li><strong><a href="/ai-reference/world">The World</a></strong> - All 40 locations, cities, and regions</li>
+<li><strong><a href="/ai-reference/bestiary">Bestiary</a></strong> - All 121 creatures and monsters</li>
+<li><strong><a href="/ai-reference/lore">Lore & History</a></strong> - All 61 pages of history, legends, and mysteries</li>
+<li><strong><a href="/ai-reference/religion">Religion & Culture</a></strong> - All 37 pages on faiths and traditions</li>
+<li><strong><a href="/ai-reference/artifacts">Artifacts & Relics</a></strong> - All 38 legendary items</li>
+<li><strong><a href="/ai-reference/nature">Nature</a></strong> - All 60 pages on flora and fauna</li>
+<li><strong><a href="/ai-reference/organizations">Organizations & Secrets</a></strong> - All 6 guilds and factions</li>
+</ul>
+
+<hr>
+
+<div class="section">
+<h2>1. Core Dice System</h2>
+
+<h3>Points to Dice Conversion</h3>
+<table>
+<tr><th>Points</th><th>Dice</th></tr>
+<tr><td>1-2</td><td>1D10</td></tr>
+<tr><td>3-4</td><td>2D10</td></tr>
+<tr><td>5-6</td><td>3D10</td></tr>
+<tr><td>7-8</td><td>4D10</td></tr>
+<tr><td>9-10</td><td>5D10</td></tr>
+<tr><td>11+</td><td>6D10</td></tr>
+</table>
+<p><strong>Maximum:</strong> No action may exceed 8 dice total, unless a class ability specifically allows it.</p>
+
+<h3>Result Levels (per die)</h3>
+<table>
+<tr><th>Roll</th><th>Result</th><th>Description</th></tr>
+<tr><td>1-4</td><td>Failure</td><td>Complete failure</td></tr>
+<tr><td>5-6</td><td>Barely</td><td>Minimal success, may have consequences</td></tr>
+<tr><td>7-9</td><td>Success</td><td>Full success</td></tr>
+<tr><td>10</td><td>Critical</td><td>Exceptional success + reroll the die</td></tr>
+</table>
+
+<h3>Critical Rolls (10)</h3>
+<p>When you roll 10: Count it as success, reroll the die, add the result. If reroll is also 10, chain continues.</p>
+
+<h3>Difficulty Levels</h3>
+<table>
+<tr><th>Difficulty</th><th>Successes Required</th></tr>
+<tr><td>Trivial</td><td>1</td></tr>
+<tr><td>Easy</td><td>2</td></tr>
+<tr><td>Normal</td><td>3</td></tr>
+<tr><td>Hard</td><td>4</td></tr>
+<tr><td>Very Hard</td><td>5</td></tr>
+<tr><td>Nearly Impossible</td><td>6+</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>2. Combat Rules</h2>
+
+<h3>Initiative</h3>
+<ul>
+<li>6 or fewer participants: Roll 1D6 (1 = slowest, 6 = fastest)</li>
+<li>More than 6 participants: Roll 1D10 instead</li>
+</ul>
+
+<h3>Attack</h3>
+<pre>Attack Pool = Core Ability + Weapon Attack Bonus
+(Convert each part to dice, max 8D10 total)</pre>
+
+<table>
+<tr><th>Successes</th><th>Result</th></tr>
+<tr><td>0</td><td>Miss - no damage</td></tr>
+<tr><td>1</td><td>Glancing blow - 50% damage</td></tr>
+<tr><td>2+</td><td>Full hit - full damage</td></tr>
+<tr><td>Critical (10)</td><td>Extra effect (DM decides)</td></tr>
+</table>
+
+<h3>Defense Options</h3>
+
+<h4>Dodge</h4>
+<pre>Pool = Dexterity + Acrobatics</pre>
+<ul>
+<li>Success: Avoid attack completely</li>
+<li>Barely: Take half damage</li>
+<li>Fail: Take full damage</li>
+</ul>
+
+<h4>Parry</h4>
+<pre>Pool = Strength + Weapon Attack Bonus</pre>
+<ul>
+<li>Success: Parry attack, no damage</li>
+<li>Barely: Reduce damage by weapon's attack bonus</li>
+<li>Fail: Take full damage</li>
+</ul>
+
+<h4>Block (requires shield or armor)</h4>
+<pre>Pool = Strength</pre>
+<ul>
+<li>Success (at least 1): Block up to shield's/armor's Block value. Remaining damage goes through. Shield takes blocked damage to its HP.</li>
+<li>Fail: Take full damage</li>
+</ul>
+
+<h4>Take Hit</h4>
+<pre>Pool = Toughness + Armor Bonus</pre>
+<p>Each success reduces damage by 1.</p>
+</div>
+
+<div class="section">
+<h2>3. Races</h2>
+
+<h3>Human</h3>
+<ul>
+<li><strong>Starting HP:</strong> 20</li>
+<li><strong>Starting Worthiness:</strong> 7</li>
+<li><strong>Starting Weapon:</strong> Longsword</li>
+<li><strong>Starting Food:</strong> 1D6</li>
+<li><strong>Bonuses:</strong> +1 Strength, +1 Dexterity, +1 Toughness, +1 Intelligence, +1 Wisdom, +1 Athletics, +1 Perception, +1 Performance, +1 Survival, +1 Investigation</li>
+</ul>
+
+<h3>Dwarf</h3>
+<ul>
+<li><strong>Starting HP:</strong> 22</li>
+<li><strong>Starting Worthiness:</strong> 7</li>
+<li><strong>Starting Weapon:</strong> Warhammer</li>
+<li><strong>Starting Food:</strong> 1D10</li>
+<li><strong>Bonuses:</strong> +2 Strength, +1 Toughness, +1 Force of Will, +1 Raw Power, +2 History, +2 Survival, +1 Resistance</li>
+</ul>
+
+<h3>Halfling</h3>
+<ul>
+<li><strong>Starting HP:</strong> 14</li>
+<li><strong>Starting Worthiness:</strong> 8</li>
+<li><strong>Starting Weapon:</strong> Sling</li>
+<li><strong>Starting Food:</strong> 1D6</li>
+<li><strong>Bonuses:</strong> +2 Dexterity, +1 Strength, +1 Toughness, +1 Intelligence, +1 Wisdom, +1 Acrobatics, +1 Stealth, +1 Sleight of Hand, +1 Perception</li>
+</ul>
+
+<h3>High Elf</h3>
+<ul>
+<li><strong>Starting HP:</strong> 16</li>
+<li><strong>Starting Worthiness:</strong> 10</li>
+<li><strong>Starting Weapon:</strong> Scimitar</li>
+<li><strong>Starting Food:</strong> 1D10</li>
+<li><strong>Bonuses:</strong> +1 Dexterity, +2 Intelligence, +2 Wisdom, +1 Acrobatics, +2 History, +2 Nature, +1 Medicine, +1 Perception</li>
+</ul>
+
+<h3>Moon Elf</h3>
+<ul>
+<li><strong>Starting HP:</strong> 18</li>
+<li><strong>Starting Worthiness:</strong> 4</li>
+<li><strong>Starting Weapon:</strong> Shortsword</li>
+<li><strong>Starting Food:</strong> 1D6</li>
+<li><strong>Bonuses:</strong> +2 Dexterity, +1 Wisdom, +2 Acrobatics, +1 Stealth, +1 Unarmed, +1 Endurance, +1 Animal Handling, +1 Insight</li>
+</ul>
+
+<h3>Orc</h3>
+<ul>
+<li><strong>Starting HP:</strong> 24</li>
+<li><strong>Starting Worthiness:</strong> -5</li>
+<li><strong>Starting Weapon:</strong> Greatclub</li>
+<li><strong>Starting Food:</strong> 1D6</li>
+<li><strong>Bonuses:</strong> +2 Strength, +2 Toughness, +2 Raw Power, +1 Endurance, +1 Unarmed, +2 Intimidation</li>
+</ul>
+
+<h3>Troll</h3>
+<ul>
+<li><strong>Starting HP:</strong> 20</li>
+<li><strong>Starting Worthiness:</strong> 2</li>
+<li><strong>Starting Weapon:</strong> Club</li>
+<li><strong>Starting Food:</strong> 1D6</li>
+<li><strong>Bonuses:</strong> +1 Dexterity, +2 Toughness, +2 Athletics, +1 Endurance, +2 Resistance, +2 Survival</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>4. Classes</h2>
+
+<h3>Warrior</h3>
+<ul>
+<li><strong>HP Bonus:</strong> +5</li>
+<li><strong>Starting Worthiness:</strong> +3</li>
+<li><strong>Starting Armor:</strong> Chainmail (chest), Leather (shoulders, legs)</li>
+<li><strong>Starting Shield:</strong> Shield (Metal)</li>
+<li><strong>Starting Weapon:</strong> Battleaxe</li>
+<li><strong>Starting Gold:</strong> 2</li>
+<li><strong>Ability Capacity:</strong> 3 melee abilities</li>
+<li><strong>Ability Type:</strong> Weakened-based</li>
+<li><strong>Bonuses:</strong> +1 Strength, +1 Toughness, +1 Athletics, +1 Endurance, +1 Unarmed, +1 Intimidation, +1 Raw Power, +1 Resistance</li>
+<li><strong>Special:</strong> Proficiency with all weapons and armor</li>
+</ul>
+
+<h3>Thief/Rogue</h3>
+<ul>
+<li><strong>HP Bonus:</strong> +2</li>
+<li><strong>Starting Worthiness:</strong> -4</li>
+<li><strong>Starting Armor:</strong> Leather (chest, legs), Cloth (head, shoulders)</li>
+<li><strong>Starting Weapon:</strong> Dagger</li>
+<li><strong>Starting Gold:</strong> 7</li>
+<li><strong>Ability Capacity:</strong> 3 melee abilities</li>
+<li><strong>Ability Type:</strong> Weakened-based</li>
+<li><strong>Bonuses:</strong> +2 Dexterity, +1 Sleight of Hand, +1 Stealth, +1 Investigation, +1 Acrobatics, +1 Perception, +1 Deception</li>
+<li><strong>Special:</strong> Expertise in lockpicking and trap detection</li>
+</ul>
+
+<h3>Outcast</h3>
+<ul>
+<li><strong>HP Bonus:</strong> +4</li>
+<li><strong>Starting Worthiness:</strong> -2</li>
+<li><strong>Starting Armor:</strong> Leather (chest), Cloth (legs)</li>
+<li><strong>Starting Weapon:</strong> Mace</li>
+<li><strong>Starting Gold:</strong> 2</li>
+<li><strong>Starting Food:</strong> 1D10</li>
+<li><strong>Ability Capacity:</strong> 3 melee abilities</li>
+<li><strong>Ability Type:</strong> Weakened-based</li>
+<li><strong>Bonuses:</strong> +1 Strength, +2 Toughness, +2 Stealth, +1 Resistance, +1 Investigation, +1 Nature</li>
+<li><strong>Special:</strong> Can use both melee and ranged effectively</li>
+</ul>
+
+<h3>Mage</h3>
+<ul>
+<li><strong>HP Bonus:</strong> +2</li>
+<li><strong>Starting Worthiness:</strong> +6</li>
+<li><strong>Starting Armor:</strong> Cloth (chest, shoulders, legs)</li>
+<li><strong>Starting Weapon:</strong> Quarterstaff</li>
+<li><strong>Starting Gold:</strong> 10</li>
+<li><strong>Spell Capacity:</strong> 10 mage spells</li>
+<li><strong>Arcana:</strong> Max 20, Starting 10</li>
+<li><strong>Ability Type:</strong> Arcana-based</li>
+<li><strong>Bonuses:</strong> +2 Intelligence, +2 Wisdom, +1 Arcana, +2 History, +1 Religion</li>
+<li><strong>Special:</strong> Full Arcana (1D10), Arcana regeneration: 1/round or 2/rest</li>
+</ul>
+
+<h3>Hunter</h3>
+<ul>
+<li><strong>HP Bonus:</strong> +3</li>
+<li><strong>Starting Worthiness:</strong> +4</li>
+<li><strong>Starting Armor:</strong> Leather (chest, shoulders, legs)</li>
+<li><strong>Starting Weapon:</strong> Longbow</li>
+<li><strong>Starting Arrows:</strong> 1D10</li>
+<li><strong>Starting Gold:</strong> 3</li>
+<li><strong>Starting Food:</strong> 1D10</li>
+<li><strong>Ability Capacity:</strong> 3 melee abilities</li>
+<li><strong>Ability Type:</strong> Weakened-based</li>
+<li><strong>Bonuses:</strong> +1 Dexterity, +1 Wisdom, +1 Perception, +1 Animal Handling, +1 Survival, +1 Insight, +1 Nature, +1 Stealth</li>
+<li><strong>Special:</strong> Expertise with bows and tracking</li>
+</ul>
+
+<h3>Druid</h3>
+<ul>
+<li><strong>HP Bonus:</strong> +3</li>
+<li><strong>Starting Worthiness:</strong> +3</li>
+<li><strong>Starting Armor:</strong> Leather (chest), Cloth (shoulders, legs)</li>
+<li><strong>Starting Weapon:</strong> Spear</li>
+<li><strong>Starting Gold:</strong> 2</li>
+<li><strong>Spell/Ability Capacity:</strong> 5</li>
+<li><strong>Arcana:</strong> Max 16, Starting 8</li>
+<li><strong>Ability Type:</strong> Arcana-based</li>
+<li><strong>Bonuses:</strong> +1 Dexterity, +2 Wisdom, +1 Nature, +2 Medicine, +2 Animal Handling</li>
+<li><strong>Special:</strong> Access to nature-based spells and melee abilities, Arcana regeneration: 1/round or 2/rest</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>5. HP Calculation</h2>
+<pre>Total HP = Race Base HP + Class HP Bonus</pre>
+<p><strong>Examples:</strong></p>
+<ul>
+<li>Human (20) + Warrior (+5) = 25 HP</li>
+<li>Orc (24) + Warrior (+5) = 29 HP</li>
+<li>Halfling (14) + Mage (+2) = 16 HP</li>
+<li>Dwarf (22) + Outcast (+4) = 26 HP</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>6. Worthiness Calculation</h2>
+<pre>Total Worthiness = Race Worthiness + Class Worthiness + Religion Modifier</pre>
+<p><strong>Examples:</strong></p>
+<ul>
+<li>Human (7) + Warrior (+3) = 10 Worthiness</li>
+<li>Orc (-5) + Warrior (+3) = -2 Worthiness</li>
+<li>High Elf (10) + Thief (-4) = 6 Worthiness</li>
+<li>Human (7) + Mage (+6) + Abyssal Veil (-5) = 8 Worthiness</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>7. Religions</h2>
+
+<h3>Creed of Shadows (Noctara)</h3>
+<ul>
+<li><strong>Deity:</strong> Noctara, Veiled Mistress of Shadows</li>
+<li><strong>Bonuses:</strong> +1 Stealth, +1 Deception</li>
+<li><strong>Description:</strong> Worship darkness and secrecy, believing true power comes through subtlety.</li>
+</ul>
+
+<h3>The Shattered Path (Tatsu)</h3>
+<ul>
+<li><strong>Deity:</strong> Tatsu, Dragon God of Exile</li>
+<li><strong>Bonuses:</strong> +1 Perception, +1 Insight</li>
+<li><strong>Description:</strong> Serve outcasts and those rejecting society, drawing strength from isolation.</li>
+</ul>
+
+<h3>The Silent Hunt (Groove Guardian)</h3>
+<ul>
+<li><strong>Deity:</strong> The Groove Guardian, Wild Spirit</li>
+<li><strong>Bonuses:</strong> +1 Agility, +1 Survival</li>
+<li><strong>Description:</strong> Revere nature and maintain ecological balance as hunters.</li>
+</ul>
+
+<h3>The Stone's Heart (Great Mountain)</h3>
+<ul>
+<li><strong>Deity:</strong> The Great Mountain, Father of Stone</li>
+<li><strong>Bonuses:</strong> +1 History, +1 Perception</li>
+<li><strong>Description:</strong> Dwarven faith believing they were carved from stone.</li>
+</ul>
+
+<h3>The Veil of Tohu</h3>
+<ul>
+<li><strong>Deity:</strong> Tohu, Dragon Goddess of Magic</li>
+<li><strong>Bonuses:</strong> +1 Arcana, +1 History</li>
+<li><strong>Description:</strong> Elven religion centered on magic as sacred.</li>
+</ul>
+
+<h3>Earthsong Covenant</h3>
+<ul>
+<li><strong>Deity:</strong> The Spirit of the Land</li>
+<li><strong>Bonuses:</strong> +1 Medicine, +1 Nature</li>
+<li><strong>Description:</strong> Halfling faith worshipping the conscious earth.</li>
+</ul>
+
+<h3>The Flame of Taninsam</h3>
+<ul>
+<li><strong>Deity:</strong> Taninsam, Dragon God of Fire</li>
+<li><strong>Bonuses:</strong> +1 Toughness, +1 Endurance</li>
+<li><strong>Description:</strong> Human faith venerating fire as creative and destructive.</li>
+</ul>
+
+<h3>Nature's Embrace (Tiamat)</h3>
+<ul>
+<li><strong>Deity:</strong> Tiamat, Steadfast God of Earth</li>
+<li><strong>Bonuses:</strong> +1 Endurance, +1 Nature</li>
+<li><strong>Description:</strong> Moon Elf faith maintaining harmony with nature.</li>
+</ul>
+
+<h3>The Soul of the Clan</h3>
+<ul>
+<li><strong>Deity:</strong> The Spirit of the Clan</li>
+<li><strong>Bonuses:</strong> +1 Toughness, +1 Unarmed</li>
+<li><strong>Description:</strong> Orc and troll religion venerating ancestral spirits.</li>
+</ul>
+
+<h3>The Abyssal Veil (EVIL)</h3>
+<ul>
+<li><strong>Deity:</strong> Nyxora & Zelgor</li>
+<li><strong>Bonuses:</strong> +2 Deception, <strong>-5 Worthiness</strong></li>
+<li><strong>Description:</strong> Worship darkness and destruction.</li>
+</ul>
+
+<h3>The Radiant Path</h3>
+<ul>
+<li><strong>Deity:</strong> The Eternal Flame</li>
+<li><strong>Bonuses:</strong> +1 Endurance, +1 Resistance</li>
+<li><strong>Description:</strong> Faith of divine light and justice, Paladins.</li>
+</ul>
+
+<h3>The Black Rebellion (EVIL)</h3>
+<ul>
+<li><strong>Deity:</strong> Malcath, The Fallen Sovereign</li>
+<li><strong>Bonuses:</strong> +2 Deception, <strong>-5 Worthiness</strong></li>
+<li><strong>Description:</strong> Worship the cast-down deity, embracing rebellion and chaos.</li>
+</ul>
+
+<h3>The Arcane Creed</h3>
+<ul>
+<li><strong>Deity:</strong> The Arcane Weave</li>
+<li><strong>Bonuses:</strong> +1 Arcana, +1 History</li>
+<li><strong>Description:</strong> Ancient order worshipping magic itself as sacred force.</li>
+</ul>
+
+<h3>The Voices of the Forgotten Loa</h3>
+<ul>
+<li><strong>Deity:</strong> The Forgotten Loa</li>
+<li><strong>Bonuses:</strong> +1 Survival, +1 Religion</li>
+<li><strong>Description:</strong> Troll shamanistic faith venerating ancient ancestral spirits.</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>8. Weapons</h2>
+
+<h3>Simple Melee Weapons</h3>
+<table>
+<tr><th>Weapon</th><th>Ability</th><th>Atk Bonus</th><th>Damage</th><th>Range</th><th>Break</th></tr>
+<tr><td>Club</td><td>Strength</td><td>+1</td><td>1d6</td><td>1</td><td>1</td></tr>
+<tr><td>Dagger</td><td>Dexterity</td><td>+1</td><td>1d6</td><td>1</td><td>0</td></tr>
+<tr><td>Greatclub</td><td>Strength</td><td>+2</td><td>1d10</td><td>2</td><td>3</td></tr>
+<tr><td>Handaxe</td><td>Strength</td><td>+1</td><td>1d6</td><td>1</td><td>2</td></tr>
+<tr><td>Javelin</td><td>Strength</td><td>+1</td><td>1d6</td><td>3/10</td><td>1</td></tr>
+<tr><td>Light Hammer</td><td>Strength</td><td>+1</td><td>1d6</td><td>1</td><td>2</td></tr>
+<tr><td>Mace</td><td>Strength</td><td>+1</td><td>1d6</td><td>1</td><td>2</td></tr>
+<tr><td>Quarterstaff</td><td>Dexterity</td><td>+1</td><td>1d6</td><td>3</td><td>1</td></tr>
+<tr><td>Sickle</td><td>Strength</td><td>+1</td><td>1d6</td><td>1</td><td>0</td></tr>
+<tr><td>Spear</td><td>Strength</td><td>+1</td><td>1d6</td><td>3</td><td>1</td></tr>
+</table>
+
+<h3>Martial Melee Weapons</h3>
+<table>
+<tr><th>Weapon</th><th>Ability</th><th>Atk Bonus</th><th>Damage</th><th>Range</th><th>Break</th></tr>
+<tr><td>Battleaxe</td><td>Strength</td><td>+2</td><td>1d10</td><td>1</td><td>3</td></tr>
+<tr><td>Flail</td><td>Strength</td><td>+2</td><td>1d10</td><td>1</td><td>2</td></tr>
+<tr><td>Glaive (Reach)</td><td>Strength</td><td>+2</td><td>1d10</td><td>3</td><td>2</td></tr>
+<tr><td>Greataxe</td><td>Strength</td><td>+3</td><td>2d6</td><td>2</td><td>5</td></tr>
+<tr><td>Greatsword</td><td>Strength</td><td>+3</td><td>2d6</td><td>2</td><td>3</td></tr>
+<tr><td>Halberd (Reach)</td><td>Strength</td><td>+2</td><td>1d10</td><td>3</td><td>3</td></tr>
+<tr><td>Lance (Reach)</td><td>Strength</td><td>+2</td><td>2d6</td><td>3</td><td>2</td></tr>
+<tr><td>Longsword</td><td>Strength</td><td>+2</td><td>1d10</td><td>2</td><td>2</td></tr>
+<tr><td>Maul</td><td>Strength</td><td>+3</td><td>2d6</td><td>2</td><td>5</td></tr>
+<tr><td>Morningstar</td><td>Strength</td><td>+2</td><td>1d10</td><td>1</td><td>3</td></tr>
+<tr><td>Pike (Reach)</td><td>Strength</td><td>+2</td><td>1d10</td><td>3</td><td>2</td></tr>
+<tr><td>Rapier</td><td>Dexterity</td><td>+2</td><td>1d10</td><td>2</td><td>0</td></tr>
+<tr><td>Scimitar</td><td>Dexterity</td><td>+2</td><td>1d6</td><td>1</td><td>1</td></tr>
+<tr><td>Shortsword</td><td>Dexterity</td><td>+2</td><td>1d6</td><td>1</td><td>1</td></tr>
+<tr><td>Trident</td><td>Strength</td><td>+1</td><td>1d6</td><td>3</td><td>1</td></tr>
+<tr><td>War Pick</td><td>Strength</td><td>+2</td><td>1d10</td><td>1</td><td>4</td></tr>
+<tr><td>Warhammer</td><td>Strength</td><td>+2</td><td>1d10</td><td>1</td><td>4</td></tr>
+<tr><td>Whip (Reach)</td><td>Dexterity</td><td>+1</td><td>1d6</td><td>3</td><td>0</td></tr>
+</table>
+
+<h3>Ranged Weapons</h3>
+<table>
+<tr><th>Weapon</th><th>Ability</th><th>Atk Bonus</th><th>Damage</th><th>Range</th><th>Break</th></tr>
+<tr><td>Shortbow</td><td>Dexterity</td><td>+2</td><td>1d6</td><td>20/40</td><td>0</td></tr>
+<tr><td>Longbow</td><td>Dexterity</td><td>+2</td><td>1d10</td><td>40/80</td><td>0</td></tr>
+<tr><td>Crossbow (Light)</td><td>Dexterity</td><td>+2</td><td>1d6</td><td>20/40</td><td>0</td></tr>
+<tr><td>Crossbow (Heavy)</td><td>Strength</td><td>+2</td><td>1d10</td><td>30/60</td><td>1</td></tr>
+<tr><td>Crossbow (Hand)</td><td>Dexterity</td><td>+2</td><td>1d6</td><td>10/30</td><td>0</td></tr>
+<tr><td>Sling</td><td>Dexterity</td><td>+1</td><td>1d6</td><td>10/30</td><td>0</td></tr>
+<tr><td>Dart</td><td>Dexterity</td><td>+1</td><td>1d6</td><td>5/15</td><td>0</td></tr>
+<tr><td>Blowgun</td><td>Dexterity</td><td>+1</td><td>1</td><td>8/24</td><td>0</td></tr>
+<tr><td>Net</td><td>Dexterity</td><td>+0</td><td>-</td><td>2/5</td><td>0</td></tr>
+</table>
+
+<h3>Fantasy Weapons</h3>
+<table>
+<tr><th>Weapon</th><th>Ability</th><th>Atk Bonus</th><th>Damage</th><th>Range</th><th>Break</th></tr>
+<tr><td>Katana</td><td>STR/DEX</td><td>+2</td><td>1d10</td><td>2</td><td>2</td></tr>
+<tr><td>Claymore</td><td>Strength</td><td>+3</td><td>2d6</td><td>2</td><td>4</td></tr>
+<tr><td>Falchion</td><td>Strength</td><td>+2</td><td>1d10</td><td>1</td><td>2</td></tr>
+<tr><td>Flamberge</td><td>Strength</td><td>+2</td><td>2d6</td><td>2</td><td>3</td></tr>
+<tr><td>Guisarme (Reach)</td><td>Strength</td><td>+2</td><td>1d10</td><td>3</td><td>3</td></tr>
+<tr><td>Scythe</td><td>Strength</td><td>+1</td><td>1d10</td><td>2</td><td>1</td></tr>
+<tr><td>Throwing Axe</td><td>Dexterity</td><td>+2</td><td>1d6</td><td>5/15</td><td>1</td></tr>
+<tr><td>Chakram</td><td>Dexterity</td><td>+2</td><td>1d6</td><td>10/30</td><td>0</td></tr>
+<tr><td>Spiked Shield</td><td>Strength</td><td>+1</td><td>1d6</td><td>1</td><td>1</td></tr>
+<tr><td>Bone Club</td><td>Strength</td><td>+1</td><td>1d6</td><td>1</td><td>1</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>9. Armor</h2>
+
+<h3>Head Armor</h3>
+<table>
+<tr><th>Armor</th><th>Type</th><th>HP</th><th>Bonus</th><th>Disadvantage</th></tr>
+<tr><td>Cloth Hood</td><td>Light</td><td>1</td><td>0+block</td><td>None</td></tr>
+<tr><td>Leather Cap</td><td>Light</td><td>2</td><td>0+block</td><td>-1 Perception</td></tr>
+<tr><td>Chain Coif</td><td>Medium</td><td>8</td><td>1+block</td><td>-1 Perception</td></tr>
+<tr><td>Light Helmet</td><td>Medium</td><td>10</td><td>1+block</td><td>-1 Perception</td></tr>
+<tr><td>Heavy Helmet</td><td>Heavy</td><td>12</td><td>2+block</td><td>-2 Perception</td></tr>
+<tr><td>Great Helm</td><td>Heavy</td><td>14</td><td>2+block</td><td>-2 Perception</td></tr>
+</table>
+
+<h3>Shoulder Armor</h3>
+<table>
+<tr><th>Armor</th><th>Type</th><th>HP</th><th>Bonus</th><th>Disadvantage</th></tr>
+<tr><td>Cloth Mantle</td><td>Light</td><td>1</td><td>0+block</td><td>None</td></tr>
+<tr><td>Leather Pauldrons</td><td>Light</td><td>3</td><td>1+block</td><td>None</td></tr>
+<tr><td>Studded Pauldrons</td><td>Light</td><td>3</td><td>1+block</td><td>None</td></tr>
+<tr><td>Chain Pauldrons</td><td>Medium</td><td>10</td><td>1+block</td><td>-1 Acrobatics</td></tr>
+<tr><td>Plate Pauldrons</td><td>Heavy</td><td>14</td><td>2+block</td><td>-2 Acrobatics</td></tr>
+</table>
+
+<h3>Chest Armor</h3>
+<table>
+<tr><th>Armor</th><th>Type</th><th>HP</th><th>Bonus</th><th>Disadvantage</th></tr>
+<tr><td>Cloth</td><td>Cloth</td><td>2</td><td>0+block</td><td>None</td></tr>
+<tr><td>Padded</td><td>Light</td><td>3</td><td>1+block</td><td>None</td></tr>
+<tr><td>Leather</td><td>Light</td><td>5</td><td>1+block</td><td>None</td></tr>
+<tr><td>Studded Leather</td><td>Light</td><td>6</td><td>2+block</td><td>None</td></tr>
+<tr><td>Hide</td><td>Medium</td><td>10</td><td>2+block</td><td>-1 Stealth</td></tr>
+<tr><td>Chain Shirt</td><td>Medium</td><td>15</td><td>3+block</td><td>-1 Stealth</td></tr>
+<tr><td>Scale Mail</td><td>Medium</td><td>18</td><td>3+block</td><td>-1 Stealth</td></tr>
+<tr><td>Breastplate</td><td>Medium</td><td>20</td><td>3+block</td><td>-1 Stealth</td></tr>
+<tr><td>Half Plate</td><td>Medium</td><td>25</td><td>4+block</td><td>-1 Stealth, -1 Acrobatics</td></tr>
+<tr><td>Ring Mail</td><td>Heavy</td><td>16</td><td>3+block</td><td>-1 Stealth, -1 Acrobatics</td></tr>
+<tr><td>Chainmail</td><td>Heavy</td><td>22</td><td>4+block</td><td>-2 Stealth, -1 Acrobatics</td></tr>
+<tr><td>Splint</td><td>Heavy</td><td>28</td><td>5+block</td><td>-2 Stealth, -1 Acrobatics, -1 Athletics</td></tr>
+<tr><td>Plate</td><td>Heavy</td><td>35</td><td>6+block</td><td>-2 Stealth, -2 Acrobatics, -1 Athletics</td></tr>
+</table>
+
+<h3>Hand Armor</h3>
+<table>
+<tr><th>Armor</th><th>Type</th><th>HP</th><th>Bonus</th><th>Disadvantage</th></tr>
+<tr><td>Cloth Gloves</td><td>Light</td><td>1</td><td>0+block</td><td>None</td></tr>
+<tr><td>Leather Gloves</td><td>Light</td><td>2</td><td>0+block</td><td>None</td></tr>
+<tr><td>Studded Gloves</td><td>Light</td><td>3</td><td>1+block</td><td>None</td></tr>
+<tr><td>Chain Gloves</td><td>Medium</td><td>8</td><td>1+block</td><td>-1 Sleight of Hand</td></tr>
+<tr><td>Plate Gauntlets</td><td>Heavy</td><td>12</td><td>2+block</td><td>-2 Sleight of Hand</td></tr>
+</table>
+
+<h3>Leg Armor</h3>
+<table>
+<tr><th>Armor</th><th>Type</th><th>HP</th><th>Bonus</th><th>Disadvantage</th></tr>
+<tr><td>Cloth Pants</td><td>Light</td><td>1</td><td>0+block</td><td>None</td></tr>
+<tr><td>Leather Greaves</td><td>Light</td><td>3</td><td>1+block</td><td>None</td></tr>
+<tr><td>Studded Greaves</td><td>Light</td><td>3</td><td>1+block</td><td>None</td></tr>
+<tr><td>Chain Greaves</td><td>Medium</td><td>10</td><td>1+block</td><td>-1 Athletics</td></tr>
+<tr><td>Plate Greaves</td><td>Heavy</td><td>14</td><td>2+block</td><td>-2 Athletics, -1 Acrobatics</td></tr>
+</table>
+
+<h3>Shields</h3>
+<table>
+<tr><th>Shield</th><th>HP</th><th>Block</th><th>Defence</th><th>Damage</th><th>Notes</th></tr>
+<tr><td>Small Shield</td><td>5</td><td>1</td><td>1</td><td>1d6</td><td>-</td></tr>
+<tr><td>Shield (Wooden)</td><td>15</td><td>3</td><td>2</td><td>1d6</td><td>-</td></tr>
+<tr><td>Shield (Metal)</td><td>22</td><td>5</td><td>3</td><td>1d6</td><td>-</td></tr>
+<tr><td>Spiked Shield</td><td>18</td><td>4</td><td>2</td><td>1d10</td><td>-</td></tr>
+<tr><td>Shield (Tower)</td><td>45</td><td>10</td><td>5</td><td>1d6</td><td>Disadvantage on Dexterity checks</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>10. Abilities & Spells</h2>
+
+<h3>Warrior Abilities (Weakened-based)</h3>
+<table>
+<tr><th>Ability</th><th>Check</th><th>Weakened Cost</th><th>Gain (dice)</th><th>Effect</th></tr>
+<tr><td>Last Stand</td><td>Armor, min 1 success</td><td>2</td><td>+2</td><td>Take focus from enemy</td></tr>
+<tr><td>Hero</td><td>Passive</td><td>Worthiness</td><td>0</td><td>Hero of the people</td></tr>
+<tr><td>Me First</td><td>Athletics, min 2 success</td><td>3</td><td>+3</td><td>Ignore initiative, +1 Init, 1 round</td></tr>
+<tr><td>Ultimate Sacrifice</td><td>Strength, min 1 success</td><td>2</td><td>+3</td><td>Adrenaline, take 2 dmg</td></tr>
+<tr><td>Paladin's Sacrifice</td><td>Strength, min 1 success</td><td>4</td><td>+3</td><td>Ignore pain, faint after</td></tr>
+<tr><td>Crusader</td><td>Armor, min 1 success</td><td>2</td><td>+3</td><td>Use armor, 1 round</td></tr>
+<tr><td>Give In</td><td>Strength, min 2 success</td><td>4</td><td>+4</td><td>Massive adrenaline, lose control</td></tr>
+<tr><td>Shield Wall</td><td>Toughness, min 2 success</td><td>3</td><td>+3</td><td>Protect allies behind you, req. shield, 2 rounds</td></tr>
+<tr><td>Battle Cry</td><td>Intimidation, min 1 success</td><td>2</td><td>+2</td><td>Inspire nearby allies, 1 round</td></tr>
+<tr><td>Second Wind</td><td>Endurance, min 1 success</td><td>3</td><td>+3</td><td>Push through exhaustion</td></tr>
+<tr><td>Disarm</td><td>Athletics, min 2 success</td><td>3</td><td>+2</td><td>Remove enemy weapon</td></tr>
+<tr><td>Whirlwind</td><td>Strength, min 2 success</td><td>4</td><td>+4</td><td>Strike multiple nearby foes, 1 round</td></tr>
+<tr><td>Intercept</td><td>Toughness, min 1 success</td><td>2</td><td>+3</td><td>Take hit meant for ally</td></tr>
+<tr><td>Unbreakable</td><td>Toughness, min 1 success</td><td>3</td><td>+3</td><td>Resist being knocked down, 2 rounds</td></tr>
+</table>
+
+<h3>Thief/Rogue Abilities (Weakened-based)</h3>
+<table>
+<tr><th>Ability</th><th>Check</th><th>Weakened Cost</th><th>Gain</th><th>Effect</th></tr>
+<tr><td>Lockpicking</td><td>Sleight of Hand, min 1</td><td>4</td><td>+1</td><td>Open normal locks, not in battle</td></tr>
+<tr><td>Sneaking</td><td>Stealth, min 1</td><td>3</td><td>+2</td><td>Extra quiet when sneaking</td></tr>
+<tr><td>Awareness</td><td>Perception, min 2</td><td>4</td><td>+4</td><td>Granted third eye, not in battle</td></tr>
+<tr><td>Vanish</td><td>Stealth, min 2</td><td>4</td><td>+4</td><td>Vanish into thin air</td></tr>
+<tr><td>Footloose</td><td>Dexterity, min 2</td><td>3</td><td>+5</td><td>Move fast as lightning</td></tr>
+<tr><td>Fixed Mind</td><td>Deception, min 1</td><td>4</td><td>+2</td><td>Deceive someone</td></tr>
+<tr><td>Backstab</td><td>Dexterity, min 2</td><td>3</td><td>+3</td><td>Strike from behind for extra damage</td></tr>
+<tr><td>Pickpocket</td><td>Sleight of Hand, min 1</td><td>4</td><td>+2</td><td>Steal unnoticed, not in battle</td></tr>
+<tr><td>Evasion</td><td>Acrobatics, min 2</td><td>3</td><td>+4</td><td>Dodge incoming attack, 1 round</td></tr>
+<tr><td>Shadow Cloak</td><td>Stealth, min 1</td><td>3</td><td>+3</td><td>Blend into shadows, 2 rounds</td></tr>
+<tr><td>Disengage</td><td>Acrobatics, min 1</td><td>2</td><td>+2</td><td>Escape without provoking</td></tr>
+<tr><td>Poison Blade</td><td>Sleight of Hand, min 1</td><td>3</td><td>+3</td><td>Coat weapon with poison, not in battle</td></tr>
+<tr><td>Silent Step</td><td>Stealth, min 1</td><td>2</td><td>+2</td><td>Move without sound, not in battle</td></tr>
+</table>
+
+<h3>Hunter Abilities (Weakened-based)</h3>
+<table>
+<tr><th>Ability</th><th>Check</th><th>Weakened Cost</th><th>Gain</th><th>Effect</th></tr>
+<tr><td>Steady Shot</td><td>Dexterity, min 1</td><td>3</td><td>+2</td><td>Arrow hits exactly where you aim</td></tr>
+<tr><td>Tame a Beast</td><td>Animal Handling, min 2</td><td>5</td><td>+5</td><td>Tame normal non-magical beast, not in battle</td></tr>
+<tr><td>Unveil Path</td><td>Survival, min 1</td><td>2</td><td>+2</td><td>Notice tracks no one else notices, not in battle</td></tr>
+<tr><td>Set Trap</td><td>Nature, min 1</td><td>3</td><td>+3</td><td>Build natural traps, not in battle</td></tr>
+<tr><td>Shadow Meld</td><td>Stealth, min 2</td><td>4</td><td>+4</td><td>Melt into shadows, not in battle</td></tr>
+<tr><td>Spider Senses</td><td>Perception, min 1</td><td>2</td><td>+2</td><td>Notice surroundings, not in battle</td></tr>
+<tr><td>Rain of Death</td><td>Dexterity, min 2</td><td>4</td><td>+3</td><td>Shoot multiple arrows at targets</td></tr>
+<tr><td>Hunter's Mark</td><td>Survival, min 1</td><td>2</td><td>+2</td><td>Mark target for tracking, 4 rounds</td></tr>
+<tr><td>Camouflage</td><td>Stealth, min 1</td><td>3</td><td>+3</td><td>Blend into natural surroundings, not in battle</td></tr>
+<tr><td>Precision Strike</td><td>Dexterity, min 2</td><td>4</td><td>+4</td><td>Strike a vital point</td></tr>
+<tr><td>Call Companion</td><td>Animal Handling, min 1</td><td>3</td><td>+3</td><td>Summon animal companion, not in battle</td></tr>
+<tr><td>Quick Draw</td><td>Dexterity, min 1</td><td>2</td><td>+3</td><td>Draw and attack in one motion</td></tr>
+<tr><td>Foraging</td><td>Nature, min 1</td><td>2</td><td>+1</td><td>Find food and supplies, not in battle</td></tr>
+<tr><td>Sniper Shot</td><td>Dexterity, min 2</td><td>4</td><td>+4</td><td>Shoot from extreme distance</td></tr>
+</table>
+
+<h3>Outcast Abilities (Weakened-based)</h3>
+<table>
+<tr><th>Ability</th><th>Check</th><th>Weakened Cost</th><th>Gain</th><th>Effect</th></tr>
+<tr><td>Shadow Step</td><td>Stealth, min 1</td><td>3</td><td>+3</td><td>Blend into shadows, move silently, not in battle</td></tr>
+<tr><td>Wilderness Survival</td><td>Nature, min 1</td><td>3</td><td>+2</td><td>Proficiency in tracking & navigation, not in battle</td></tr>
+<tr><td>Street Smarts</td><td>Investigation, min 1</td><td>2</td><td>+2</td><td>Read people and intentions, not in battle</td></tr>
+<tr><td>Unseen Ally</td><td>Nature, min 1</td><td>3</td><td>+2</td><td>Communicate with small creatures, not in battle</td></tr>
+<tr><td>Improvised Weaponry</td><td>Strength, min 1</td><td>3</td><td>+3</td><td>Use anything as weapon, no disadvantage</td></tr>
+<tr><td>Resilient Spirit</td><td>Toughness, min 1</td><td>3</td><td>+3</td><td>Resist mental & emotional manipulation</td></tr>
+<tr><td>Counterculture</td><td>Investigation, min 1</td><td>2</td><td>+2</td><td>Familiarity with forbidden knowledge</td></tr>
+<tr><td>Scavenge</td><td>Investigation, min 1</td><td>2</td><td>+2</td><td>Find useful items in ruins, not in battle</td></tr>
+<tr><td>Blend In</td><td>Stealth, min 1</td><td>2</td><td>+2</td><td>Disappear in crowds, not in battle</td></tr>
+<tr><td>Iron Will</td><td>Toughness, min 1</td><td>3</td><td>+3</td><td>Resist fear and intimidation</td></tr>
+<tr><td>Dirty Fighting</td><td>Strength, min 2</td><td>3</td><td>+3</td><td>Fight without honor for advantage</td></tr>
+<tr><td>Underground Network</td><td>Investigation, min 1</td><td>3</td><td>+3</td><td>Contact hidden allies, not in battle</td></tr>
+<tr><td>Endure Elements</td><td>Toughness, min 1</td><td>2</td><td>+2</td><td>Resist harsh weather, 4 rounds</td></tr>
+<tr><td>Adapt</td><td>Investigation, min 1</td><td>3</td><td>+3</td><td>Quickly learn new skill/trade, not in battle</td></tr>
+</table>
+
+<h3>Mage Spells (Arcana-based)</h3>
+
+<h4>Offensive Spells</h4>
+<table>
+<tr><th>Spell</th><th>Arcana</th><th>Damage</th><th>Effect</th></tr>
+<tr><td>Scorch</td><td>1</td><td>2/D10</td><td>Scorch an enemy</td></tr>
+<tr><td>Fireball</td><td>1</td><td>2/D6</td><td>Shoot a fireball</td></tr>
+<tr><td>Arcane Bolt</td><td>1</td><td>1/D10</td><td>Shoot arcane bolt</td></tr>
+<tr><td>Icebolt</td><td>1</td><td>1/D10</td><td>Cast bolt of frost</td></tr>
+<tr><td>Thunderclap</td><td>1</td><td>1/D6</td><td>Summon lightning</td></tr>
+<tr><td>Frostbite</td><td>1</td><td>1/D6</td><td>Freeze target with cold</td></tr>
+<tr><td>Magic Missile</td><td>1</td><td>1/D6</td><td>Never-miss magic projectile</td></tr>
+<tr><td>Acid Splash</td><td>1</td><td>1/D6</td><td>Hurl acid at 1-2 targets</td></tr>
+<tr><td>Icelance</td><td>2</td><td>2/D6</td><td>Slice with sharp icelance</td></tr>
+<tr><td>Mage Blade</td><td>2</td><td>2/D10</td><td>Control a magical sword, 1 round</td></tr>
+<tr><td>Shadow Bolt</td><td>2</td><td>2/D6</td><td>Cast bolt of shadow</td></tr>
+<tr><td>Ice Knife</td><td>2</td><td>2/D10</td><td>Throw ice knife that explodes on impact</td></tr>
+<tr><td>Ray of Frost</td><td>3</td><td>3/D6</td><td>Pierce with frost</td></tr>
+<tr><td>Arcane Blast</td><td>3</td><td>2/D10</td><td>Blast with arcane</td></tr>
+<tr><td>Mind Blast</td><td>3</td><td>2/D10</td><td>Psychic damage to mind</td></tr>
+<tr><td>Fireblast</td><td>4</td><td>3/D6</td><td>Blast with fire</td></tr>
+<tr><td>Spirit Guardians</td><td>4</td><td>3/D6</td><td>Spirits damage enemies, 4 rounds</td></tr>
+<tr><td>Chain Lightning</td><td>5</td><td>3/D6</td><td>Lightning jumps between targets</td></tr>
+<tr><td>Arcane Missiles</td><td>6</td><td>4/D6</td><td>Multiple arcane missiles</td></tr>
+<tr><td>Disintegrate</td><td>7</td><td>4/D10</td><td>Disintegrate target</td></tr>
+</table>
+
+<h4>Utility & Other Spells</h4>
+<table>
+<tr><th>Spell</th><th>Arcana</th><th>Type</th><th>Effect</th></tr>
+<tr><td>Detect Magic</td><td>1</td><td>Divination</td><td>Sense magical auras, 2 rounds</td></tr>
+<tr><td>Water Breathing</td><td>1</td><td>Transmutation</td><td>Breathe under water, 10 rounds</td></tr>
+<tr><td>Light</td><td>2</td><td>Fire</td><td>Summon source of light, 1 round</td></tr>
+<tr><td>Prismatic Barrier</td><td>2</td><td>Protection</td><td>Shield a party member, 1 round</td></tr>
+<tr><td>Ice Armor</td><td>2</td><td>Protection</td><td>Shroud yourself in ice, 4 rounds</td></tr>
+<tr><td>Sleep</td><td>2</td><td>Enchantment</td><td>Put creatures to sleep, 3 rounds</td></tr>
+<tr><td>Arcane Lock</td><td>2</td><td>Abjuration</td><td>Lock a door magically, Permanent</td></tr>
+<tr><td>Levitate</td><td>2</td><td>Transmutation</td><td>Float in the air, 4 rounds</td></tr>
+<tr><td>Mage Hand</td><td>3</td><td>Conjuration</td><td>Control a magical hand, 1 round</td></tr>
+<tr><td>Find Familiar</td><td>3</td><td>Conjuration</td><td>Summon magic companion, Permanent</td></tr>
+<tr><td>Mirror Image</td><td>3</td><td>Illusion</td><td>Create duplicate images, 3 rounds</td></tr>
+<tr><td>Polymorph</td><td>3</td><td>Transmutation</td><td>Transform a character, 2 rounds</td></tr>
+<tr><td>Charm Person</td><td>3</td><td>Enchantment</td><td>Charm a humanoid, 2 rounds</td></tr>
+<tr><td>Arcane Eye</td><td>3</td><td>Divination</td><td>See through magical eye, 4 rounds</td></tr>
+<tr><td>Web</td><td>3</td><td>Utility</td><td>Create sticky webs, 2 rounds</td></tr>
+<tr><td>Counterspell</td><td>4</td><td>Abjuration</td><td>Counter enemy spell, Instant</td></tr>
+<tr><td>Dispel Magic</td><td>4</td><td>Abjuration</td><td>Remove magical effects, 1 round</td></tr>
+<tr><td>Invisibility</td><td>4</td><td>Transformation</td><td>Make someone invisible, 4 rounds</td></tr>
+<tr><td>Teleport</td><td>5</td><td>Conjuration</td><td>Teleport short distance, Instant</td></tr>
+<tr><td>Animate Dead</td><td>6</td><td>Necromancy</td><td>Animate something dead, 1 round</td></tr>
+<tr><td>Time Warp</td><td>6</td><td>Manipulation</td><td>Slow or rewind time, 1 round</td></tr>
+<tr><td>Arcane Gate</td><td>6</td><td>Transmutation</td><td>Create portal between points, 4 rounds</td></tr>
+<tr><td>Wish</td><td>8</td><td>Utility</td><td>Grant a wish, Instant</td></tr>
+</table>
+
+<h4>Summoning / Black Magic Spells</h4>
+<table>
+<tr><th>Spell</th><th>Arcana</th><th>Damage</th><th>Effect</th></tr>
+<tr><td>Summon Imp</td><td>3</td><td>1/D10</td><td>Summon small imp-like creature, 1 round</td></tr>
+<tr><td>Summon Shadowspawn</td><td>3</td><td>1/D10</td><td>Summon shadow creature, 1 round</td></tr>
+<tr><td>Summon Lesser Demons</td><td>3</td><td>1/D10</td><td>Summon multiple lesser demons, 1 round</td></tr>
+<tr><td>Summon Void</td><td>4</td><td>2/D6</td><td>Summon creature from void, 1 round</td></tr>
+<tr><td>Summon Greater Demon</td><td>4</td><td>2/D6</td><td>Summon greater demon, 2 rounds</td></tr>
+<tr><td>Summon Infernal</td><td>5</td><td>2/D10</td><td>Summon infernal demon, 2 rounds</td></tr>
+<tr><td>Summon Fiend</td><td>6</td><td>3/D6</td><td>Summon a fiend, 4 rounds</td></tr>
+<tr><td>Maze</td><td>7</td><td>0</td><td>Trap target in labyrinth, Special</td></tr>
+</table>
+
+<h3>Druid Spells (Arcana-based)</h3>
+
+<h4>Nature Offensive</h4>
+<table>
+<tr><th>Spell</th><th>Arcana</th><th>Damage</th><th>Effect</th></tr>
+<tr><td>Sunfire</td><td>1</td><td>1/D10</td><td>Channel sun energy, Only daytime</td></tr>
+<tr><td>Moonfall</td><td>1</td><td>1/D10</td><td>Channel moon energy, Only nighttime</td></tr>
+<tr><td>Poison Spray</td><td>1</td><td>1/D6</td><td>Spray poison at target</td></tr>
+<tr><td>Produce Flame</td><td>1</td><td>1/D10</td><td>Create flame to throw</td></tr>
+<tr><td>Infestation</td><td>1</td><td>1/D6</td><td>Insects plague target</td></tr>
+<tr><td>Thorns</td><td>2</td><td>1/D10</td><td>Thorns pierce target</td></tr>
+<tr><td>Vine Lash</td><td>2</td><td>1/D10</td><td>Vines strike target</td></tr>
+<tr><td>Hail of Thorns</td><td>2</td><td>2/D6</td><td>Thorns explode on hit</td></tr>
+<tr><td>Earthshaping</td><td>3</td><td>2/D6</td><td>Earth moves at will, 1 round</td></tr>
+<tr><td>Mending</td><td>3</td><td>1/D10</td><td>Mend a target (healing)</td></tr>
+<tr><td>Blight</td><td>3</td><td>2/D6</td><td>Drain life from target</td></tr>
+<tr><td>Moonbeam</td><td>3</td><td>2/D6</td><td>Beam of moonlight, 2 rounds</td></tr>
+<tr><td>Insect Plague</td><td>3</td><td>1/D6</td><td>Summon insects, 1 round</td></tr>
+<tr><td>Whips</td><td>4</td><td>2/D10</td><td>Roots attack target, 1 round</td></tr>
+<tr><td>Storm</td><td>4</td><td>2/D6</td><td>Summon the winds</td></tr>
+<tr><td>Tunes of Healing</td><td>4</td><td>2/D6</td><td>Heal a target</td></tr>
+<tr><td>Thunderclap</td><td>4</td><td>3/D6</td><td>Summon thunder, 1 round</td></tr>
+<tr><td>Tidal Wave</td><td>4</td><td>3/D6</td><td>Summon massive wave</td></tr>
+<tr><td>Starfall</td><td>4</td><td>2/D10</td><td>Stars fall on target, Only nighttime</td></tr>
+<tr><td>Call Lightning</td><td>5</td><td>3/D6</td><td>Strike with lightning</td></tr>
+<tr><td>Cloudkill</td><td>5</td><td>3/D6</td><td>Deadly poison cloud, 4 rounds</td></tr>
+<tr><td>Healing Circle</td><td>5</td><td>2/D10</td><td>Heal multiple targets</td></tr>
+<tr><td>Warrior of Tohu</td><td>6</td><td>8 flat</td><td>Channel raw arcana</td></tr>
+<tr><td>Wall of Thorns</td><td>6</td><td>4/D6</td><td>Create wall of thorns, 4 rounds</td></tr>
+<tr><td>Tsunami</td><td>6</td><td>4/D6</td><td>Summon devastating tsunami</td></tr>
+<tr><td>Earthquake</td><td>6</td><td>3/D6</td><td>Shake the earth violently</td></tr>
+<tr><td>Storm of Vengeance</td><td>7</td><td>4/D10</td><td>Summon apocalyptic storm, 4 rounds</td></tr>
+<tr><td>Rebirth</td><td>8</td><td>0</td><td>Revive someone, Not in battle</td></tr>
+</table>
+
+<h4>Nature Utility & Summoning</h4>
+<table>
+<tr><th>Spell</th><th>Arcana</th><th>Type</th><th>Effect</th></tr>
+<tr><td>Purify Water</td><td>1</td><td>Utility</td><td>Cleanse water, Permanent</td></tr>
+<tr><td>Barkskin</td><td>2</td><td>Protection</td><td>Harden skin like bark, 4 rounds</td></tr>
+<tr><td>Entangle</td><td>2</td><td>Control</td><td>Roots hold targets, 2 rounds</td></tr>
+<tr><td>Fog Cloud</td><td>2</td><td>Control</td><td>Create thick fog, 3 rounds</td></tr>
+<tr><td>Speak with Plants</td><td>2</td><td>Utility</td><td>Communicate with plants, 2 rounds</td></tr>
+<tr><td>Air Bubble</td><td>2</td><td>Utility</td><td>Create air bubble, 24 hours</td></tr>
+<tr><td>Innervate</td><td>3</td><td>Support</td><td>Give someone initiative</td></tr>
+<tr><td>Packleader</td><td>3</td><td>Summoning</td><td>Summon friends, Same region only</td></tr>
+<tr><td>Animal Handling</td><td>3</td><td>Utility</td><td>Communicate with animals, 2 rounds</td></tr>
+<tr><td>Tree Stride</td><td>3</td><td>Utility</td><td>Teleport between trees, 1 round</td></tr>
+<tr><td>Cure Poison</td><td>3</td><td>Healing</td><td>Remove poison from target</td></tr>
+<tr><td>Summon Beast</td><td>3</td><td>Summoning</td><td>Summon beast companion, 2 rounds</td></tr>
+<tr><td>Dust Devil</td><td>3</td><td>Control</td><td>Summon small whirlwind, 2 rounds</td></tr>
+<tr><td>Prowler's Eyes</td><td>4</td><td>Utility</td><td>See in the dark, 1 round</td></tr>
+<tr><td>Plant Growth</td><td>4</td><td>Utility</td><td>Plant grows quickly, Permanent</td></tr>
+<tr><td>Wildshape</td><td>4</td><td>Transformation</td><td>Transform into animal, 4 rounds</td></tr>
+<tr><td>Summon Fey</td><td>4</td><td>Summoning</td><td>Summon fey creature, 2 rounds</td></tr>
+<tr><td>Giant Insect</td><td>4</td><td>Summoning</td><td>Transform insects to giants, 4 rounds</td></tr>
+<tr><td>Create Food and Water</td><td>4</td><td>Utility</td><td>Conjure sustenance, Instant</td></tr>
+<tr><td>Conjure Animals</td><td>5</td><td>Summoning</td><td>Summon animal spirits, 2 rounds</td></tr>
+<tr><td>Conjure Woodland Beings</td><td>5</td><td>Summoning</td><td>Summon forest creatures, 2 rounds</td></tr>
+<tr><td>Summon Celestial</td><td>5</td><td>Summoning</td><td>Summon celestial being, 4 rounds</td></tr>
+<tr><td>Summon Draconic Spirit</td><td>5</td><td>Summoning</td><td>Summon dragon spirit, 4 rounds</td></tr>
+<tr><td>Conjure Fey</td><td>6</td><td>Summoning</td><td>Summon powerful fey, 4 rounds</td></tr>
+<tr><td>Heroes' Feast</td><td>6</td><td>Utility</td><td>Summon magical feast, Permanent</td></tr>
+<tr><td>Temple of the Gods</td><td>7</td><td>Utility</td><td>Create holy temple, 24 hours</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>11. Status Effects</h2>
+
+<h3>Weakened (Exhaustion)</h3>
+<ul>
+<li>Each character has <strong>6 Weakened Points</strong></li>
+<li>Using abilities costs Weakened</li>
+<li><strong>When Weakened = 0:</strong> Roll 1D10 + Toughness
+<ul>
+<li>1-2: Death</li>
+<li>3-5: Unconscious</li>
+<li>6-10: Exhausted (can move but not fight)</li>
+</ul>
+</li>
+<li><strong>Recovery:</strong> Short rest = +1 Weakened, Long rest = all restored</li>
+</ul>
+
+<h3>Bleed (Bleeding)</h3>
+<ul>
+<li>When you receive a critical wound, you start bleeding</li>
+<li><strong>Each round:</strong> Roll 1D6 (1-2 = 3 HP, 3-4 = 2 HP, 5-6 = 1 HP loss)</li>
+<li><strong>Bleed [X]:</strong> Roll X dice, take highest</li>
+<li><strong>Stop bleeding:</strong> Medicine check (1 success per Bleed level), Bandage (Bleed 1), Healing magic (all)</li>
+</ul>
+
+<h3>Other Effects</h3>
+<table>
+<tr><th>Status</th><th>Effect</th></tr>
+<tr><td>Poisoned</td><td>-1D10 on all rolls, take 1 damage/round</td></tr>
+<tr><td>Stunned</td><td>Cannot act this round</td></tr>
+<tr><td>Blinded</td><td>-2D10 on attacks and perception</td></tr>
+<tr><td>Deafened</td><td>Cannot hear, -1D10 on perception</td></tr>
+<tr><td>Frightened</td><td>Cannot approach fear source, -1D10 on attacks</td></tr>
+<tr><td>Prone</td><td>-1D10 on attacks, +1D10 for enemies in melee</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>12. Healing & Rest</h2>
+
+<h3>Natural Healing</h3>
+<ul>
+<li><strong>Short rest (1 hour):</strong> +1D6 HP, +1 Weakened</li>
+<li><strong>Long rest (8 hours):</strong> All HP restored, all Weakened restored</li>
+</ul>
+
+<h3>Medicine Check</h3>
+<ul>
+<li>1 success: +1D6 HP to patient</li>
+<li>2+ successes: +2D6 HP to patient</li>
+<li>Critical: +3D6 HP to patient</li>
+</ul>
+
+<h3>Potions</h3>
+<table>
+<tr><th>Potion</th><th>Effect</th></tr>
+<tr><td>Adrenaline</td><td>+2D10 on next action</td></tr>
+<tr><td>Antidote</td><td>Cures Poisoned status</td></tr>
+<tr><td>Poison</td><td>Can be applied to weapons (DM decides effect)</td></tr>
+<tr><td>Arcane Elixir</td><td>+10 Arcana (Mage/Druid only)</td></tr>
+<tr><td>Healing Potion</td><td>Restore 1D10 HP</td></tr>
+</table>
+<p><strong>Note:</strong> Poison CANNOT be used to create poisoned arrows.</p>
+</div>
+
+<div class="section">
+<h2>13. Resources</h2>
+
+<h3>Food & Water</h3>
+<ul>
+<li>Tracked with dice (D10 → D6 → out)</li>
+<li><strong>Daily:</strong> Roll your food die. 1-5 = reduce die size</li>
+<li><strong>Without:</strong> 1 day = no effect, 2 days = -1D10 all rolls, 3+ days = 1 dmg/day</li>
+</ul>
+
+<h3>Ammunition</h3>
+<ul>
+<li><strong>After combat:</strong> Roll 1D6 to recover (1-2 = 25%, 3-4 = 50%, 5-6 = 75%)</li>
+<li><strong>Cost:</strong> Arrows/Bolts (20-50) = 1 gold, Sling Bullets (20) = 4 copper</li>
+</ul>
+
+<h3>Arcane Elixir</h3>
+<ul>
+<li>Starting: Mage = 2, Druid = 1, Others = 0</li>
+<li>Max carried: 4</li>
+<li>Effect: Restores 10 Arcana</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>14. Character Creation Summary</h2>
+
+<ol>
+<li>Choose <strong>Race</strong> (gives base HP, Worthiness, bonuses)</li>
+<li>Choose <strong>Class</strong> (gives HP bonus, equipment, abilities)</li>
+<li>Choose <strong>Religion</strong> (optional, gives bonuses)</li>
+<li>Distribute <strong>10 extra points</strong> among talents (max 5 per talent at start)</li>
+<li>Note starting equipment from Race + Class</li>
+<li>Calculate Total HP = Race HP + Class HP Bonus</li>
+<li>Calculate Total Worthiness = Race + Class + Religion</li>
+</ol>
+</div>
+
+<div class="section">
+<h2>15. Quick Reference</h2>
+
+<h3>Attack Sequence</h3>
+<pre>
+1. Build Attack Pool = Core Ability + Weapon Attack Bonus (convert to dice)
+2. Roll pool (max 8D10)
+3. Count successes (7-9 = success, 10 = critical + reroll)
+4. Determine hit: 0 = miss, 1 = 50% dmg, 2+ = full dmg
+5. Roll weapon damage dice
+</pre>
+
+<h3>Defense Sequence</h3>
+<pre>
+1. Choose defense type (Dodge, Parry, Block, Take Hit)
+2. Build Defense Pool (varies by type)
+3. Roll pool
+4. Count successes
+5. Apply result (success = no damage, barely = partial, fail = full)
+</pre>
+
+<h3>Spell Casting (Mage/Druid)</h3>
+<pre>
+1. Choose spell
+2. Check Arcana cost
+3. Roll Arcana check (need at least 1 success)
+4. On success: Pay Arcana cost, apply spell effect
+5. On fail: DM decides (fizzle or backlash)
+</pre>
+
+<h3>Ability Usage (Melee Classes)</h3>
+<pre>
+1. Check ability's Check requirement
+2. Roll the check (e.g., "Stealth, min 2 success")
+3. On success: Pay Weakened cost
+4. Gain the bonus dice for your action
+</pre>
+</div>
+
+<hr>
+
+<p><em>Aedelore RPG System v1.0 - The DM always has the final say.</em></p>
+<p><em>For more lore and world information, visit the <a href="/wiki">Aedelore Wiki</a>.</em></p>
+
+</body>
+</html>

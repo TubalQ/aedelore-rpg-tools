@@ -21,8 +21,47 @@ async function ensureCsrfToken() {
     }
 }
 
-// Initialize CSRF on load
+// Validate stored auth token on page load
+// If token is invalid/expired, clear it immediately to avoid 401 loops
+async function validateStoredToken() {
+    const token = localStorage.getItem('aedelore_auth_token');
+    if (!token) return false;
+
+    try {
+        const res = await fetch('/api/me', {
+            headers: { 'Authorization': `Bearer ${token}` },
+            credentials: 'include'
+        });
+
+        if (res.ok) {
+            return true; // Token is valid
+        } else {
+            // Token invalid - clear it from localStorage
+            // (server will clear the cookie via the response)
+            localStorage.removeItem('aedelore_auth_token');
+            window.authToken = null;
+            return false;
+        }
+    } catch (e) {
+        // Network error - don't clear, might be offline
+        console.warn('Could not validate token (network error)');
+        return false;
+    }
+}
+
+// Initialize on page load
 ensureCsrfToken();
+
+// Validate token early (runs async, doesn't block page load)
+// This helps clear stale tokens before user interacts with the page
+validateStoredToken().then(valid => {
+    if (!valid && localStorage.getItem('aedelore_auth_token') === null) {
+        // Token was cleared - update UI if the function exists
+        if (typeof window.updateAuthUI === 'function') {
+            window.updateAuthUI();
+        }
+    }
+});
 
 // API request helper with CSRF protection
 async function apiRequest(url, options = {}) {

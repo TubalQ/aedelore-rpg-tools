@@ -8,6 +8,8 @@ Sitemap: https://aedelore.nu/sitemap.xml
 # Crawl-delay for polite crawling
 Crawl-delay: 1
 
-# Disallow test files
+# Disallow non-public pages
+Disallow: /wiki-admin
 Disallow: /test-*.html
 Disallow: /.claude/
+Disallow: /api/

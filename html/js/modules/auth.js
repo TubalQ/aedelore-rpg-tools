@@ -164,6 +164,20 @@ async function doLogin() {
 
         window.authToken = data.token;
         localStorage.setItem('aedelore_auth_token', window.authToken);
+
+        // Check for local character and migrate to cloud automatically
+        if (window.hasLocalCharacter && window.hasLocalCharacter()) {
+            console.log('Found local character, migrating to cloud...');
+            const migrated = await window.migrateLocalToCloud();
+            if (migrated) {
+                console.log('Local character migrated successfully');
+            }
+        }
+
+        // Remove sync notice if shown
+        const notice = document.getElementById('sync-notice');
+        if (notice) notice.remove();
+
         location.reload();
     } catch (error) {
         errorEl.textContent = 'Connection error. Please try again.';
@@ -250,6 +264,11 @@ async function doLogout() {
     localStorage.removeItem('aedelore_auth_token');
     localStorage.removeItem('aedelore_current_character_id');
     localStorage.removeItem('aedelore_character_autosave');
+
+    // Clear local character data (already saved to cloud)
+    if (window.clearLocalCharacter) {
+        window.clearLocalCharacter();
+    }
 
     // Clear Service Worker cache
     if ('caches' in window) {

@@ -5,7 +5,16 @@ if (!process.env.DATABASE_URL) {
 }
 
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL
+    connectionString: process.env.DATABASE_URL,
+    max: 20,                        // Maximum connections in pool
+    idleTimeoutMillis: 30000,       // Close idle connections after 30s
+    connectionTimeoutMillis: 5000,  // Timeout for new connections
+    allowExitOnIdle: false          // Keep pool alive
+});
+
+// Handle unexpected pool errors (prevents crashes)
+pool.on('error', (err, client) => {
+    console.error('Unexpected PostgreSQL pool error:', err.message);
 });
 
 // Initialize database schema
