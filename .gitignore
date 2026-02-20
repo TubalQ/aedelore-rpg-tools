@@ -19,8 +19,9 @@ claude/
 Claude/
 CLAUDE.md
 
-# Database backups
+# Database backups and dumps
 backups/
+db/*.sql
 *.sql.gz
 *.dump
 
@@ -69,5 +70,3 @@ pgdata/
 # Test coverage
 coverage/
 .nyc_output/
-db/aedelore-dump.sql
-db/umami-dump.sql
