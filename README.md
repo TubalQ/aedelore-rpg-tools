@@ -152,10 +152,15 @@ docker compose up -d
 | `html/sitemap.xml` | Update all URLs to your domain |
 | `nginx.conf` | Set `set_real_ip_from` to your reverse proxy IP |
 
+## Android App
+
+The native Android app is currently under development. The `android/` directory contains a Kotlin/Jetpack Compose application that will provide a native mobile experience for Aedelore character sheets and campaign tools. It is not yet ready for use.
+
 ## Project Structure
 
 ```
 aedelore-rpg-tools/
+├── android/                # Native Android app (under development)
 ├── html/                   # Frontend PWA
 │   ├── css/               # Stylesheets
 │   ├── js/                # JavaScript modules
