@@ -69,3 +69,5 @@ pgdata/
 # Test coverage
 coverage/
 .nyc_output/
+db/aedelore-dump.sql
+db/umami-dump.sql
