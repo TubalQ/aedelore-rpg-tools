@@ -21,6 +21,7 @@
     --accent-primary: #f0c040;
     --accent-primary-hover: #ffd666;
     --accent-primary-glow: rgba(240, 192, 64, 0.3);
+    --accent-primary-10: rgba(240, 192, 64, 0.1);
 
     /* Secondary Colors - Vibrant */
     --accent-green: #22d97f;
@@ -3173,8 +3174,30 @@ button.danger-btn svg {
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
+.two-col-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 480px) {
+    .two-col-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}
+
 .field-group {
     margin-bottom: var(--space-4);
+}
+
+/* Relationship Cards - replaced by button-based UI, old CSS removed */
+
+/* Religion field - full width on small screens for long names */
+@media (max-width: 600px) {
+    .religion-field {
+        grid-column: 1 / -1;
+    }
 }
 
 /* ===========================================
@@ -3903,7 +3926,7 @@ input[type="range"]::-moz-range-thumb {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 10001;
     animation: fadeIn 150ms ease;
 }
 
@@ -4014,19 +4037,78 @@ input[type="range"]::-moz-range-thumb {
     text-decoration: underline;
 }
 
+/* DM Session standalone link */
+.dm-session-link {
+    text-decoration: none;
+    color: var(--text-base);
+}
+
+.dm-session-link .icon-arrow {
+    display: none !important;
+}
+
+/* OIDC Login */
+.oidc-login-btn {
+    width: 100%;
+    padding: var(--space-4);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    background: linear-gradient(135deg, #3b9eff, #00bcd4);
+    color: #000;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    margin-bottom: var(--space-3);
+}
+
+.oidc-login-btn:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(59, 158, 255, 0.3);
+    opacity: 0.9;
+}
+
+.auth-separator {
+    display: flex;
+    align-items: center;
+    margin: var(--space-4) 0;
+    gap: var(--space-3);
+}
+
+.auth-separator::before,
+.auth-separator::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-color);
+}
+
+.auth-separator span {
+    color: var(--text-subdued);
+    font-size: var(--font-size-sm);
+    text-transform: lowercase;
+}
+
 /* Modal - Mobile Responsive */
 @media (max-width: 480px) {
-    .modal-content {
-        max-width: calc(100% - 24px);
-        margin: 12px;
-        padding: var(--space-4);
-        max-height: calc(100vh - 24px);
+    .modal-overlay {
+        align-items: flex-start;
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 12px;
+    }
+
+    .modal-content {
+        max-width: 100%;
+        margin: auto 0;
+        padding: var(--space-4);
+        max-height: none;
+        overflow-y: visible;
     }
 
     .modal-content h2 {
         font-size: var(--font-size-lg);
-        margin-bottom: var(--space-4);
+        margin-bottom: var(--space-3);
     }
 
     .modal-close {
@@ -4041,6 +4123,19 @@ input[type="range"]::-moz-range-thumb {
 
     .modal-submit {
         padding: var(--space-3);
+    }
+
+    .oidc-login-btn {
+        padding: var(--space-3);
+        font-size: var(--font-size-sm);
+    }
+
+    .auth-separator {
+        margin: var(--space-3) 0;
+    }
+
+    #auth-modal .modal-form .field-group {
+        margin-bottom: var(--space-3);
     }
 }
 
@@ -7965,12 +8060,7 @@ input[type="range"]::-moz-range-thumb {
        MOBILE ATTRIBUTES PAGE
        =========================================== */
 
-    /* Willpower/HP - single column */
-    #page-attributes .section:first-child > div[style*="grid-template-columns: 1fr 1fr"] {
-        display: flex !important;
-        flex-direction: column;
-        gap: 12px;
-    }
+    /* Willpower/HP - handled by .two-col-grid responsive class */
 
     /* Race/Class/Religion bonuses - stack vertically */
     .grid.grid-3 {
@@ -8085,18 +8175,20 @@ input[type="range"]::-moz-range-thumb {
         border-bottom: none;
     }
 
-    /* Shield table labels */
+    /* Shield table labels (7 columns: Type, HP, Block, Defence, Damage, Current HP, Broken) */
     #page-combat .section:nth-child(1) table td:nth-child(1)::before { content: "Type"; }
     #page-combat .section:nth-child(1) table td:nth-child(2)::before { content: "HP"; }
     #page-combat .section:nth-child(1) table td:nth-child(3)::before { content: "Block"; }
     #page-combat .section:nth-child(1) table td:nth-child(4)::before { content: "Defence"; }
     #page-combat .section:nth-child(1) table td:nth-child(5)::before { content: "Damage"; }
+    #page-combat .section:nth-child(1) table td:nth-child(6)::before { content: "Current HP"; }
+    #page-combat .section:nth-child(1) table td:nth-child(7)::before { content: "Broken"; }
 
-    /* Armor table labels */
+    /* Armor table labels (6 columns: Type, HP, Block, Current HP, Disadvantage, Broken) */
     #page-combat .section:nth-child(2) table td:nth-child(1)::before { content: "Type"; }
     #page-combat .section:nth-child(2) table td:nth-child(2)::before { content: "HP"; }
     #page-combat .section:nth-child(2) table td:nth-child(3)::before { content: "Block"; }
-    #page-combat .section:nth-child(2) table td:nth-child(4)::before { content: "Dmg"; }
+    #page-combat .section:nth-child(2) table td:nth-child(4)::before { content: "Current HP"; }
     #page-combat .section:nth-child(2) table td:nth-child(5)::before { content: "Disadv"; }
     #page-combat .section:nth-child(2) table td:nth-child(6)::before { content: "Broken"; }
 
@@ -8667,7 +8759,7 @@ input[type="range"]::-moz-range-thumb {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 9999;
+    z-index: 5000;
     animation: fadeIn 0.2s ease;
 }
 
@@ -9093,7 +9185,7 @@ input[type="range"]::-moz-range-thumb {
     border-radius: 20px;
     font-size: 0.75rem;
     color: var(--accent-green);
-    z-index: 9999;
+    z-index: 5000;
     opacity: 0;
     transform: translateY(10px);
     transition: opacity 0.3s ease, transform 0.3s ease;
@@ -9284,6 +9376,12 @@ input[type="range"]::-moz-range-thumb {
     padding: var(--space-3);
 }
 
+tr.legendary-weapon td select,
+tr.legendary-weapon td input {
+    box-shadow: 0 0 8px 2px rgba(218, 165, 32, 0.5);
+    border-color: goldenrod !important;
+}
+
 .weapon-name {
     font-weight: 600;
     color: var(--text-base);
@@ -9310,73 +9408,7 @@ input[type="range"]::-moz-range-thumb {
     margin-right: 4px;
 }
 
-.quick-abilities-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: var(--space-3);
-}
-
-.quick-ability-card {
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-lg);
-    padding: var(--space-3);
-}
-
-.quick-ability-card.conjurer {
-    border-left: 3px solid var(--accent-purple);
-}
-
-.quick-ability-card.melee {
-    border-left: 3px solid var(--accent-amber);
-}
-
-.ability-name {
-    font-weight: 600;
-    color: var(--text-base);
-    font-size: var(--font-size-sm);
-    margin-bottom: var(--space-2);
-}
-
-.ability-details {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-    font-size: var(--font-size-xs);
-    margin-bottom: var(--space-1);
-}
-
-.ability-effect {
-    width: 100%;
-    color: var(--text-subdued);
-    margin-bottom: var(--space-1);
-}
-
-.ability-cost {
-    color: var(--accent-purple);
-    font-weight: 500;
-}
-
-.ability-dmg {
-    color: var(--accent-red);
-    font-weight: 500;
-}
-
-.ability-gain {
-    color: var(--accent-green);
-    font-weight: 500;
-}
-
-.ability-weak {
-    color: var(--accent-amber);
-    font-weight: 500;
-}
-
-.ability-check {
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    font-style: italic;
-}
+/* Quick abilities are rendered as inline pill buttons (same pattern as relationships) */
 
 .empty-state {
     color: var(--text-muted);
@@ -9729,7 +9761,7 @@ input.locked:disabled {
     background: var(--bg-elevated);
     border-top: 1px solid var(--border-purple);
     padding: var(--space-4) var(--space-6);
-    z-index: 10000;
+    z-index: 10002;
     transform: translateY(100%);
     transition: transform 0.3s ease;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
@@ -10714,7 +10746,7 @@ input.locked:disabled {
     height: 100vh;
     background: var(--bg-surface);
     border-right: 1px solid var(--border-default);
-    z-index: 1000;
+    z-index: 900;
     flex-direction: column;
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
     overflow-y: auto;

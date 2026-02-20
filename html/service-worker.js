@@ -1,13 +1,17 @@
 // Aedelore Character Sheet Service Worker
-const CACHE_NAME = 'aedelore-v346';
+// Strategy: stale-while-revalidate (no manual version bumps needed)
+const CACHE_NAME = 'aedelore-cache';
 
-// Files to cache for offline use
+// Files to pre-cache on first install
 const STATIC_ASSETS = [
   '/character-sheet',
+  '/dm-session',
   '/wiki',
   '/wiki-admin',
+  '/js/dm-session.js',
   '/js/wiki.js',
   '/js/wiki-admin.js',
+  '/data/npc-names.js',
   '/css/styles.css',
   '/css/fonts.css',
   '/fonts/inter/inter-300.woff2',
@@ -38,6 +42,7 @@ const STATIC_ASSETS = [
   '/js/modules/campaigns.js',
   '/js/modules/progression.js',
   '/js/modules/onboarding.js',
+  '/js/modules/activity-monitor.js',
   // RPG system modules
   '/js/systems/system-config.js',
   '/js/systems/dnd5e.js',
@@ -55,99 +60,72 @@ const STATIC_ASSETS = [
   '/manifest.json'
 ];
 
-// Install event - cache static assets
+// Install event - pre-cache static assets
 self.addEventListener('install', event => {
-  console.log('[SW] Installing service worker...');
+  console.log('[SW] Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('[SW] Caching static assets');
-        return cache.addAll(STATIC_ASSETS);
-      })
-      .then(() => {
-        console.log('[SW] Static assets cached');
-        return self.skipWaiting();
-      })
-      .catch(err => {
-        console.error('[SW] Cache error:', err);
-      })
+      .then(cache => cache.addAll(STATIC_ASSETS))
+      .then(() => self.skipWaiting())
+      .catch(err => console.error('[SW] Pre-cache error:', err))
   );
 });
 
-// Activate event - clean up old caches
+// Activate event - clean up old versioned caches, claim clients
 self.addEventListener('activate', event => {
-  console.log('[SW] Activating service worker...');
+  console.log('[SW] Activating...');
   event.waitUntil(
     caches.keys()
-      .then(cacheNames => {
-        return Promise.all(
-          cacheNames
-            .filter(name => name !== CACHE_NAME)
-            .map(name => {
-              console.log('[SW] Deleting old cache:', name);
-              return caches.delete(name);
-            })
-        );
-      })
-      .then(() => {
-        console.log('[SW] Service worker activated');
-        return self.clients.claim();
-      })
+      .then(names => Promise.all(
+        names.filter(n => n !== CACHE_NAME).map(n => {
+          console.log('[SW] Deleting old cache:', n);
+          return caches.delete(n);
+        })
+      ))
+      .then(() => self.clients.claim())
   );
 });
 
-// Fetch event - serve from cache, fallback to network
+// Fetch event - stale-while-revalidate
+// Serves cached version instantly, fetches fresh copy in background
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
   // Skip non-GET requests
-  if (event.request.method !== 'GET') {
-    return;
-  }
+  if (event.request.method !== 'GET') return;
 
-  // Skip API calls - always go to network
-  if (url.pathname.startsWith('/api/')) {
-    return;
-  }
+  // API calls always go to network
+  if (url.pathname.startsWith('/api/')) return;
 
-  // For static assets, use cache-first strategy
   event.respondWith(
-    caches.match(event.request)
-      .then(cachedResponse => {
-        if (cachedResponse) {
-          // Return cached version, but also fetch update in background
-          event.waitUntil(
-            fetch(event.request)
-              .then(networkResponse => {
-                if (networkResponse && networkResponse.status === 200) {
-                  caches.open(CACHE_NAME)
-                    .then(cache => cache.put(event.request, networkResponse));
-                }
-              })
-              .catch(() => {})
-          );
-          return cachedResponse;
-        }
+    caches.match(event.request).then(cached => {
+      // Always fetch fresh version in background
+      const networkFetch = fetch(event.request)
+        .then(response => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => null);
 
-        // Not in cache, fetch from network
-        return fetch(event.request)
-          .then(networkResponse => {
-            // Cache successful responses
-            if (networkResponse && networkResponse.status === 200) {
-              const responseClone = networkResponse.clone();
-              caches.open(CACHE_NAME)
-                .then(cache => cache.put(event.request, responseClone));
-            }
-            return networkResponse;
-          })
-          .catch(() => {
-            // Offline and not cached - return offline page if available
-            if (event.request.mode === 'navigate') {
-              return caches.match('/character-sheet');
-            }
-            return new Response('Offline', { status: 503 });
-          });
-      })
+      if (cached) {
+        // Serve from cache immediately, update in background
+        event.waitUntil(networkFetch);
+        return cached;
+      }
+
+      // Not in cache — wait for network
+      return networkFetch.then(response => {
+        if (response) return response;
+        // Offline fallback
+        if (event.request.mode === 'navigate') {
+          return caches.match('/character-sheet');
+        }
+        return new Response('Offline', { status: 503 });
+      });
+    })
   );
 });
 

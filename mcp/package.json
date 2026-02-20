@@ -1,0 +1,15 @@
+{
+  "name": "aedelore-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for Aedelore DM Tools",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "express": "^5.1.0",
+    "zod": "^3.24.0"
+  }
+}

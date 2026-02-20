@@ -1,0 +1,124 @@
+WORLD OF ASHENDOR — GEOGRAPHIC REFERENCE
+
+The continent of Ashendor stretches north to south, bordered by ocean on west, north, and east. The south opens to a vast sea.
+
+=== REGIONS (North to South) ===
+
+THORSHEIM (Far North): Colossal impassable snow-covered mountain range spanning the entire northern edge. The Dragon Gods sleep here. Nothing civilized exists beyond.
+
+BRIGHTWOODS (Northwest): Vast dark corrupted forest under Thorsheim. Dangerous, untamed wilderness filled with dark forces. The Sunken City lies at its southern end.
+
+MOUNT BASIN (North-Central): Mountainous area directly below the Great Tree of Morningstar. Forms the natural border between Westfall (west) and Eastwatch (east).
+
+BOREA (Northeast): Frozen mountainous region under Thorsheim. Snow and ice year-round. Dwarven homeland. A prominent waterfall cascades down the eastern mountains to the coast.
+
+WESTFALL (West): Western half of the continent south of Brightwoods. Farmland, forests, coast. Generally peaceful. Temperate climate.
+
+EASTWATCH (East): Eastern half south of Borea. Forests, farmland, eastern coast. A bay with islands separates it from Northern Marches to the south. Temperate.
+
+NORTHERN MARCHES (Central): Border zone between Westfall and Eastwatch. Transitional landscape. Temperate.
+
+ALFWYLD FOREST (Northern Eastwatch): Ancient forest at the edge of southern Mount Basin. Halfling homeland. Lush and warm.
+
+ARFALIA (South): Southern continent below Northern Marches. Mountain ranges in the north (Lorenzia), coastal plains, and the Ivory Bogs in the southwest. Mediterranean climate in the south.
+
+THE IVORY BOGS (SW Arfalia): Wetland/bog region near the southwestern coast. Home to Feldale and Varrow.
+
+THE BURNING PASSAGE (Southwest): Volcanic scorched region. Orange and red terrain with active volcanoes. Hot, dry, desolate, uninhabited.
+
+ORCISH TERRITORY (Far East): Islands east of Fort Salinax. Orc and troll domains beyond the sea.
+
+=== MAJOR LANDMARKS ===
+
+THE GREAT TREE OF MORNINGSTAR: Enormous sacred tree in north-central Ashendor, between Brightwoods and Borea, south of Thorsheim. Visible from great distances. Spiritual reference point.
+
+THE SUNKEN CITY: Cursed ruins of an ancient elven metropolis in southern Brightwoods. Once ruled by King Malcath, who was consumed by dark ambition. Mist-shrouded, haunted. Serexa Fortress watches over it.
+
+THE FLOATING ISLES: Enchanted islands suspended in the sky above the southwestern sea, west of Fall of the First Heroes. Born from the First War's magic. Sacred to elves — temples and libraries built upon them.
+
+FALL OF THE FIRST HEROES: Historic site north of Nortaq, east of the Burning Passage. Tied to the First War.
+
+THE OLD BRIDGE: Bridge near Lutovia crossing the river that flows from the Sunken City southward to Feldale.
+
+BROKEN BRIDGE: Near Serexa Fortress, connecting toward Brightwoods.
+
+THE BARROWHILLS: Hills at Mount Basin's foot, east of Castle Black.
+
+=== MAJOR RIVER ===
+A significant river flows from the Sunken City southward through the continent, passing the Old Bridge near Lutovia, continuing down to the Ivory Bogs and Feldale. Another river flows through East Trade to the eastern sea.
+
+=== SETTLEMENTS (North to South, organized by region) ===
+
+--- BOREA (Northeast, arctic/alpine) ---
+THIR: Western Borea. Proud dwarven forge-city founded by Kaela Stonebreaker after Amber's Call fell. Fires never dim. Unmatched craftsmanship. Snow-capped mountains.
+AMBER'S CALL: Southwestern Borea, east of Mount Basin. RUINS. Once the jewel of dwarven civilization, now frozen and overtaken by dark forces. Ice-covered crumbling walls.
+MITHANDRIR'S WATCH: Southern Borea, east of Amber's Call. Watchtower/outpost in the northern frontier.
+SEAWATCH: Northeast coast, below Mithandrir's Watch. Fortified dwarven harbor. Vital trade link between northern dwarven kingdoms and southern territories. Thick stone walls.
+OUTPOST: Just west of Seawatch. Small unnamed outpost.
+
+--- NORTHERN FRONTIER (Border Brightwoods/Westfall/Eastwatch) ---
+RIVERMOUNT: East of Sunken City, on the Brightwoods/Westfall border against Mount Basin's wall. Elven fortress — northern bastion of light and magic. Ornate stone walls, green-roofed towers, magical wards woven into every building. Along riverbanks.
+SEREXA FORTRESS: Northern Westfall, at Brightwoods border (level with Sunken City). Built by humans, elves, and dwarves. Guards the Sunken City and Brightwoods. Only elite soldiers, paladins, and mages. Daily combat against dark creatures crossing from the north.
+CASTLE BLACK: Directly below Serexa, western Westfall coast. Human-elven fortress, sister to Rivermount. Overlooks rugged coastline with fierce sea winds. Discipline and readiness.
+
+--- EASTWATCH (Eastern half) ---
+ALFWYLD FOREST: Northern Eastwatch. Ancient halfling homeland.
+HERRA: Center of Eastwatch, right of Alfwyld. Quiet dwarven village at forest edge. Retired dwarves. Woodcraft, hunting. Thatched roofs, wooden fences. Peaceful.
+HALFHILL: South of center in Eastwatch, below Herra. Dwarven farming town (originally human-built, gifted to dwarves). Grand clock tower. Devoted to The Stone's Heart. Blend of human and dwarven architecture.
+SAWWELL: Eastwatch, west of Halfhill. CURSED AND ABANDONED. A bottomless pit appeared overnight in the village center. Former residents now corrupted and haunted. Eerie void calls from the pit.
+PROPERMILL: Southwestern Eastwatch, east of Finnstown. Elven/halfling village. Produces minerals, salt, herbs, and spices. Central watermill. Quiet prosperity.
+HOGFOOT: Eastwatch, east of Propermill. Bustling dwarven smithing village. Legendary craftsmanship — best place for unique weapons and armor. Built into snowy rugged terrain. Furnaces and hammers.
+NORTHBRIDGE: Eastwatch, southeast of Hogfoot. Pacifist village of humans and dwarves in a lush valley. Violence strictly forbidden. Meditation, spiritual growth, gardens, rivers. Strangers welcome if peaceful.
+SOUTHBRIDGE: Eastwatch, southeast of Northbridge. Peaceful farming settlement of dwarves and halflings. Stream through the village. Simple wooden homes.
+TIDEWALL: Eastwatch, southeast of Northbridge, at eastern coast. Peaceful coastal village. Windmill, fishing boats, statue on town square. No walls or fortifications. Serene.
+EMBERSAIL: Eastern shore of the bay (between Northern Marches and Eastwatch). Coastal city built by dwarves and humans. Harbor, retired soldiers and adventurers seeking new beginnings. Gateway to southern regions.
+
+--- WESTFALL (Western half) ---
+SINGAPER: Westfall, southeast of Castle Black. Crossroads town between east and west Ashendor. Rest stop with inns, craftsmen, marketplace. No one stays long.
+
+--- NORTHERN MARCHES (Central border zone) ---
+FINNSTOWN: East of Barrowhills, southwest of Sawwell. Multi-racial town devoted to the Light. Dwarves, halflings, elves, humans. Grand fountain square. Welcoming but strict moral code.
+JACOBSVILLE: East of Lutovia. Scholarly human town. Church of the Morningstar. Prestigious but exclusive and expensive. Aloof locals.
+SARAH'SVILLE: South of Jacobsville. Isolated, unfriendly human town. Residents cut themselves off from the world. Better passed through than stayed in.
+BOTTOMWAY: Southern end of Northern Marches, southeast of Sarah'sville. Quiet farming town. Golden wheat fields, vegetable gardens. Smells of fresh bread. Unassuming charm.
+LUTOVIA: Westfall side, southeast of Singaper, near the Old Bridge. Largest human stronghold. Dedicated to Taninsam. Towering walls never breached. Paladins, holy warriors. Red and gold banners.
+
+--- ARFALIA (Southern continent) ---
+LORENZIA: Northern Arfalia, nestled in mountain ranges. High Elf capital. City of magic and knowledge. Tall towers with red roofs, bridges, canals, magical lights. Ancient libraries and academies. Breathtaking mountain valley.
+PUDDLE: South of Lorenzia, at mountain foot (mountain between them). Small elven town. Crystal-clear mountain streams and pools. Healers, herbalists. Moss-covered cottages. Ethereal, timeless feel.
+FILAX: Just southwest of Puddle. Small village built by Tyralia outcasts. Appears almost abandoned — thatched roofs, wooden palisade. But hides secret tunnels, hidden gatherings, possible forgotten magic beneath the surface.
+FELDALE: Northern Ivory Bogs, west of Filax. Hidden Moon Elf settlement built high in tree canopy. Suspended walkways, ethereal light. Few outsiders know it exists. The forest itself guards its secrets.
+AVENSTOFF: Southeast of Feldale, near coast, directly west of Tyralia. Bustling town blending human and elven cultures. Cobbled streets, half-timbered houses, central marketplace. Trade and cultural hub.
+TYRALIA: Arfalia coast, east of Avenstoff. Grand human capital — largest human city. Expansive harbor, Temple of Taninsam, guild halls, endless marketplace. "If you cannot find it in Tyralia, it may not exist." Trade, culture, innovation.
+SEYWALD: East of Tyralia. (Description pending.)
+ROOTFIELD: Directly north of Seywald. Small peaceful halfling village — the only one outside Alfwyld Forest. Wooden palisade built with human help. Herb gardens, simple faith, quiet life.
+EAST TRADE: East of Seywald, at eastern coast. Second largest human city. River flowing to the sea. Magnificent trade and diplomacy hub. Merchant ships, Guilded Assembly, Grand Exchange. Neutral ground where even rivals find common cause.
+HOLYWELL: Southeast of Lorenzia area, coast. RUINS. Once-thriving coastal town destroyed by a mysterious dark storm with purple lightning. Workers who tried to rebuild vanished. Haunted — shadows, whispers, an unsettling presence.
+VARROW: Southern Ivory Bogs, far south toward coast. Small village of Moon Elves and human hunters. Deep untouched wilderness. Thatch-roofed huts. Nature magic, ancient traditions. Fiercely protective of their simple way of life.
+
+--- FORT & ISLAND ---
+FORT SALINAX: Rocky island northeast of Holywell. Ancient fortress against orc/troll invasions from overseas. Dedicated to Tanin'iver (dragon god of water). Austere, disciplined garrison. Only the bravest.
+
+--- FAR SOUTH ---
+NORTAQ: Far southwest. RUINS. Once a flourishing kingdom where humans, elves, orcs, and trolls lived together. Burned to ash by Taninsam during the First War. Now a shadowy wasteland — dark magicians, stray orcs/trolls, wicked creatures. A place of dread.
+
+=== CLIMATE ZONES ===
+Arctic/Alpine: Thorsheim, Borea — permanent snow, extreme cold
+Cold Temperate: Brightwoods, northern frontier — cold winters, cool summers
+Temperate: Westfall, Eastwatch, Northern Marches — four seasons, mild, fertile
+Warm Temperate: Alfwyld Forest, southern heartlands — warm, lush
+Arid/Volcanic: The Burning Passage — hot, dry, volcanic
+Mediterranean: Arfalia, southern coast — warm, dry summers
+
+=== TRAVEL TIMES (on foot) ===
+Tyralia to East Trade: 2-3 days
+Tyralia to Lorenzia: 3-4 days
+Tyralia to Singaper: 4-5 days
+East Trade to Embersail: 5-7 days
+Singaper to Rivermount: 4-5 days
+Rivermount to Serexa Fortress: 2-3 days
+Central to Nortaq (far south): 8-10 days
+Central to Borea (northeast): 6-8 days
+Coast to coast (west to east): 7-10 days
+Thorsheim foothills to Nortaq: 12-15 days
+(Horse halves these times. Sea travel faster for coastal routes. Mountains/forests/volcanic terrain significantly increases time.)

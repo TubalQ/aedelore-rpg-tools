@@ -55,7 +55,13 @@ const WEAPONS_DATA = {
     "Spiked Shield": { type: "Fantasy Melee", ability: "Strength", bonus: "+1", damage: "1d6", range: "1", break: "1" },
     "Chakram": { type: "Fantasy Ranged", ability: "Dexterity", bonus: "+2", damage: "1d6", range: "10/30", break: "0" },
     "Flamberge": { type: "Fantasy Melee", ability: "Strength", bonus: "+2", damage: "2d6", range: "2", break: "3" },
-    "Bone Club": { type: "Fantasy Melee", ability: "Strength", bonus: "+1", damage: "1d6", range: "1", break: "1" }
+    "Bone Club": { type: "Fantasy Melee", ability: "Strength", bonus: "+1", damage: "1d6", range: "1", break: "1" },
+
+    // Legendary Weapons (Sunken City)
+    "Starlight Blade": { type: "Legendary Melee", ability: "Strength", bonus: "+4", damage: "2d10", range: "2", break: "5" },
+    "Nightdagger": { type: "Legendary Melee", ability: "Dexterity", bonus: "+4", damage: "2d6", range: "1", break: "3" },
+    "Duskbow": { type: "Legendary Ranged", ability: "Dexterity", bonus: "+4", damage: "2d6", range: "40/80", break: "3" },
+    "Eclipse Staff": { type: "Legendary Melee", ability: "Strength/Dexterity", bonus: "+4", damage: "2d6", range: "3", break: "3" }
 };
 
 // Simple array for datalist (backward compatibility)

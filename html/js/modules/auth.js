@@ -8,23 +8,203 @@ window.authToken = localStorage.getItem('aedelore_auth_token');
 window.currentCharacterId = null;
 window.currentCampaign = null;
 
+// OIDC config (fetched at startup)
+window._oidcConfig = null;
+
+// ============================================
+// OIDC Support
+// ============================================
+
+async function initOidcConfig() {
+    try {
+        const res = await window.apiRequest('/api/auth/oidc/config');
+        if (res.ok) {
+            window._oidcConfig = await res.json();
+            updateOidcUI();
+        } else {
+            console.warn('OIDC config fetch failed:', res.status);
+        }
+    } catch (e) {
+        console.warn('OIDC config fetch error:', e.message);
+    }
+}
+
+function updateOidcUI() {
+    const config = window._oidcConfig;
+    const oidcSection = document.getElementById('auth-oidc-section');
+    const localSection = document.getElementById('auth-local-section');
+    const oidcSeparator = document.getElementById('auth-oidc-separator');
+
+    if (!config || !config.enabled || !config.providers.length) {
+        if (oidcSection) oidcSection.style.display = 'none';
+        if (oidcSeparator) oidcSeparator.style.display = 'none';
+        if (localSection) localSection.style.display = '';
+        return;
+    }
+
+    // Show OIDC buttons
+    if (oidcSection) {
+        oidcSection.innerHTML = '';
+        for (const provider of config.providers) {
+            const btn = document.createElement('button');
+            btn.className = 'oidc-login-btn';
+            btn.textContent = `Sign in with ${provider.providerName}`;
+            btn.onclick = () => startOidcLogin(provider);
+            oidcSection.appendChild(btn);
+        }
+        oidcSection.style.display = '';
+    }
+
+    // Show/hide local login based on config
+    if (config.localEnabled === false) {
+        if (localSection) localSection.style.display = 'none';
+        if (oidcSeparator) oidcSeparator.style.display = 'none';
+    } else {
+        if (localSection) localSection.style.display = '';
+        if (oidcSeparator) oidcSeparator.style.display = '';
+    }
+}
+
+function generateCodeVerifier() {
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    return btoa(String.fromCharCode(...array))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+}
+
+async function generateCodeChallenge(verifier) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(verifier);
+    const hash = await crypto.subtle.digest('SHA-256', data);
+    return btoa(String.fromCharCode(...new Uint8Array(hash)))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+}
+
+async function startOidcLogin(provider) {
+    const codeVerifier = generateCodeVerifier();
+    const codeChallenge = await generateCodeChallenge(codeVerifier);
+    const state = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2);
+
+    // Save PKCE + state in sessionStorage for the callback
+    sessionStorage.setItem('oidc_code_verifier', codeVerifier);
+    sessionStorage.setItem('oidc_state', state);
+    sessionStorage.setItem('oidc_provider_id', provider.id);
+
+    const redirectUri = window.location.origin + window.location.pathname;
+    sessionStorage.setItem('oidc_redirect_uri', redirectUri);
+
+    const params = new URLSearchParams({
+        response_type: 'code',
+        client_id: provider.clientId,
+        redirect_uri: redirectUri,
+        state: state,
+        code_challenge: codeChallenge,
+        code_challenge_method: 'S256',
+        scope: 'openid profile email'
+    });
+
+    window.location.href = `${provider.authorizationEndpoint}?${params.toString()}`;
+}
+
+async function handleOidcCallback() {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    const state = params.get('state');
+
+    if (!code) return false;
+
+    const savedState = sessionStorage.getItem('oidc_state');
+    const codeVerifier = sessionStorage.getItem('oidc_code_verifier');
+    const providerId = sessionStorage.getItem('oidc_provider_id');
+    const redirectUri = sessionStorage.getItem('oidc_redirect_uri');
+
+    // Clean up sessionStorage
+    sessionStorage.removeItem('oidc_code_verifier');
+    sessionStorage.removeItem('oidc_state');
+    sessionStorage.removeItem('oidc_provider_id');
+    sessionStorage.removeItem('oidc_redirect_uri');
+
+    // Validate state
+    if (state !== savedState) {
+        console.error('OIDC state mismatch');
+        return false;
+    }
+
+    if (!codeVerifier || !providerId || !redirectUri) {
+        console.error('Missing OIDC session data');
+        return false;
+    }
+
+    // Clean URL (remove code/state params)
+    const cleanUrl = window.location.pathname;
+    window.history.replaceState({}, '', cleanUrl);
+
+    try {
+        const res = await window.apiRequest('/api/auth/oidc/callback', {
+            method: 'POST',
+            body: JSON.stringify({ code, codeVerifier, redirectUri, providerId })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            console.error('OIDC callback failed:', data.error);
+            return false;
+        }
+
+        window.authToken = data.token;
+        localStorage.setItem('aedelore_auth_token', data.token);
+        localStorage.setItem('aedelore_username', data.username || '');
+
+        // Reload to apply auth state
+        location.reload();
+        return true;
+    } catch (error) {
+        console.error('OIDC callback error:', error);
+        return false;
+    }
+}
+
 function updateAuthUI() {
     const loggedOutDiv = document.getElementById('server-logged-out');
     const loggedInDiv = document.getElementById('server-logged-in');
     const serverBtnText = document.getElementById('server-btn-text');
+    const authBtnLoggedOut = document.getElementById('auth-btn-logged-out');
+    const authBtnLoggedIn = document.getElementById('auth-btn-logged-in');
+    const authBtnUsername = document.getElementById('auth-btn-username');
 
     if (window.authToken) {
         if (loggedOutDiv) loggedOutDiv.style.display = 'none';
         if (loggedInDiv) loggedInDiv.style.display = 'block';
-        if (serverBtnText) serverBtnText.textContent = 'Cloud ✓';
+        if (serverBtnText) serverBtnText.textContent = 'Cloud';
+        if (authBtnLoggedOut) authBtnLoggedOut.style.display = 'none';
+        if (authBtnLoggedIn) authBtnLoggedIn.style.display = '';
+        // Show username in account button
+        const storedUsername = localStorage.getItem('aedelore_username');
+        if (authBtnUsername) authBtnUsername.textContent = storedUsername || 'Account';
     } else {
         if (loggedOutDiv) loggedOutDiv.style.display = 'block';
         if (loggedInDiv) loggedInDiv.style.display = 'none';
         if (serverBtnText) serverBtnText.textContent = 'Cloud';
+        if (authBtnLoggedOut) authBtnLoggedOut.style.display = '';
+        if (authBtnLoggedIn) authBtnLoggedIn.style.display = 'none';
     }
 }
 
 function showAuthModal(mode = 'login') {
+    // Close mobile menu if open
+    const mobileMenu = document.getElementById('header-menu');
+    const mobileCloseBtn = document.getElementById('mobile-menu-close');
+    if (mobileMenu && mobileMenu.classList.contains('mobile-open')) {
+        mobileMenu.classList.remove('mobile-open');
+        if (mobileCloseBtn) mobileCloseBtn.classList.remove('visible');
+        document.body.style.overflow = '';
+    }
+
     const modal = document.getElementById('auth-modal');
     const title = document.getElementById('auth-modal-title');
     const submitBtn = document.getElementById('auth-submit-btn');
@@ -69,6 +249,14 @@ function showAuthModal(mode = 'login') {
         if (confirmGroup) confirmGroup.style.display = '';
         if (forgotText) forgotText.style.display = 'none';
         submitBtn.onclick = doRegister;
+    }
+
+    // Update OIDC buttons visibility
+    updateOidcUI();
+
+    // If OIDC config not loaded yet, re-fetch and update when ready
+    if (!window._oidcConfig) {
+        initOidcConfig();
     }
 
     modal.style.display = 'flex';
@@ -164,6 +352,7 @@ async function doLogin() {
 
         window.authToken = data.token;
         localStorage.setItem('aedelore_auth_token', window.authToken);
+        localStorage.setItem('aedelore_username', username);
 
         // Check for local character and migrate to cloud automatically
         if (window.hasLocalCharacter && window.hasLocalCharacter()) {
@@ -218,6 +407,7 @@ async function doRegister() {
 
         window.authToken = data.token;
         localStorage.setItem('aedelore_auth_token', window.authToken);
+        localStorage.setItem('aedelore_username', username);
         location.reload();
     } catch (error) {
         errorEl.textContent = 'Connection error. Please try again.';
@@ -262,7 +452,8 @@ async function doLogout() {
     window.currentCharacterId = null;
     window.currentCampaign = null;
     localStorage.removeItem('aedelore_auth_token');
-    localStorage.removeItem('aedelore_current_character_id');
+    localStorage.removeItem('aedelore_username');
+    // Keep aedelore_current_character_id so it auto-loads on next login
     localStorage.removeItem('aedelore_character_autosave');
 
     // Clear local character data (already saved to cloud)
@@ -314,13 +505,31 @@ async function deleteAccount() {
 
         window.authToken = null;
         window.currentCharacterId = null;
+        window.currentCampaign = null;
         localStorage.removeItem('aedelore_auth_token');
-        updateAuthUI();
+        localStorage.removeItem('aedelore_username');
+        localStorage.removeItem('aedelore_current_character_id');
+        localStorage.removeItem('aedelore_character_autosave');
         alert('✅ Account deleted successfully.');
+        location.reload();
     } catch (error) {
         alert('❌ Connection error. Please try again.');
     }
 }
+
+// ============================================
+// Initialize OIDC on page load
+// ============================================
+
+// Check for OIDC callback (code in URL) before anything else
+(async function() {
+    if (window.location.search.includes('code=')) {
+        const handled = await handleOidcCallback();
+        if (handled) return; // Will reload
+    }
+    // Fetch OIDC config (non-blocking)
+    initOidcConfig();
+})();
 
 // Export to global scope
 window.updateAuthUI = updateAuthUI;
@@ -333,3 +542,5 @@ window.doLogin = doLogin;
 window.doRegister = doRegister;
 window.doLogout = doLogout;
 window.deleteAccount = deleteAccount;
+window.startOidcLogin = startOidcLogin;
+window.initOidcConfig = initOidcConfig;

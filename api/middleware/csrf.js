@@ -58,6 +58,12 @@ function csrfProtection(req, res, next) {
         return next();
     }
 
+    // Skip for Bearer token auth (API/MCP calls) — CSRF only protects cookie-based browser auth
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        return next();
+    }
+
     const cookieToken = req.cookies[CSRF_COOKIE_NAME];
     // Accept CSRF token from header OR query param (for sendBeacon which can't set headers)
     const headerToken = req.headers[CSRF_HEADER_NAME] || req.query.csrf_token;

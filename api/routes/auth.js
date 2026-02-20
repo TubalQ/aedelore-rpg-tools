@@ -5,6 +5,7 @@ const db = require('../db');
 const { sendPasswordResetEmail } = require('../email');
 const { generateToken, generateResetToken, validateUsername, validatePassword, validateEmail } = require('../helpers');
 const { authLimiter, passwordResetLimiter, authenticate, isAccountLocked, recordFailedAttempt, clearLoginAttempts } = require('../middleware/auth');
+const oidc = require('../middleware/oidc');
 const { loggers } = require('../logger');
 
 const log = loggers.auth;
@@ -557,6 +558,149 @@ router.delete('/account', authenticate, async (req, res) => {
         log.error({ err: error }, 'Delete account error');
         if (metrics) metrics.errors++;
         res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// ============================================
+// OIDC Endpoints
+// ============================================
+
+// GET /api/auth/oidc/config — public endpoint, returns OIDC config for frontend
+router.get('/auth/oidc/config', async (req, res) => {
+    if (!oidc.isOidcEnabled()) {
+        return res.json({ enabled: false, providers: [] });
+    }
+
+    const providers = oidc.loadProviders();
+    const configs = [];
+
+    for (const provider of providers) {
+        try {
+            const discovery = await oidc.discoverOidc(provider);
+            configs.push({
+                id: provider.id,
+                providerName: provider.providerName,
+                authorizationEndpoint: discovery.authorization_endpoint,
+                clientId: provider.clientId
+            });
+        } catch (err) {
+            log.error({ err, providerId: provider.id }, 'Failed to discover OIDC provider');
+        }
+    }
+
+    res.json({
+        enabled: true,
+        localEnabled: oidc.isLocalEnabled(),
+        providers: configs,
+        callbackUrl: process.env.OIDC_CALLBACK_URL || `${process.env.APP_URL || 'https://aedelore.nu'}/character-sheet`
+    });
+});
+
+// POST /api/auth/oidc/callback — exchange code for tokens, JIT provision, return local session
+router.post('/auth/oidc/callback', authLimiter, async (req, res) => {
+    const { code, codeVerifier, redirectUri, providerId } = req.body;
+
+    if (!code || !codeVerifier || !redirectUri || !providerId) {
+        return res.status(400).json({ error: 'Missing required fields: code, codeVerifier, redirectUri, providerId' });
+    }
+
+    if (!oidc.isOidcEnabled()) {
+        return res.status(400).json({ error: 'OIDC authentication is not enabled' });
+    }
+
+    const provider = oidc.getProvider(providerId);
+    if (!provider) {
+        return res.status(400).json({ error: 'Unknown OIDC provider' });
+    }
+
+    try {
+        // Exchange authorization code for tokens
+        const tokens = await oidc.exchangeCodeForTokens(code, redirectUri, codeVerifier, provider);
+
+        if (!tokens.id_token) {
+            return res.status(400).json({ error: 'No ID token received from provider' });
+        }
+
+        // Validate the ID token
+        const claims = await oidc.validateIdToken(tokens.id_token, provider);
+
+        const sub = claims.sub;
+        const username = claims.preferred_username || claims.name || null;
+        const email = claims.email || null;
+
+        if (!sub) {
+            return res.status(400).json({ error: 'No subject claim in ID token' });
+        }
+
+        // JIT provisioning: find or create local user
+        const user = await oidc.findOrCreateUser(sub, username, email, provider.id);
+
+        // Log login history
+        const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip;
+        const userAgent = req.headers['user-agent'] || null;
+        await db.query(
+            'INSERT INTO login_history (user_id, ip_address, user_agent) VALUES ($1, $2, $3)',
+            [user.id, ip, userAgent]
+        );
+
+        // Create local session token (same system as regular login)
+        const token = generateToken();
+        await db.query(
+            'INSERT INTO auth_tokens (token, user_id) VALUES ($1, $2)',
+            [token, user.id]
+        );
+
+        if (metrics) {
+            metrics.auth.logins++;
+            writeMetricsFile?.();
+        }
+
+        // Set httpOnly cookie
+        res.cookie(AUTH_COOKIE_NAME, token, AUTH_COOKIE_OPTIONS);
+
+        res.json({
+            success: true,
+            token,
+            userId: user.id,
+            username: user.username
+        });
+    } catch (err) {
+        log.error({ err, providerId }, 'OIDC callback error');
+        return res.status(401).json({ error: 'OIDC authentication failed' });
+    }
+});
+
+// POST /api/auth/oidc/jit — internal endpoint for MCP to JIT provision users
+// Accepts sub, username, email from a validated JWT and returns a local token
+router.post('/auth/oidc/jit', async (req, res) => {
+    const { sub, username, email } = req.body;
+
+    if (!sub) {
+        return res.status(400).json({ error: 'Subject (sub) required' });
+    }
+
+    if (!oidc.isOidcEnabled()) {
+        return res.status(400).json({ error: 'OIDC not enabled' });
+    }
+
+    try {
+        const user = await oidc.findOrCreateUser(sub, username, email);
+
+        const token = generateToken();
+        await db.query(
+            'INSERT INTO auth_tokens (token, user_id) VALUES ($1, $2)',
+            [token, user.id]
+        );
+
+        if (metrics) {
+            metrics.auth.logins++;
+            writeMetricsFile?.();
+        }
+
+        res.json({ success: true, token, userId: user.id, username: user.username });
+    } catch (err) {
+        log.error({ err }, 'OIDC JIT provisioning error');
+        res.status(500).json({ error: 'JIT provisioning failed' });
     }
 });
 

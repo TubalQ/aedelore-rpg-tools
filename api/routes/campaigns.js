@@ -88,10 +88,16 @@ function generateSessionSummary(data, playerCharacterName = null) {
         }))
     };
 
-    // Only include DM-only fields if not player view
+    // Turning points and events - filter by visibleTo for players
+    summary.turning_points = turningPoints
+        .filter(tp => tp.description && isVisibleToPlayer(tp.visibleTo))
+        .map(tp => ({ description: tp.description, consequence: tp.consequence, linkedTo: tp.linkedTo || '' }));
+    summary.event_log = eventLog
+        .filter(e => e.text && isVisibleToPlayer(e.visibleTo))
+        .map(e => ({ text: e.text, timestamp: e.timestamp, linkedTo: e.linkedTo || '' }));
+
+    // Session notes - full for DM, only follow-up for players
     if (!playerCharacterName) {
-        summary.turning_points = turningPoints.map(tp => ({ description: tp.description, consequence: tp.consequence }));
-        summary.event_log = eventLog.map(e => ({ text: e.text, timestamp: e.timestamp }));
         summary.session_notes = data.sessionNotes || null;
     } else {
         if (data.sessionNotes && data.sessionNotes.followUp) {
@@ -410,6 +416,7 @@ router.get('/:id/players', authenticate, async (req, res) => {
                     class: data.class || '',
                     religion: data.religion || '',
                     background: data.background || '',
+                    relationships: data.relationships || '',
                     xp: p.character_xp || 0,
                     xp_spent: p.character_xp_spent || 0,
                     race_class_locked: p.character_race_class_locked || false,

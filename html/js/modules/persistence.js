@@ -21,6 +21,10 @@ const LOCAL_NOTICE_DISMISSED_KEY = 'aedelore_sync_notice_dismissed';
 // Save character to localStorage (for non-logged-in users)
 function saveLocally() {
     const data = window.getAllFields();
+
+    // Don't save empty character data (no name = nothing worth saving)
+    if (!(data.character_name || '').trim()) return false;
+
     const currentData = JSON.stringify(data);
 
     // Skip if no changes
@@ -111,8 +115,14 @@ async function migrateLocalToCloud() {
     const localData = getLocalCharacter();
     if (!localData || !window.authToken) return false;
 
+    // Don't migrate empty/blank character data (saved by autosave when logged out)
+    const characterName = (localData.character_name || '').trim();
+    if (!characterName) {
+        clearLocalCharacter();
+        return false;
+    }
+
     try {
-        const characterName = localData.character_name || 'Unnamed Character';
         const system = localStorage.getItem('aedelore_selected_system') || 'aedelore';
 
         const res = await window.apiRequest('/api/characters', {
@@ -461,7 +471,7 @@ async function loadCharacterById(id) {
 
         if (!res.ok) {
             alert('❌ Error loading character');
-            return;
+            return false;
         }
 
         const character = await res.json();
@@ -481,11 +491,11 @@ async function loadCharacterById(id) {
 
             if (confirm(`This character was created in ${charSystemName}, but you're currently using ${currentSystemName}.\n\nSwitch to ${charSystemName} and load this character?`)) {
                 localStorage.setItem('aedelore_selected_system', charSystem);
-                localStorage.setItem('aedelore_pending_character_id', id);
+                localStorage.setItem('aedelore_current_character_id', id);
                 location.reload();
-                return;
+                return true;
             } else {
-                return;
+                return true; // User declined — don't trigger fallback loading
             }
         }
 
@@ -520,8 +530,10 @@ async function loadCharacterById(id) {
 
         lastSavedData = JSON.stringify(window.getAllFields());
         startAutoSave();
+        return true;
     } catch (error) {
         alert('❌ Connection error. Please try again.');
+        return false;
     }
 }
 
@@ -705,10 +717,27 @@ window.addEventListener('load', async () => {
     window.updateAuthUI();
 
     if (window.authToken) {
-        // Logged in: load from cloud
+        // Logged in: try loading last character, fall back to most recent
+        let loaded = false;
         const pendingCharId = localStorage.getItem('aedelore_current_character_id');
         if (pendingCharId) {
-            await loadCharacterById(parseInt(pendingCharId));
+            loaded = await loadCharacterById(parseInt(pendingCharId));
+        }
+        if (!loaded) {
+            // No last character or load failed — auto-load most recently updated
+            try {
+                const res = await window.apiRequest('/api/characters');
+                if (res.ok) {
+                    const chars = await res.json();
+                    const currentSystem = localStorage.getItem('aedelore_selected_system') || 'aedelore';
+                    const match = chars.find(c => (c.system || 'aedelore') === currentSystem);
+                    if (match) {
+                        await loadCharacterById(parseInt(match.id));
+                    }
+                }
+            } catch (e) {
+                console.warn('Auto-load character failed:', e);
+            }
         }
     } else {
         // Not logged in: load local character if exists

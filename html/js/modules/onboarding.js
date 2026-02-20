@@ -21,7 +21,7 @@ function initOnboarding() {
         showOnboarding();
     }
 
-    setInterval(updateOnboardingProgress, 1000);
+    window._onboardingInterval = setInterval(updateOnboardingProgress, 1000);
     cloneOnboardingForMobile();
 }
 
@@ -138,6 +138,10 @@ function hideOnboarding() {
 function hideOnboardingPermanent() {
     localStorage.setItem('onboarding_dismissed', 'true');
     hideOnboarding();
+    if (window._onboardingInterval) {
+        clearInterval(window._onboardingInterval);
+        window._onboardingInterval = null;
+    }
 }
 
 function toggleOnboardingMobile() {

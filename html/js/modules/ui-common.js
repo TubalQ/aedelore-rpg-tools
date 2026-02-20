@@ -91,11 +91,9 @@ function initCollapsibleSections() {
         const sectionId = section.getAttribute('data-section-id');
         if (sectionId && window.innerWidth <= 1024) {
             const collapsedSections = JSON.parse(localStorage.getItem('collapsedSections') || '{}');
-            if (collapsedSections[sectionId] === undefined || collapsedSections[sectionId] === true) {
+            if (collapsedSections[sectionId] === true) {
                 section.classList.add('collapsed');
             }
-        } else if (window.innerWidth <= 1024) {
-            section.classList.add('collapsed');
         }
     });
 }
@@ -109,11 +107,9 @@ function handleCollapsibleResize() {
             const sectionId = section.getAttribute('data-section-id');
             if (sectionId) {
                 const collapsedSections = JSON.parse(localStorage.getItem('collapsedSections') || '{}');
-                if (collapsedSections[sectionId] === undefined || collapsedSections[sectionId] === true) {
+                if (collapsedSections[sectionId] === true) {
                     section.classList.add('collapsed');
                 }
-            } else {
-                section.classList.add('collapsed');
             }
         });
     }

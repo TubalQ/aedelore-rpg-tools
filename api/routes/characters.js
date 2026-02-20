@@ -259,12 +259,14 @@ router.put('/:id', authenticate, async (req, res) => {
             log.error({ err: parseErr }, 'Failed to parse existing character data');
         }
 
-        // Merge: keep quest_items from database (only DM can modify via /give-item endpoint)
-        // But quest_items_archived is player-managed (from client data, or preserve existing)
+        // Merge: keep server-managed fields from database
+        // quest_items: only DM can modify via /give-item endpoint
+        // relationships: preserve if client doesn't send them (MCP may have updated)
         const mergedData = {
             ...data,
             quest_items: existingData.quest_items || [],
-            quest_items_archived: data.quest_items_archived || existingData.quest_items_archived || []
+            quest_items_archived: data.quest_items_archived || existingData.quest_items_archived || [],
+            relationships: data.relationships || existingData.relationships || ''
         };
 
         // Include user_id in WHERE clause as additional safeguard
@@ -341,23 +343,35 @@ router.post('/:id/link-campaign', authenticate, async (req, res) => {
             return res.status(404).json({ error: 'Invalid share code' });
         }
 
-        // Update character with campaign_id
-        await db.query(
-            'UPDATE characters SET campaign_id = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
-            [campaign.id, req.params.id]
-        );
+        // Update character and add as campaign player in a transaction
+        const client = await db.pool.connect();
+        try {
+            await client.query('BEGIN');
 
-        // Also add user as campaign player if not already
-        const existingPlayer = await db.get(
-            'SELECT id FROM campaign_players WHERE campaign_id = $1 AND user_id = $2',
-            [campaign.id, req.userId]
-        );
+            await client.query(
+                'UPDATE characters SET campaign_id = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+                [campaign.id, req.params.id]
+            );
 
-        if (!existingPlayer && campaign.user_id !== req.userId) {
-            await db.query(
-                'INSERT INTO campaign_players (campaign_id, user_id) VALUES ($1, $2)',
+            // Add user as campaign player if not already (including DM playing their own campaign)
+            const existingPlayer = await client.query(
+                'SELECT id FROM campaign_players WHERE campaign_id = $1 AND user_id = $2',
                 [campaign.id, req.userId]
             );
+
+            if (existingPlayer.rows.length === 0) {
+                await client.query(
+                    'INSERT INTO campaign_players (campaign_id, user_id) VALUES ($1, $2)',
+                    [campaign.id, req.userId]
+                );
+            }
+
+            await client.query('COMMIT');
+        } catch (txError) {
+            await client.query('ROLLBACK');
+            throw txError;
+        } finally {
+            client.release();
         }
 
         res.json({ success: true, campaign_name: campaign.name, campaign_id: campaign.id });

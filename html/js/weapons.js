@@ -11,6 +11,10 @@ function setupWeaponAutofill() {
                     const weapon = WEAPONS_DATA[weaponName];
                     console.log(`Auto-filling weapon ${i}: ${weaponName}`, weapon);
 
+                    // Legendary glow
+                    const isLegendary = weapon.type && weapon.type.startsWith('Legendary');
+                    weaponInput.closest('tr')?.classList.toggle('legendary-weapon', isLegendary);
+
                     // Auto-fill attack bonus
                     const atkInput = document.getElementById(`weapon_${i}_atk`);
                     if (atkInput) {
@@ -35,6 +39,9 @@ function setupWeaponAutofill() {
                         breakInput.value = weapon.break;
                     }
                 } else {
+                    // Remove legendary glow
+                    weaponInput.closest('tr')?.classList.remove('legendary-weapon');
+
                     // Clear fields if weapon name is empty
                     const atkInput = document.getElementById(`weapon_${i}_atk`);
                     if (atkInput) {

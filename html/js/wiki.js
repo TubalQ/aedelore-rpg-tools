@@ -12,6 +12,81 @@ let searchTimeout = null;
 // API base URL
 const API_BASE = '/api/wiki';
 
+// Adventure gate config
+const ADVENTURE_BOOK_SLUG = 'ready-to-play-adventures';
+const ADVENTURE_FREE_SLUGS = ['main-story-introduction', 'introduction'];
+const SPOILER_STORAGE_KEY = 'wiki_adventure_confirmed';
+
+// Pending navigation (stored while spoiler modal is shown)
+let pendingNavigation = null;
+
+// Adventure gate helpers
+function isAdventureBook(bookSlug) {
+    return bookSlug === ADVENTURE_BOOK_SLUG;
+}
+
+function isFreePage(pageSlug) {
+    return ADVENTURE_FREE_SLUGS.includes(pageSlug);
+}
+
+function isLoggedIn() {
+    return !!localStorage.getItem('aedelore_auth_token');
+}
+
+function hasSpoilerConsent() {
+    return sessionStorage.getItem(SPOILER_STORAGE_KEY) === 'true';
+}
+
+// Spoiler modal
+function showSpoilerModal(callback) {
+    pendingNavigation = callback;
+    document.getElementById('spoiler-modal').classList.add('active');
+}
+
+function confirmSpoilerWarning() {
+    sessionStorage.setItem(SPOILER_STORAGE_KEY, 'true');
+    document.getElementById('spoiler-modal').classList.remove('active');
+    if (pendingNavigation) {
+        pendingNavigation();
+        pendingNavigation = null;
+    }
+}
+
+function cancelSpoilerWarning() {
+    document.getElementById('spoiler-modal').classList.remove('active');
+    pendingNavigation = null;
+    navigateTo('home');
+}
+
+// Login gate HTML
+function loginGateMessage() {
+    return `
+        <div class="wiki-login-gate">
+            <p>Some parts of the story require an account to protect the experience for players.</p>
+            <p>Creating an account is free. Aedelore only stores a username and password to manage your account. We do not collect, process, or sell any personal data. We have no agreements with third parties. When you delete your account, all your data is permanently erased and nothing remains.</p>
+            <a href="/dm-session">Create a free account</a>
+        </div>
+    `;
+}
+
+// Truncate intro content to "Adventure Background" section only
+function truncateToFirstSection(htmlContent) {
+    const temp = document.createElement('div');
+    temp.innerHTML = htmlContent;
+    const headings = temp.querySelectorAll('h2');
+    // Keep everything up to the second h2
+    if (headings.length >= 2) {
+        let node = headings[1];
+        // Remove the second h2 and everything after it
+        while (node) {
+            const next = node.nextSibling;
+            node.parentNode.removeChild(node);
+            node = next;
+        }
+    }
+    return temp.innerHTML;
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     // Parse initial route from hash
@@ -157,6 +232,12 @@ async function loadBooks() {
 
 // Load a book's contents
 async function loadBook(bookSlug) {
+    // Adventure gate: require spoiler consent
+    if (isAdventureBook(bookSlug) && !hasSpoilerConsent()) {
+        showSpoilerModal(() => loadBook(bookSlug));
+        return;
+    }
+
     const content = document.getElementById('wiki-content');
     const sidebar = document.getElementById('sidebar');
 
@@ -190,6 +271,9 @@ async function loadBook(bookSlug) {
             }
         });
 
+        const loggedIn = isLoggedIn();
+        const isAdventure = isAdventureBook(bookSlug);
+
         let html = `
             <a href="#" class="wiki-back-btn" onclick="navigateTo('home'); return false;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -222,13 +306,15 @@ async function loadBook(bookSlug) {
                             ${chapter.description ? `<p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px;">${escapeHtml(chapter.description)}</p>` : ''}
                             ${pages.length > 0 ? `
                                 <ul class="wiki-page-list">
-                                    ${pages.map(page => `
+                                    ${pages.map(page => {
+                                        const locked = isAdventure && !loggedIn && !isFreePage(page.slug);
+                                        return `
                                         <li>
-                                            <a href="#${bookSlug}/${page.slug}" onclick="navigateTo('page', '${bookSlug}', '${page.slug}'); return false;">
+                                            <a href="#${bookSlug}/${page.slug}" class="${locked ? 'wiki-page-locked' : ''}" onclick="navigateTo('page', '${bookSlug}', '${page.slug}'); return false;">
                                                 ${escapeHtml(page.title)}
                                             </a>
                                         </li>
-                                    `).join('')}
+                                    `;}).join('')}
                                 </ul>
                             ` : '<p style="color: var(--text-muted); font-size: 0.85rem;">No pages in this chapter yet.</p>'}
                         </div>
@@ -244,13 +330,15 @@ async function loadBook(bookSlug) {
             html += `
                 <h3 style="font-size: 1.1rem; margin-top: 32px; margin-bottom: 16px; color: var(--text-muted);">Pages</h3>
                 <ul class="wiki-page-list" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 8px;">
-                    ${standalonePages.map(page => `
+                    ${standalonePages.map(page => {
+                        const locked = isAdventure && !loggedIn && !isFreePage(page.slug);
+                        return `
                         <li>
-                            <a href="#${bookSlug}/${page.slug}" onclick="navigateTo('page', '${bookSlug}', '${page.slug}'); return false;">
+                            <a href="#${bookSlug}/${page.slug}" class="${locked ? 'wiki-page-locked' : ''}" onclick="navigateTo('page', '${bookSlug}', '${page.slug}'); return false;">
                                 ${escapeHtml(page.title)}
                             </a>
                         </li>
-                    `).join('')}
+                    `;}).join('')}
                 </ul>
             `;
         }
@@ -275,8 +363,33 @@ function toggleChapter(header) {
 
 // Load a page
 async function loadPage(bookSlug, pageSlug) {
+    // Adventure gate: require spoiler consent
+    if (isAdventureBook(bookSlug) && !hasSpoilerConsent()) {
+        showSpoilerModal(() => loadPage(bookSlug, pageSlug));
+        return;
+    }
+
     const content = document.getElementById('wiki-content');
     const sidebar = document.getElementById('sidebar');
+
+    // Adventure gate: non-free pages require login
+    if (isAdventureBook(bookSlug) && !isFreePage(pageSlug) && !isLoggedIn()) {
+        content.innerHTML = `
+            <a href="#${bookSlug}" class="wiki-back-btn" onclick="navigateTo('book', '${bookSlug}'); return false;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5m7-7-7 7 7 7"/>
+                </svg>
+                Back to Ready to Play Adventures
+            </a>
+            ${loginGateMessage()}
+        `;
+        sidebar.style.display = 'none';
+        currentView = 'page';
+        currentBook = bookSlug;
+        currentPage = pageSlug;
+        window.scrollTo(0, 0);
+        return;
+    }
 
     content.innerHTML = '<div class="wiki-loading"><div class="wiki-loading-spinner"></div><p>Loading...</p></div>';
 
@@ -297,6 +410,13 @@ async function loadPage(bookSlug, pageSlug) {
         }
         breadcrumbItems.push({ title: page.title, slug: `${page.book_slug}/${page.slug}` });
         updateBreadcrumb(breadcrumbItems);
+
+        // Determine if content should be truncated
+        const shouldTruncate = isAdventureBook(bookSlug) && isFreePage(pageSlug) && !isLoggedIn();
+        let pageContent = page.content || '<p>No content yet.</p>';
+        if (shouldTruncate) {
+            pageContent = truncateToFirstSection(pageContent);
+        }
 
         // Build page HTML
         let html = `
@@ -320,10 +440,15 @@ async function loadPage(bookSlug, pageSlug) {
         }
 
         // Content
-        html += `<div class="wiki-page-body">${page.content || '<p>No content yet.</p>'}</div>`;
+        html += `<div class="wiki-page-body">${pageContent}</div>`;
 
-        // Tags
-        if (page.tags && page.tags.length > 0) {
+        // Login gate after truncated content
+        if (shouldTruncate) {
+            html += loginGateMessage();
+        }
+
+        // Tags (only if full content shown)
+        if (!shouldTruncate && page.tags && page.tags.length > 0) {
             html += `
                 <div class="wiki-tags">
                     ${page.tags.map(tag => `
@@ -480,3 +605,5 @@ window.navigateTo = navigateTo;
 window.toggleChapter = toggleChapter;
 window.scrollToSection = scrollToSection;
 window.searchByTag = searchByTag;
+window.confirmSpoilerWarning = confirmSpoilerWarning;
+window.cancelSpoilerWarning = cancelSpoilerWarning;

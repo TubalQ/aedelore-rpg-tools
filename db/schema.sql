@@ -147,7 +147,9 @@ CREATE TABLE public.users (
     id integer NOT NULL,
     username text NOT NULL,
     password_hash text NOT NULL,
-    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    email text,
+    oidc_sub text
 );
 
 
@@ -248,6 +250,14 @@ ALTER TABLE ONLY public.users
 
 
 --
+-- Name: users users_oidc_sub_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_oidc_sub_key UNIQUE (oidc_sub);
+
+
+--
 -- Name: idx_auth_tokens_user_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -280,6 +290,13 @@ CREATE INDEX idx_sessions_campaign_id ON public.sessions USING btree (campaign_i
 --
 
 CREATE INDEX idx_sessions_user_id ON public.sessions USING btree (user_id);
+
+
+--
+-- Name: idx_users_oidc_sub; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_users_oidc_sub ON public.users(oidc_sub) WHERE oidc_sub IS NOT NULL;
 
 
 --

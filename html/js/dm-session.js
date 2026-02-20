@@ -49,14 +49,7 @@ async function validateStoredToken() {
     }
 }
 
-// Validate token early
-validateStoredToken().then(valid => {
-    if (!valid && localStorage.getItem('aedelore_auth_token') === null) {
-        if (typeof updateAuthUI === 'function') {
-            updateAuthUI();
-        }
-    }
-});
+// Token validation and OIDC callback handled by core-api.js and auth.js
 
 // API request helper with CSRF protection
 async function apiRequest(url, options = {}) {
@@ -76,11 +69,22 @@ async function apiRequest(url, options = {}) {
         headers['X-CSRF-Token'] = csrfToken;
     }
 
-    return fetch(url, {
+    const response = await fetch(url, {
         ...options,
         headers,
         credentials: 'include'  // Include cookies in request
     });
+
+    // Global 401 interceptor: clear auth state on expired/invalid token
+    if (response.status === 401) {
+        localStorage.removeItem('aedelore_auth_token');
+        authToken = null;
+        if (typeof updateAuthUI === 'function') {
+            updateAuthUI();
+        }
+    }
+
+    return response;
 }
 
 let currentCampaignId = null;
@@ -335,6 +339,9 @@ function getEmptySessionData() {
         // Turning points - key decisions/moments
         turningPoints: [], // { description, consequence }
 
+        // DM Notes - private AI/DM notes, never shown to players
+        dmNotes: [], // { timestamp, text, category: 'plot'|'mechanic'|'npc'|'plan'|'reminder' }
+
         // Session notes (post-session)
         sessionNotes: {
             summary: '',
@@ -398,195 +405,8 @@ function updateAuthUI() {
     }
 }
 
-function showAuthModal(mode = 'login') {
-    const modal = document.getElementById('auth-modal');
-    const title = document.getElementById('auth-modal-title');
-    const submitBtn = document.getElementById('auth-submit-btn');
-    const toggleText = document.getElementById('auth-toggle-text');
-    const forgotText = document.getElementById('auth-forgot-text');
-    const usernameInput = document.getElementById('auth-username');
-    const emailInput = document.getElementById('auth-email');
-    const emailGroup = document.getElementById('auth-email-group');
-    const passwordInput = document.getElementById('auth-password');
-    const confirmInput = document.getElementById('auth-confirm-password');
-    const confirmGroup = document.getElementById('auth-confirm-group');
-
-    usernameInput.value = '';
-    if (emailInput) emailInput.value = '';
-    passwordInput.value = '';
-    if (confirmInput) confirmInput.value = '';
-    document.getElementById('auth-error').textContent = '';
-
-    // Handle Enter key on inputs
-    const handleEnter = (e) => {
-        if (e.key === 'Enter') {
-            submitBtn.click();
-        }
-    };
-    usernameInput.onkeydown = handleEnter;
-    if (emailInput) emailInput.onkeydown = handleEnter;
-    passwordInput.onkeydown = handleEnter;
-    if (confirmInput) confirmInput.onkeydown = handleEnter;
-
-    if (mode === 'login') {
-        title.textContent = 'Login';
-        submitBtn.textContent = 'Login';
-        submitBtn.onclick = doLogin;
-        toggleText.innerHTML = 'No account? <a href="#" onclick="showAuthModal(\'register\'); return false;">Register here</a>';
-        if (emailGroup) emailGroup.style.display = 'none';
-        if (confirmGroup) confirmGroup.style.display = 'none';
-        if (forgotText) forgotText.style.display = '';
-    } else {
-        title.textContent = 'Register';
-        submitBtn.textContent = 'Register';
-        submitBtn.onclick = doRegister;
-        toggleText.innerHTML = 'Have an account? <a href="#" onclick="showAuthModal(\'login\'); return false;">Login here</a>';
-        if (emailGroup) emailGroup.style.display = '';
-        if (confirmGroup) confirmGroup.style.display = '';
-        if (forgotText) forgotText.style.display = 'none';
-    }
-
-    modal.style.display = 'flex';
-    usernameInput.focus();
-}
-
-function hideAuthModal() {
-    document.getElementById('auth-modal').style.display = 'none';
-}
-
-function showForgotPasswordModal() {
-    hideAuthModal();
-    const modal = document.getElementById('forgot-password-modal');
-    const emailInput = document.getElementById('forgot-email');
-    const errorEl = document.getElementById('forgot-error');
-    const successEl = document.getElementById('forgot-success');
-    const submitBtn = document.getElementById('forgot-submit-btn');
-
-    if (emailInput) emailInput.value = '';
-    if (errorEl) errorEl.textContent = '';
-    if (successEl) successEl.textContent = '';
-    if (submitBtn) submitBtn.disabled = false;
-
-    modal.style.display = 'flex';
-    if (emailInput) emailInput.focus();
-}
-
-function hideForgotPasswordModal() {
-    document.getElementById('forgot-password-modal').style.display = 'none';
-}
-
-async function requestPasswordReset() {
-    const emailInput = document.getElementById('forgot-email');
-    const errorEl = document.getElementById('forgot-error');
-    const successEl = document.getElementById('forgot-success');
-    const submitBtn = document.getElementById('forgot-submit-btn');
-
-    const email = emailInput.value.trim();
-
-    if (!email) {
-        errorEl.textContent = 'Please enter your email address';
-        return;
-    }
-
-    submitBtn.disabled = true;
-    errorEl.textContent = '';
-    successEl.textContent = '';
-
-    try {
-        const res = await apiRequest('/api/forgot-password', {
-            method: 'POST',
-            body: JSON.stringify({ email })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            errorEl.textContent = data.error || 'Request failed';
-            submitBtn.disabled = false;
-            return;
-        }
-
-        successEl.textContent = data.message || 'If an account with this email exists, a reset link has been sent.';
-        emailInput.value = '';
-    } catch (error) {
-        errorEl.textContent = 'Connection error. Please try again.';
-        submitBtn.disabled = false;
-    }
-}
-
-async function doLogin() {
-    const username = document.getElementById('auth-username').value.trim();
-    const password = document.getElementById('auth-password').value;
-    const errorEl = document.getElementById('auth-error');
-
-    if (!username || !password) {
-        errorEl.textContent = 'Please enter username and password';
-        return;
-    }
-
-    try {
-        const res = await apiRequest('/api/login', {
-            method: 'POST',
-            body: JSON.stringify({ username, password })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            errorEl.textContent = data.error || 'Login failed';
-            return;
-        }
-
-        authToken = data.token;
-        localStorage.setItem('aedelore_auth_token', authToken);
-        hideAuthModal();
-        updateAuthUI();
-    } catch (error) {
-        errorEl.textContent = 'Connection error. Please try again.';
-    }
-}
-
-async function doRegister() {
-    const username = document.getElementById('auth-username').value.trim();
-    const emailInput = document.getElementById('auth-email');
-    const email = emailInput ? emailInput.value.trim() : '';
-    const password = document.getElementById('auth-password').value;
-    const confirmInput = document.getElementById('auth-confirm-password');
-    const confirmPassword = confirmInput ? confirmInput.value : '';
-    const errorEl = document.getElementById('auth-error');
-
-    if (!username || !password || !email) {
-        errorEl.textContent = 'Please enter username, email, and password';
-        return;
-    }
-
-    if (password !== confirmPassword) {
-        errorEl.textContent = 'Passwords do not match';
-        return;
-    }
-
-    try {
-        const res = await apiRequest('/api/register', {
-            method: 'POST',
-            body: JSON.stringify({ username, email, password })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            errorEl.textContent = data.error || 'Registration failed';
-            return;
-        }
-
-        authToken = data.token;
-        localStorage.setItem('aedelore_auth_token', authToken);
-        hideAuthModal();
-        updateAuthUI();
-    } catch (error) {
-        errorEl.textContent = 'Connection error. Please try again.';
-    }
-}
-
+// Auth UI (showAuthModal, doLogin, doRegister, OIDC) provided by auth.js
+// Override doLogout with dm-session specific version (saves session first)
 async function doLogout() {
     // Save any unsaved session changes first
     if (currentSessionId && !isSessionLocked && authToken) {
@@ -628,6 +448,10 @@ async function doLogout() {
     // Reload page
     location.reload();
 }
+
+// Override auth.js global functions with dm-session specific versions
+window.doLogout = doLogout;
+window.updateAuthUI = updateAuthUI;
 
 // ============================================
 // Password Change
@@ -1067,11 +891,11 @@ async function restoreSession(id) {
 
         if (!res.ok) throw new Error('Failed to restore');
 
-        alert('Session restored successfully!');
+        showSaveIndicator('Session restored!');
         await loadTrashSessions();
-        // If we're viewing a campaign, refresh the session list
-        if (currentCampaign) {
-            await loadCampaignSessions(currentCampaign.id);
+        // Refresh dashboard if we have a campaign loaded
+        if (currentCampaignId) {
+            await loadCampaignsAndShowDashboard();
         }
     } catch (err) {
         console.error('Error restoring session:', err);
@@ -1197,6 +1021,7 @@ function toggleVisibilityAll(dataPath, isChecked) {
     }
     console.log('[Visibility] After setting, value is:', getVisibilityAt(dataPath));
     renderPlanningByDay();
+    renderDayTimeline(); // Also re-render During Play view
     renderNPCsList();
     renderPlacesList();
     renderEncountersList();
@@ -1232,6 +1057,7 @@ function toggleVisibilityPlayer(dataPath, playerName, isChecked) {
     }
 
     renderPlanningByDay();
+    renderDayTimeline(); // Also re-render During Play view
     renderNPCsList();
     renderPlacesList();
     renderEncountersList();
@@ -1946,6 +1772,7 @@ async function loadSession(sessionId) {
         await syncCampaignPlayers();
 
         // Populate all dynamic lists
+        syncDaySelector();
         renderAllLists();
         populateSessionNotes();
 
@@ -2013,7 +1840,7 @@ async function saveSession() {
             return;
         }
 
-        alert('Session saved!');
+        showSaveIndicator('Session saved!');
 
     } catch (error) {
         console.error('Save session error:', error);
@@ -2161,11 +1988,19 @@ function hideSessionContent() {
 // Tab Switching
 // ============================================
 
-function switchTab(tabId) {
+function switchTab(tabId, evt) {
     document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
-    event.target.closest('.tab').classList.add('active');
+    const e = evt || window.event;
+    if (e && e.target) {
+        const tab = e.target.closest('.tab');
+        if (tab) tab.classList.add('active');
+    } else {
+        // Fallback: find tab by onclick attribute
+        const tab = document.querySelector(`.tab[onclick*="${tabId}"]`);
+        if (tab) tab.classList.add('active');
+    }
     document.getElementById(tabId).classList.add('active');
 
     // Sync views when switching to play mode
@@ -2231,6 +2066,7 @@ function renderAllLists() {
     renderPlayLists();
     renderTurningPointsList();
     renderEventLogList();
+    renderDMNotesTab();
 
     // Update hook and prolog displays
     updateHookDisplay();
@@ -2302,6 +2138,37 @@ const TIME_LABELS = {
     'evening': '🌙 Evening',
     'night': '🌑 Night'
 };
+
+function addDayOption() {
+    const select = document.getElementById('planning-default-day');
+    if (!select) return;
+    const maxDay = Math.max(...[...select.options].map(o => parseInt(o.value) || 0));
+    const newDay = maxDay + 1;
+    const option = document.createElement('option');
+    option.value = newDay;
+    option.textContent = `Day ${newDay}`;
+    select.appendChild(option);
+    select.value = newDay;
+}
+
+function syncDaySelector() {
+    const select = document.getElementById('planning-default-day');
+    if (!select) return;
+    // Find highest day used in any content array
+    let maxUsed = 0;
+    ['npcs', 'places', 'encounters', 'items', 'readAloud'].forEach(key => {
+        (sessionData[key] || []).forEach(item => {
+            if (item.day && item.day > maxUsed) maxUsed = item.day;
+        });
+    });
+    const maxOption = Math.max(...[...select.options].map(o => parseInt(o.value) || 0));
+    for (let d = maxOption + 1; d <= maxUsed; d++) {
+        const option = document.createElement('option');
+        option.value = d;
+        option.textContent = `Day ${d}`;
+        select.appendChild(option);
+    }
+}
 
 function getSelectedPlanningDay() {
     const select = document.getElementById('planning-default-day');
@@ -2790,10 +2657,10 @@ function renderPlaceWithLinkedContent(place, group, day) {
     // Add buttons for this place
     html += `
                 <div style="display: flex; gap: var(--space-1); flex-wrap: wrap; margin-top: var(--space-2); padding-top: var(--space-2); border-top: 1px dashed var(--border-subtle);">
-                    <button onclick="addReadAloudToPlace('${escapeHtml(place.name)}', ${day}, '${place.time || ''}')" style="padding: 2px 8px; font-size: 0.75rem; background: var(--accent-purple-20); color: var(--accent-purple); border: none; border-radius: 4px; cursor: pointer;">+ Read-Aloud</button>
-                    <button onclick="addEncounterToPlace('${escapeHtml(place.name)}', ${day}, '${place.time || ''}')" style="padding: 2px 8px; font-size: 0.75rem; background: var(--accent-red-20); color: var(--accent-red); border: none; border-radius: 4px; cursor: pointer;">+ Encounter</button>
-                    <button onclick="addNPCToPlace('${escapeHtml(place.name)}', ${day}, '${place.time || ''}')" style="padding: 2px 8px; font-size: 0.75rem; background: var(--primary-blue-20); color: var(--primary-blue); border: none; border-radius: 4px; cursor: pointer;">+ NPC</button>
-                    <button onclick="addItemToPlace('${escapeHtml(place.name)}', ${day}, '${place.time || ''}')" style="padding: 2px 8px; font-size: 0.75rem; background: var(--accent-gold-20); color: var(--accent-gold); border: none; border-radius: 4px; cursor: pointer;">+ Item</button>
+                    <button onclick="addReadAloudToPlace('${escapeHtml(place.name).replace(/'/g, "\\'")}', ${day}, '${place.time || ''}')" style="padding: 2px 8px; font-size: 0.75rem; background: var(--accent-purple-20); color: var(--accent-purple); border: none; border-radius: 4px; cursor: pointer;">+ Read-Aloud</button>
+                    <button onclick="addEncounterToPlace('${escapeHtml(place.name).replace(/'/g, "\\'")}', ${day}, '${place.time || ''}')" style="padding: 2px 8px; font-size: 0.75rem; background: var(--accent-red-20); color: var(--accent-red); border: none; border-radius: 4px; cursor: pointer;">+ Encounter</button>
+                    <button onclick="addNPCToPlace('${escapeHtml(place.name).replace(/'/g, "\\'")}', ${day}, '${place.time || ''}')" style="padding: 2px 8px; font-size: 0.75rem; background: var(--primary-blue-20); color: var(--primary-blue); border: none; border-radius: 4px; cursor: pointer;">+ NPC</button>
+                    <button onclick="addItemToPlace('${escapeHtml(place.name).replace(/'/g, "\\'")}', ${day}, '${place.time || ''}')" style="padding: 2px 8px; font-size: 0.75rem; background: var(--accent-gold-20); color: var(--accent-gold); border: none; border-radius: 4px; cursor: pointer;">+ Item</button>
                 </div>
             </div>
         </div>`;
@@ -2859,8 +2726,8 @@ function renderEncounterCompact(enc, day, placeName, linkedRA = []) {
                     <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 6px;">
                         <input type="text" value="${escapeHtml(p.name || '')}" onchange="sessionData.encounters[${enc._index}].enemies[${pIndex}].name = this.value; renderPlayLists();" placeholder="Name" style="flex: 1; min-width: 100px; font-size: 0.85rem; font-weight: 500; padding: 6px 8px;">
                         <select onchange="sessionData.encounters[${enc._index}].enemies[${pIndex}].disposition = this.value; renderPlanningByDay();" style="font-size: 0.8rem; padding: 6px 8px;">
-                            <option value="enemy" ${p.disposition !== 'neutral' ? 'selected' : ''}>Enemy</option>
-                            <option value="neutral" ${p.disposition === 'neutral' ? 'selected' : ''}>Neutral</option>
+                            <option value="enemy" ${p.disposition === 'enemy' ? 'selected' : ''}>Enemy</option>
+                            <option value="neutral" ${p.disposition !== 'enemy' ? 'selected' : ''}>Neutral</option>
                         </select>
                         <select onchange="sessionData.encounters[${enc._index}].enemies[${pIndex}].role = this.value;" style="font-size: 0.8rem; padding: 6px 8px;">
                             <option value="" ${!p.role ? 'selected' : ''}>Role</option>
@@ -2901,15 +2768,20 @@ function renderEncounterCompact(enc, day, placeName, linkedRA = []) {
                 <input type="text" value="${escapeHtml(enc.loot || '')}" onchange="sessionData.encounters[${enc._index}].loot = this.value;" placeholder="Gold, items, etc." style="width: 100%; font-size: 0.8rem; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: 4px; padding: 4px 8px;">
             </div>`;
 
-    // Show matching items with descriptions (read-only, from items array)
+    // Show matching items with descriptions (editable)
     if (matchingItems.length > 0) {
         html += `<div style="margin-bottom: var(--space-2);">
             <div style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 2px;">📜 Linked Items:</div>`;
         matchingItems.forEach(item => {
             const foundStyle = item.found ? 'opacity: 0.6;' : '';
-            html += `<div style="margin-left: var(--space-2); padding: 4px 8px; background: linear-gradient(135deg, rgba(251, 191, 36, 0.08) 0%, rgba(251, 191, 36, 0.02) 100%); border-radius: 4px; border-left: 2px solid var(--accent-gold); margin-bottom: 2px; ${foundStyle}">
-                <span style="font-size: 0.75rem; color: var(--accent-gold);">${escapeHtml(item.name)}${item.found ? ' ✓' : ''}</span>
-                ${item.description ? `<span style="font-size: 0.7rem; color: var(--text-muted);"> - ${escapeHtml(item.description.substring(0, 60))}${item.description.length > 60 ? '...' : ''}</span>` : ''}
+            html += `<div style="margin-left: var(--space-2); padding: 8px; background: linear-gradient(135deg, rgba(251, 191, 36, 0.08) 0%, rgba(251, 191, 36, 0.02) 100%); border-radius: 4px; border-left: 2px solid var(--accent-gold); margin-bottom: 4px; position: relative; ${foundStyle}">
+                <button class="remove-btn" onclick="removeItem(${item._index}); renderPlanningByDay();" style="top: 4px; right: 4px; width: 18px; height: 18px; font-size: 12px;">&times;</button>
+                <div style="display: flex; gap: var(--space-2); align-items: center; margin-bottom: 4px;">
+                    <span style="color: var(--accent-gold); font-size: 0.8rem;">💎</span>
+                    <input type="text" value="${escapeHtml(item.name || '')}" onchange="sessionData.items[${item._index}].name = this.value; renderPlayLists();" placeholder="Item name" style="flex: 1; font-size: 0.8rem; font-weight: 500; background: transparent; border: none; border-bottom: 1px solid var(--border-subtle); padding: 2px 0; color: var(--accent-gold); ${item.found ? 'text-decoration: line-through;' : ''}">
+                    ${item.found ? '<span style="color: var(--accent-green); font-size: 0.7rem;">✓</span>' : ''}
+                </div>
+                <textarea rows="2" onchange="sessionData.items[${item._index}].description = this.value;" placeholder="Description..." style="width: 100%; font-size: 0.75rem; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: 4px; padding: 4px 6px; resize: vertical;">${escapeHtml(item.description || '')}</textarea>
             </div>`;
         });
         html += `</div>`;
@@ -2924,7 +2796,7 @@ function renderEncounterCompact(enc, day, placeName, linkedRA = []) {
 
     // Add Read-Aloud button for encounter
     if (enc.name) {
-        html += `<button onclick="addReadAloudToEncounter('${escapeHtml(enc.name)}', ${day}, '${enc.time || ''}')" style="margin-top: var(--space-2); padding: 4px 8px; font-size: 0.7rem; background: var(--accent-purple-20); color: var(--accent-purple); border: none; border-radius: 4px; cursor: pointer;">+ Read-Aloud</button>`;
+        html += `<button onclick="addReadAloudToEncounter('${escapeHtml(enc.name).replace(/'/g, "\\'")}', ${day}, '${enc.time || ''}')" style="margin-top: var(--space-2); padding: 4px 8px; font-size: 0.7rem; background: var(--accent-purple-20); color: var(--accent-purple); border: none; border-radius: 4px; cursor: pointer;">+ Read-Aloud</button>`;
     }
 
     html += `</div>`;
@@ -2970,7 +2842,7 @@ function renderNPCCompact(npc, day, placeName, linkedRA = []) {
 
     // Add Read-Aloud button for NPC
     if (npc.name) {
-        html += `<button onclick="addReadAloudToNPC('${escapeHtml(npc.name)}', ${day}, '${npc.time || ''}')" style="margin-top: var(--space-1); padding: 2px 6px; font-size: 0.7rem; background: var(--accent-purple-20); color: var(--accent-purple); border: none; border-radius: 3px; cursor: pointer;">+ Read-Aloud</button>`;
+        html += `<button onclick="addReadAloudToNPC('${escapeHtml(npc.name).replace(/'/g, "\\'")}', ${day}, '${npc.time || ''}')" style="margin-top: var(--space-1); padding: 2px 6px; font-size: 0.7rem; background: var(--accent-purple-20); color: var(--accent-purple); border: none; border-radius: 3px; cursor: pointer;">+ Read-Aloud</button>`;
     }
 
     html += `</div>`;
@@ -3070,14 +2942,20 @@ function renderUnlinkedContent(encounters, readAloud, npcs, items, day) {
                     <input type="text" value="${escapeHtml(enc.loot || '')}" onchange="sessionData.encounters[${enc._index}].loot = this.value;" placeholder="Gold, items, etc." style="width: 100%; font-size: 0.8rem; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 4px; padding: 4px 8px;">
                 </div>`;
 
-        // Show matching items
+        // Show matching items (editable)
         if (matchingItems.length > 0) {
             html += `<div style="margin-bottom: var(--space-1);">
                 <div style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 2px;">📜 Linked Items:</div>`;
             matchingItems.forEach(item => {
-                html += `<div style="margin-left: var(--space-2); padding: 4px 8px; background: linear-gradient(135deg, rgba(251, 191, 36, 0.08) 0%, rgba(251, 191, 36, 0.02) 100%); border-radius: 4px; border-left: 2px solid var(--accent-gold); margin-bottom: 2px;">
-                    <span style="font-size: 0.75rem; color: var(--accent-gold);">${escapeHtml(item.name)}</span>
-                    ${item.description ? `<span style="font-size: 0.7rem; color: var(--text-muted);"> - ${escapeHtml(item.description.substring(0, 60))}${item.description.length > 60 ? '...' : ''}</span>` : ''}
+                const foundStyle = item.found ? 'opacity: 0.6;' : '';
+                html += `<div style="margin-left: var(--space-2); padding: 8px; background: linear-gradient(135deg, rgba(251, 191, 36, 0.08) 0%, rgba(251, 191, 36, 0.02) 100%); border-radius: 4px; border-left: 2px solid var(--accent-gold); margin-bottom: 4px; position: relative; ${foundStyle}">
+                    <button class="remove-btn" onclick="removeItem(${item._index}); renderPlanningByDay();" style="top: 4px; right: 4px; width: 18px; height: 18px; font-size: 12px;">&times;</button>
+                    <div style="display: flex; gap: var(--space-2); align-items: center; margin-bottom: 4px;">
+                        <span style="color: var(--accent-gold); font-size: 0.8rem;">💎</span>
+                        <input type="text" value="${escapeHtml(item.name || '')}" onchange="sessionData.items[${item._index}].name = this.value; renderPlayLists();" placeholder="Item name" style="flex: 1; font-size: 0.8rem; font-weight: 500; background: transparent; border: none; border-bottom: 1px solid var(--border-subtle); padding: 2px 0; color: var(--accent-gold); ${item.found ? 'text-decoration: line-through;' : ''}">
+                        ${item.found ? '<span style="color: var(--accent-green); font-size: 0.7rem;">✓</span>' : ''}
+                    </div>
+                    <textarea rows="2" onchange="sessionData.items[${item._index}].description = this.value;" placeholder="Description..." style="width: 100%; font-size: 0.75rem; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: 4px; padding: 4px 6px; resize: vertical;">${escapeHtml(item.description || '')}</textarea>
                 </div>`;
             });
             html += `</div>`;
@@ -3474,10 +3352,13 @@ function renderPlayPlaceWithLinkedContent(place, group, day) {
         <div class="place-container" style="margin-bottom: var(--space-3); border: 1px solid ${place.visited ? 'var(--accent-green)' : 'var(--accent-cyan)'}; border-radius: var(--radius-md); overflow: hidden;">
             <!-- Place Header -->
             <div style="padding: var(--space-3); background: linear-gradient(135deg, ${place.visited ? 'rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05)' : 'rgba(0, 188, 212, 0.15) 0%, rgba(0, 188, 212, 0.05)'} 100%); border-bottom: 1px solid var(--border-subtle);">
-                <div style="display: flex; gap: var(--space-2); align-items: center;">
+                <div style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap;">
                     <input type="checkbox" ${place.visited ? 'checked' : ''} onchange="sessionData.places[${place._index}].visited = this.checked; renderDayTimeline(); triggerAutoSave();" style="width: 18px; height: 18px; cursor: pointer;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${place.visited ? 'var(--accent-green)' : 'var(--accent-cyan)'}" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                    <span style="font-weight: 600; font-size: 1rem; ${place.visited ? 'text-decoration: line-through; opacity: 0.6;' : ''}">${escapeHtml(place.name || 'Unnamed Place')}</span>
+                    <span style="font-weight: 600; font-size: 1rem; flex: 1; ${place.visited ? 'text-decoration: line-through; opacity: 0.6;' : ''}">${escapeHtml(place.name || 'Unnamed Place')}</span>
+                    <button onclick="addContextualEvent('place', '${escapeHtml(place.name || '').replace(/'/g, "\\'")}'); event.stopPropagation();" style="padding: 2px 6px; font-size: 0.7rem; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: 4px; color: var(--text-secondary); cursor: pointer;" title="Add Event">📝</button>
+                    <button onclick="addContextualTurningPoint('place', '${escapeHtml(place.name || '').replace(/'/g, "\\'")}'); event.stopPropagation();" style="padding: 2px 6px; font-size: 0.7rem; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: 4px; color: var(--text-secondary); cursor: pointer;" title="Add Turning Point">⚡</button>
+                    ${generateVisibilityDropdown(place.visibleTo, `sessionData.places[${place._index}].visibleTo`)}
                 </div>
                 ${place.description ? `<p style="margin: var(--space-1) 0 0 28px; font-size: 0.85rem; color: var(--text-secondary); ${place.visited ? 'opacity: 0.6;' : ''}">${escapeHtml(place.description)}</p>` : ''}
             </div>
@@ -3561,13 +3442,18 @@ function renderPlayEncounter(enc, linkedRA = [], linkedItems = []) {
 
     let html = `
         <div style="padding: var(--space-3); margin-bottom: var(--space-2); background: var(--bg-surface); border-radius: var(--radius-md); border-left: 3px solid ${statusColor};">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-2);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-2); flex-wrap: wrap; gap: var(--space-2);">
                 <span style="font-weight: 600; ${enc.status === 'completed' ? 'text-decoration: line-through; opacity: 0.6;' : ''}">⚔️ ${escapeHtml(enc.name || 'Unnamed Encounter')}</span>
-                <select onchange="sessionData.encounters[${enc._index}].status = this.value; renderDayTimeline(); triggerAutoSave();" style="padding: 2px 8px; font-size: 0.75rem; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: 4px; color: var(--text-base);">
-                    <option value="planned" ${enc.status !== 'started' && enc.status !== 'completed' ? 'selected' : ''}>Planned</option>
-                    <option value="started" ${enc.status === 'started' ? 'selected' : ''}>⚔️ In Progress</option>
-                    <option value="completed" ${enc.status === 'completed' ? 'selected' : ''}>✓ Completed</option>
-                </select>
+                <div style="display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap;">
+                    <button onclick="addContextualEvent('encounter', '${escapeHtml(enc.name || '').replace(/'/g, "\\'")}'); event.stopPropagation();" style="padding: 2px 6px; font-size: 0.7rem; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: 4px; color: var(--text-secondary); cursor: pointer;" title="Add Event">📝</button>
+                    <button onclick="addContextualTurningPoint('encounter', '${escapeHtml(enc.name || '').replace(/'/g, "\\'")}'); event.stopPropagation();" style="padding: 2px 6px; font-size: 0.7rem; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: 4px; color: var(--text-secondary); cursor: pointer;" title="Add Turning Point">⚡</button>
+                    ${generateVisibilityDropdown(enc.visibleTo, `sessionData.encounters[${enc._index}].visibleTo`)}
+                    <select onchange="sessionData.encounters[${enc._index}].status = this.value; renderDayTimeline(); triggerAutoSave();" style="padding: 2px 8px; font-size: 0.75rem; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: 4px; color: var(--text-base);">
+                        <option value="planned" ${enc.status !== 'started' && enc.status !== 'completed' ? 'selected' : ''}>Planned</option>
+                        <option value="started" ${enc.status === 'started' ? 'selected' : ''}>⚔️ In Progress</option>
+                        <option value="completed" ${enc.status === 'completed' ? 'selected' : ''}>✓ Completed</option>
+                    </select>
+                </div>
             </div>`;
 
     // Participants with HP controls
@@ -3639,9 +3525,10 @@ function renderPlayEncounter(enc, linkedRA = [], linkedItems = []) {
 function renderPlayReadAloud(ra) {
     return `
         <div style="padding: var(--space-3); margin-bottom: var(--space-2); background: ${ra.read ? 'var(--bg-surface)' : 'linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(168, 85, 247, 0.02) 100%)'}; border-radius: var(--radius-sm); border-left: 3px solid ${ra.read ? 'var(--accent-green)' : 'var(--accent-purple)'}; ${ra.read ? 'opacity: 0.6;' : ''}">
-            <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2);">
+            <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); flex-wrap: wrap;">
                 <input type="checkbox" ${ra.read ? 'checked' : ''} onchange="updateReadAloud(${ra._index}, 'read', this.checked); renderDayTimeline(); triggerAutoSave();" style="width: 18px; height: 18px; cursor: pointer;">
-                <span style="font-weight: 500; color: var(--accent-gold); ${ra.read ? 'text-decoration: line-through;' : ''}">📖 ${escapeHtml(ra.title || 'Untitled')}</span>
+                <span style="font-weight: 500; color: var(--accent-gold); flex: 1; ${ra.read ? 'text-decoration: line-through;' : ''}">📖 ${escapeHtml(ra.title || 'Untitled')}</span>
+                ${generateVisibilityDropdown(ra.visibleTo, `sessionData.readAloud[${ra._index}].visibleTo`)}
             </div>
             <div style="font-style: italic; color: var(--text-base); white-space: pre-wrap; font-size: 0.9rem; padding: var(--space-2); background: var(--bg-elevated); border-radius: var(--radius-sm);">${escapeHtml(ra.text || '')}</div>
         </div>`;
@@ -3651,9 +3538,12 @@ function renderPlayReadAloud(ra) {
 function renderPlayNPC(npc, linkedRA = []) {
     let html = `
         <div style="padding: var(--space-2) var(--space-3); margin-bottom: var(--space-2); background: var(--bg-surface); border-radius: var(--radius-sm); border-left: 3px solid ${npc.status === 'used' ? 'var(--accent-green)' : 'var(--primary-blue)'};">
-            <div style="display: flex; align-items: center; gap: var(--space-2);">
+            <div style="display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap;">
                 <input type="checkbox" ${npc.status === 'used' ? 'checked' : ''} onchange="sessionData.npcs[${npc._index}].status = this.checked ? 'used' : 'unused'; renderDayTimeline(); triggerAutoSave();" style="width: 18px; height: 18px; cursor: pointer;">
-                <span style="font-weight: 500; ${npc.status === 'used' ? 'text-decoration: line-through; opacity: 0.6;' : ''}">👤 ${escapeHtml(npc.name || 'Unnamed NPC')}</span>
+                <span style="font-weight: 500; flex: 1; ${npc.status === 'used' ? 'text-decoration: line-through; opacity: 0.6;' : ''}">👤 ${escapeHtml(npc.name || 'Unnamed NPC')}</span>
+                <button onclick="addContextualEvent('npc', '${escapeHtml(npc.name || '').replace(/'/g, "\\'")}'); event.stopPropagation();" style="padding: 2px 6px; font-size: 0.7rem; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: 4px; color: var(--text-secondary); cursor: pointer;" title="Add Event">📝</button>
+                <button onclick="addContextualTurningPoint('npc', '${escapeHtml(npc.name || '').replace(/'/g, "\\'")}'); event.stopPropagation();" style="padding: 2px 6px; font-size: 0.7rem; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: 4px; color: var(--text-secondary); cursor: pointer;" title="Add Turning Point">⚡</button>
+                ${generateVisibilityDropdown(npc.visibleTo, `sessionData.npcs[${npc._index}].visibleTo`)}
                 ${npc.role ? `<span style="font-size: 0.75rem; color: var(--text-subdued);">(${escapeHtml(npc.role)})</span>` : ''}
                 ${npc.disposition ? `<span style="font-size: 0.7rem; padding: 1px 6px; border-radius: 4px; background: ${npc.disposition === 'friendly' ? 'var(--accent-green-20)' : npc.disposition === 'hostile' ? 'var(--accent-red-20)' : 'var(--bg-elevated)'}; color: ${npc.disposition === 'friendly' ? 'var(--accent-green)' : npc.disposition === 'hostile' ? 'var(--accent-red)' : 'var(--text-subdued)'};">${escapeHtml(npc.disposition)}</span>` : ''}
             </div>
@@ -3776,6 +3666,31 @@ function renderPlayersList() {
             `;
         }
 
+        // Relationships section if filled in (toggleable)
+        let relationshipsSection = '';
+        if (p.relationships) {
+            try {
+                const rels = typeof p.relationships === 'string' ? JSON.parse(p.relationships) : p.relationships;
+                if (Array.isArray(rels) && rels.length > 0) {
+                    const relItems = rels.map(r =>
+                        `<div style="font-size: 0.85rem; color: var(--text-secondary); padding: 2px 0;"><strong style="color: var(--text-base);">${escapeHtml(r.name || '')}</strong>${r.relation ? ` — <span style="color: var(--accent-blue);">${escapeHtml(r.relation)}</span>` : ''}${r.notes ? `: ${escapeHtml(r.notes)}` : ''}</div>`
+                    ).join('');
+                    const toggleId = `rel-toggle-${p.name ? p.name.replace(/\s+/g, '-') : Math.random().toString(36).slice(2)}`;
+                    relationshipsSection = `
+                        <div style="margin-top: 8px; background: var(--bg-surface); border-radius: 6px; border: 1px solid var(--border-subtle); border-left: 3px solid var(--accent-blue); overflow: hidden;">
+                            <div onclick="var c=document.getElementById('${toggleId}');var a=this.querySelector('.rel-arrow');if(c.style.display==='none'){c.style.display='block';a.style.transform='rotate(90deg)';}else{c.style.display='none';a.style.transform='rotate(0deg)';}" style="padding: 8px 10px; cursor: pointer; display: flex; align-items: center; gap: 6px; user-select: none;">
+                                <span class="rel-arrow" style="font-size: 0.65rem; color: var(--accent-blue); transition: transform 0.15s; transform: rotate(0deg);">&#9654;</span>
+                                <span style="font-size: 0.7rem; color: var(--accent-blue); font-weight: 600; text-transform: uppercase;">Relationships (${rels.length})</span>
+                            </div>
+                            <div id="${toggleId}" style="display: none; padding: 0 10px 10px 10px;">
+                                ${relItems}
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (e) { /* ignore parse errors */ }
+        }
+
         // XP and lock info for campaign members with linked characters
         let xpSection = '';
         if (isCampaignMember && p.characterId) {
@@ -3813,9 +3728,9 @@ function renderPlayersList() {
                             <span style="font-size: 0.7rem; color: ${abLocked ? 'var(--text-muted)' : '#ef4444'};">${abLocked ? '🔒' : '🔓'}Abil</span>
                         </div>
                         <div style="display: flex; gap: 6px;">
-                            <button class="btn-small btn-gold" onclick="showGiveXPModal(${p.characterId}, '${escapeHtml(p.character || p.player)}')" title="Give XP">✨ XP</button>
-                            <button class="btn-small btn-secondary" onclick="unlockCharacter(${p.characterId}, '${escapeHtml(p.character || p.player)}')" title="Unlock">🔓</button>
-                            <button class="btn-small" onclick="showPlayerBuild(${p.characterId}, '${escapeHtml(p.character || p.player)}')" title="View Build" style="background: var(--accent-cyan);">📊</button>
+                            <button class="btn-small btn-gold" onclick="showGiveXPModal(${p.characterId}, '${escapeHtml(p.character || p.player).replace(/'/g, "\\'")}')" title="Give XP">✨ XP</button>
+                            <button class="btn-small btn-secondary" onclick="unlockCharacter(${p.characterId}, '${escapeHtml(p.character || p.player).replace(/'/g, "\\'")}')" title="Unlock">🔓</button>
+                            <button class="btn-small" onclick="showPlayerBuild(${p.characterId}, '${escapeHtml(p.character || p.player).replace(/'/g, "\\'")}')" title="View Build" style="background: var(--accent-cyan);">📊</button>
                         </div>
                     </div>
                 </div>
@@ -3852,6 +3767,7 @@ function renderPlayersList() {
                 </div>
             </div>
             ${backgroundSection}
+            ${relationshipsSection}
             ${xpSection}
         </div>
     `}).join('');
@@ -3928,6 +3844,7 @@ async function syncCampaignPlayers() {
                     sessionData.players[existingIndex].class = cp.character.class || '';
                     sessionData.players[existingIndex].religion = cp.character.religion || '';
                     sessionData.players[existingIndex].background = cp.character.background || '';
+                    sessionData.players[existingIndex].relationships = cp.character.relationships || '';
                     sessionData.players[existingIndex].xp = cp.character.xp || 0;
                     sessionData.players[existingIndex].xp_spent = cp.character.xp_spent || 0;
                     sessionData.players[existingIndex].race_class_locked = cp.character.race_class_locked || false;
@@ -3949,6 +3866,7 @@ async function syncCampaignPlayers() {
                     class: cp.character ? cp.character.class : '',
                     religion: cp.character ? cp.character.religion : '',
                     background: cp.character ? cp.character.background : '',
+                    relationships: cp.character ? cp.character.relationships : '',
                     xp: cp.character ? cp.character.xp : 0,
                     xp_spent: cp.character ? cp.character.xp_spent : 0,
                     race_class_locked: cp.character ? cp.character.race_class_locked : false,
@@ -4906,13 +4824,18 @@ function renderTurningPointsList() {
     container.innerHTML = sessionData.turningPoints.map((tp, i) => `
         <div class="decision-card" style="padding: var(--space-3);">
             <button class="remove-btn" onclick="removeTurningPoint(${i})">&times;</button>
+            ${tp.linkedTo ? `<div style="margin-bottom: var(--space-1);"><span style="font-size: 0.7rem; padding: 1px 6px; border-radius: 4px; background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text-muted);">${tp.linkedType === 'place' ? '📍' : tp.linkedType === 'encounter' ? '⚔️' : '👤'} ${escapeHtml(tp.linkedTo)}</span></div>` : ''}
             <div class="field-group" style="margin-bottom: var(--space-2);">
                 <label style="font-size: 0.7rem; color: var(--accent-purple);">What happened?</label>
                 <input type="text" value="${escapeHtml(tp.description || '')}" onchange="sessionData.turningPoints[${i}].description = this.value" placeholder="Key decision or important moment">
             </div>
-            <div class="field-group" style="margin-bottom: 0;">
+            <div class="field-group" style="margin-bottom: var(--space-2);">
                 <label style="font-size: 0.7rem;">Consequence</label>
                 <input type="text" value="${escapeHtml(tp.consequence || '')}" onchange="sessionData.turningPoints[${i}].consequence = this.value" placeholder="What does this lead to?">
+            </div>
+            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                <label style="font-size: 0.7rem; color: var(--text-muted);">Visible to:</label>
+                ${generateVisibilityDropdown(tp.visibleTo, `sessionData.turningPoints[${i}].visibleTo`)}
             </div>
         </div>
     `).join('');
@@ -4943,10 +4866,17 @@ function renderEventLogList() {
     }
 
     container.innerHTML = sessionData.eventLog.map((event, i) => `
-        <div style="display: flex; align-items: flex-start; gap: var(--space-2); padding: var(--space-2); margin-bottom: var(--space-1); background: var(--bg-surface); border-radius: var(--radius-sm);">
-            <span style="font-size: 0.7rem; color: var(--text-muted); min-width: 50px;">${escapeHtml(event.timestamp || '')}</span>
-            <span style="flex: 1; font-size: 0.85rem;">${escapeHtml(event.text || '')}</span>
-            <button onclick="removeEventLog(${i})" style="background: none; border: none; color: var(--accent-red); cursor: pointer; padding: 0; font-size: 1rem;">&times;</button>
+        <div style="padding: var(--space-2); margin-bottom: var(--space-1); background: var(--bg-surface); border-radius: var(--radius-sm);">
+            <div style="display: flex; align-items: flex-start; gap: var(--space-2);">
+                <span style="font-size: 0.7rem; color: var(--text-muted); min-width: 50px;">${escapeHtml(event.timestamp || '')}</span>
+                ${event.linkedTo ? `<span style="font-size: 0.65rem; padding: 0 4px; border-radius: 3px; background: var(--bg-elevated); border: 1px solid var(--border-subtle); color: var(--text-muted); white-space: nowrap;">${event.linkedType === 'place' ? '📍' : event.linkedType === 'encounter' ? '⚔️' : '👤'} ${escapeHtml(event.linkedTo)}</span>` : ''}
+                <span style="flex: 1; font-size: 0.85rem;">${escapeHtml(event.text || '')}</span>
+                <button onclick="removeEventLog(${i})" style="background: none; border: none; color: var(--accent-red); cursor: pointer; padding: 0; font-size: 1rem;">&times;</button>
+            </div>
+            <div style="margin-top: 4px; display: flex; align-items: center; gap: var(--space-2);">
+                <label style="font-size: 0.65rem; color: var(--text-muted);">Visible:</label>
+                ${generateVisibilityDropdown(event.visibleTo, `sessionData.eventLog[${i}].visibleTo`)}
+            </div>
         </div>
     `).join('');
 }
@@ -4969,6 +4899,123 @@ function addEventLog() {
 function removeEventLog(index) {
     sessionData.eventLog.splice(index, 1);
     renderEventLogList();
+    triggerAutoSave();
+}
+
+// Contextual Event - adds an event linked to a place/encounter/NPC
+function addContextualEvent(linkedType, linkedTo) {
+    if (!sessionData.eventLog) sessionData.eventLog = [];
+
+    const now = new Date();
+    const timestamp = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    const text = prompt(`Event at ${linkedTo}:`);
+    if (!text || !text.trim()) return;
+
+    sessionData.eventLog.push({ timestamp, text: text.trim(), linkedType, linkedTo, visibleTo: 'all' });
+    renderEventLogList();
+    updateDMSidebar();
+    triggerAutoSave();
+}
+
+// Contextual Turning Point - adds a TP linked to a place/encounter/NPC
+function addContextualTurningPoint(linkedType, linkedTo) {
+    if (!sessionData.turningPoints) sessionData.turningPoints = [];
+
+    const description = prompt(`Turning point at ${linkedTo}:`);
+    if (!description || !description.trim()) return;
+
+    const consequence = prompt('Consequence (optional):') || '';
+
+    sessionData.turningPoints.push({ description: description.trim(), consequence: consequence.trim(), linkedType, linkedTo, visibleTo: 'all' });
+    renderTurningPointsList();
+    updateDMSidebar();
+    updateLockUI();
+    triggerAutoSave();
+}
+
+// ============================================
+// DM Notes Tab (Private AI/DM notebook)
+// ============================================
+
+let dmNotesTabFilter = 'all';
+
+function getCategoryColor(cat) {
+    const colors = {
+        plot: '#a855f7',
+        npc: '#3b82f6',
+        mechanic: '#eab308',
+        plan: '#22c55e',
+        reminder: '#9ca3af'
+    };
+    return colors[cat] || colors.reminder;
+}
+
+function renderDMNotesList(notes, container, filterVar, removePrefix) {
+    if (!container) return;
+
+    if (!notes || notes.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-secondary); font-style: italic;">No AI notes yet. The AI game master will add private notes here during play.</p>';
+        return;
+    }
+
+    const filtered = filterVar === 'all' ? notes : notes.filter(n => n.category === filterVar);
+
+    if (filtered.length === 0) {
+        container.innerHTML = `<p style="color: var(--text-secondary); font-style: italic;">No ${filterVar} notes.</p>`;
+        return;
+    }
+
+    container.innerHTML = filtered.map((note, displayIdx) => {
+        const realIdx = filterVar === 'all' ? displayIdx : notes.indexOf(note);
+        const cat = note.category || 'reminder';
+        return `
+        <div style="padding: var(--space-2); margin-bottom: var(--space-1); background: var(--bg-surface); border-radius: var(--radius-sm); border-left: 3px solid ${getCategoryColor(cat)};">
+            <div style="display: flex; align-items: flex-start; gap: var(--space-2);">
+                <span style="font-size: 0.7rem; color: var(--text-muted); min-width: 40px;">${escapeHtml(note.timestamp || '')}</span>
+                <span class="dm-note-badge dm-note-badge-${cat}">${cat}</span>
+                <span style="flex: 1; font-size: 0.85rem; color: var(--text-base);">${escapeHtml(note.text || '')}</span>
+                <button onclick="${removePrefix}(${realIdx})" style="background: none; border: none; color: var(--accent-red); cursor: pointer; padding: 0; font-size: 1rem; opacity: 0.5;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">&times;</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function renderDMNotesTab() {
+    const container = document.getElementById('dm-notes-tab-content');
+    renderDMNotesList(sessionData.dmNotes, container, dmNotesTabFilter, 'removeDMNoteTab');
+}
+
+function filterDMNotesTab(filter) {
+    dmNotesTabFilter = filter;
+    document.querySelectorAll('.dm-note-tab-filter').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === filter);
+    });
+    renderDMNotesTab();
+}
+
+function addDMNoteFromTab() {
+    const input = document.getElementById('dm-note-tab-input');
+    const catSelect = document.getElementById('dm-note-tab-category');
+    if (!input || !input.value.trim()) return;
+
+    if (!sessionData.dmNotes) sessionData.dmNotes = [];
+
+    const now = new Date();
+    const timestamp = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+
+    sessionData.dmNotes.push({
+        timestamp,
+        text: input.value.trim(),
+        category: catSelect ? catSelect.value : 'reminder'
+    });
+    input.value = '';
+    renderDMNotesTab();
+    triggerAutoSave();
+}
+
+function removeDMNoteTab(index) {
+    sessionData.dmNotes.splice(index, 1);
+    renderDMNotesTab();
     triggerAutoSave();
 }
 
@@ -5280,7 +5327,8 @@ function sessionToMarkdown(session, campaignName) {
     if (data.turningPoints && data.turningPoints.length > 0) {
         md += '## Turning Points\n\n';
         data.turningPoints.forEach((tp, i) => {
-            md += `### ${i + 1}. ${tp.description || 'Unnamed turning point'}\n`;
+            const prefix = tp.linkedTo ? `[${tp.linkedTo}] ` : '';
+            md += `### ${i + 1}. ${prefix}${tp.description || 'Unnamed turning point'}\n`;
             if (tp.consequence) md += `**Consequence:** ${tp.consequence}\n`;
             md += '\n';
         });
@@ -5290,7 +5338,8 @@ function sessionToMarkdown(session, campaignName) {
     if (data.eventLog && data.eventLog.length > 0) {
         md += '## Event Log\n\n';
         data.eventLog.forEach(event => {
-            md += `- **${event.timestamp || ''}** - ${event.text || ''}\n`;
+            const prefix = event.linkedTo ? `[${event.linkedTo}] ` : '';
+            md += `- **${event.timestamp || ''}** - ${prefix}${event.text || ''}\n`;
         });
         md += '\n';
     }
@@ -5479,7 +5528,7 @@ async function showPlayerBuild(characterId, characterName) {
 
         if (!res.ok) {
             const data = await res.json();
-            content.innerHTML = `<p style="color: var(--accent-red);">Error: ${data.error || 'Could not load build'}</p>`;
+            content.innerHTML = `<p style="color: var(--accent-red);">Error: ${escapeHtml(data.error || 'Could not load build')}</p>`;
             return;
         }
 
@@ -5742,7 +5791,7 @@ async function giveItemToPlayer(itemIndex, playerName, oldPlayerName) {
                 name: item.name,
                 description: item.description || '',
                 campaign_id: currentCampaignId,
-                sessionName: sessionData.title || 'Unknown Session'
+                sessionName: `Session ${document.getElementById('session_number')?.value || '?'}`
             })
         });
 
@@ -5829,7 +5878,7 @@ function manageLocks(characterId, characterName, rcLocked, attrLocked, abilLocke
 
     const modal = document.getElementById('confirm-modal');
     document.getElementById('confirm-title').textContent = 'Manage Locks';
-    document.getElementById('confirm-message').innerHTML = `<strong>${characterName}</strong><br><span style="font-size: 0.85rem; color: var(--text-secondary);">Click to toggle lock state:</span>`;
+    document.getElementById('confirm-message').innerHTML = `<strong>${escapeHtml(characterName)}</strong><br><span style="font-size: 0.85rem; color: var(--text-secondary);">Click to toggle lock state:</span>`;
 
     const btnContainer = modal.querySelector('div[style*="flex"]');
     btnContainer.style.flexWrap = 'wrap';
@@ -6240,6 +6289,27 @@ function renderSessionSummary() {
         `;
     }
 
+    // DM Notes (private)
+    const dmNotes = sessionData.dmNotes || [];
+    if (dmNotes.length > 0) {
+        html += `
+            <div class="summary-section" style="margin-bottom: var(--space-4);">
+                <h4 style="color: var(--accent-purple); margin-bottom: var(--space-2);">
+                    <span style="margin-right: 8px;">📓</span>DM Notes (${dmNotes.length}) <span style="font-size: 0.7rem; font-weight: 400; color: var(--text-muted);">— private</span>
+                </h4>
+                <ul style="list-style: none; padding: 0; margin: 0; max-height: 300px; overflow-y: auto;">
+                    ${dmNotes.map(note => `
+                        <li style="padding: var(--space-1) 0; font-size: 0.85rem;">
+                            ${note.timestamp ? `<span style="color: var(--text-muted);">[${note.timestamp}]</span> ` : ''}
+                            <span class="dm-note-badge dm-note-badge-${note.category || 'reminder'}">${note.category || 'reminder'}</span>
+                            <span style="color: var(--text-base); margin-left: 4px;">${escapeHtml(note.text)}</span>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        `;
+    }
+
     // Empty state
     if (usedNPCs.length === 0 && visitedPlaces.length === 0 && completedEncounters.length === 0 &&
         startedEncounters.length === 0 && foundItems.length === 0 && turningPoints.length === 0 && eventLog.length === 0) {
@@ -6627,8 +6697,53 @@ function hideAIModal() {
 function switchAITab(tab) {
     document.getElementById('ai-tab-export').classList.toggle('active', tab === 'export');
     document.getElementById('ai-tab-import').classList.toggle('active', tab === 'import');
+    document.getElementById('ai-tab-mcp').classList.toggle('active', tab === 'mcp');
     document.getElementById('ai-export-tab').style.display = tab === 'export' ? 'block' : 'none';
     document.getElementById('ai-import-tab').style.display = tab === 'import' ? 'block' : 'none';
+    document.getElementById('ai-mcp-tab').style.display = tab === 'mcp' ? 'block' : 'none';
+    if (tab === 'mcp') populateMCPConfig();
+}
+
+function populateMCPConfig() {
+    const token = authToken || localStorage.getItem('aedelore_auth_token') || '';
+    const tokenField = document.getElementById('mcp-token');
+    if (tokenField) tokenField.value = token;
+
+    const config = JSON.stringify({
+        mcpServers: {
+            aedelore: {
+                type: "streamablehttp",
+                url: "https://aedelore.nu/mcp",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        }
+    }, null, 2);
+
+    const configField = document.getElementById('mcp-config');
+    if (configField) configField.value = config;
+}
+
+function copyMCPField(fieldId) {
+    const field = document.getElementById(fieldId);
+    if (!field) return;
+    const val = field.type === 'password' ? field.value : field.value;
+    navigator.clipboard.writeText(val).then(() => {
+        const btn = field.nextElementSibling || field.parentElement.querySelector('button:last-child');
+        if (btn) {
+            const orig = btn.textContent;
+            btn.textContent = 'Copied!';
+            btn.style.color = 'var(--accent-green)';
+            setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 2000);
+        }
+    });
+}
+
+function toggleMCPTokenVisibility() {
+    const field = document.getElementById('mcp-token');
+    if (!field) return;
+    field.type = field.type === 'password' ? 'text' : 'password';
 }
 
 function updateAITaskDescription() {
@@ -6980,12 +7095,12 @@ function formatSessionForAI(session) {
 
     // Turning Points
     if (data.turningPoints && data.turningPoints.length > 0) {
-        output += `\n**Key Moments:** ${data.turningPoints.map(tp => tp.description).join('; ')}\n`;
+        output += `\n**Key Moments:** ${data.turningPoints.map(tp => (tp.linkedTo ? `[${tp.linkedTo}] ` : '') + tp.description).join('; ')}\n`;
     }
 
     // Event Log
     if (data.eventLog && data.eventLog.length > 0) {
-        output += `\n**Events:** ${data.eventLog.map(e => e.text).join('; ')}\n`;
+        output += `\n**Events:** ${data.eventLog.map(e => (e.linkedTo ? `[${e.linkedTo}] ` : '') + e.text).join('; ')}\n`;
     }
 
     // NPCs
@@ -7046,7 +7161,8 @@ function formatSessionForAI(session) {
 }
 
 // Helper function to get session summary for AI context
-function getSelectedSessionSummary(selectedSessionId) {
+// Fetches full session data from API since dashboard only loads metadata
+async function getSelectedSessionSummary(selectedSessionId) {
     let output = '';
 
     if (!allCampaigns || allCampaigns.length === 0) return output;
@@ -7057,16 +7173,34 @@ function getSelectedSessionSummary(selectedSessionId) {
     if (selectedSessionId === 'all') {
         // Include all previous sessions
         output += `\n### Previous Sessions\n`;
-        campaign.sessions.forEach(session => {
+        for (const session of campaign.sessions) {
             if (session.id !== currentSessionId) {
+                if (!session.data) {
+                    try {
+                        const res = await apiRequest(`/api/sessions/${session.id}`);
+                        if (res.ok) {
+                            const full = await res.json();
+                            session.data = typeof full.data === 'string' ? JSON.parse(full.data) : full.data;
+                        }
+                    } catch (e) { /* skip */ }
+                }
                 output += `\n---\n**Session ${session.session_number}** (${session.date || 'No date'})\n`;
                 output += formatSessionForAI(session);
             }
-        });
+        }
     } else if (selectedSessionId && selectedSessionId !== 'none') {
-        // Include specific session
+        // Include specific session - fetch full data if needed
         const session = campaign.sessions.find(s => s.id == selectedSessionId);
         if (session && session.id !== currentSessionId) {
+            if (!session.data) {
+                try {
+                    const res = await apiRequest(`/api/sessions/${session.id}`);
+                    if (res.ok) {
+                        const full = await res.json();
+                        session.data = typeof full.data === 'string' ? JSON.parse(full.data) : full.data;
+                    }
+                } catch (e) { /* skip */ }
+            }
             output += `\n### Previous Session Context\n`;
             output += `\n**Session ${session.session_number}** (${session.date || 'No date'})\n`;
             output += formatSessionForAI(session);
@@ -7077,7 +7211,7 @@ function getSelectedSessionSummary(selectedSessionId) {
 }
 
 // Quick AI Actions - generates focused prompts for specific tasks
-function quickAIAction(action, buttonEl) {
+async function quickAIAction(action, buttonEl) {
     collectAllData();
 
     // Highlight the selected quick action button
@@ -7137,7 +7271,7 @@ function quickAIAction(action, buttonEl) {
 
     // Add previous session data if checkbox is checked
     if (includePrevious) {
-        output += getSelectedSessionSummary(selectedSessionId);
+        output += await getSelectedSessionSummary(selectedSessionId);
     }
 
     // Add session planning guidelines
@@ -7296,7 +7430,7 @@ When done, provide the full export format so I can import everything at once.
     document.getElementById('ai-export-output').style.display = 'block';
 }
 
-function generateAIExport() {
+async function generateAIExport() {
     collectAllData();
 
     const taskType = document.getElementById('ai-task-type').value;
@@ -7358,7 +7492,7 @@ You are a DM assistant for the Aedelore tabletop RPG system. Your role is to hel
 
     // Add previous sessions if requested
     if (includePrevious) {
-        output += getSelectedSessionSummary(selectedSessionId);
+        output += await getSelectedSessionSummary(selectedSessionId);
     }
 
     // Add current session data
@@ -8845,7 +8979,7 @@ function renderPlayerCampaignView() {
                 <div style="margin-bottom: var(--space-4);">
                     <h5 style="color: var(--accent-green); margin: 0 0 var(--space-2) 0; font-size: 0.9rem;">Key Moments</h5>
                     <ul style="margin: 0; padding-left: var(--space-4); color: var(--text-secondary);">
-                        ${summary.turning_points.map(tp => `<li>${escapeHtml(tp.description)}</li>`).join('')}
+                        ${summary.turning_points.map(tp => `<li>${tp.linkedTo ? `<span style="font-size: 0.8rem; color: var(--text-muted);">[${escapeHtml(tp.linkedTo)}]</span> ` : ''}${escapeHtml(tp.description)}${tp.consequence ? ` <span style="color: var(--text-muted);">→ ${escapeHtml(tp.consequence)}</span>` : ''}</li>`).join('')}
                     </ul>
                 </div>
             `;
@@ -8857,7 +8991,7 @@ function renderPlayerCampaignView() {
                 <div style="margin-bottom: var(--space-4);">
                     <h5 style="color: var(--text-muted); margin: 0 0 var(--space-2) 0; font-size: 0.9rem;">Session Log</h5>
                     <div style="color: var(--text-secondary); font-size: 0.85rem;">
-                        ${summary.event_log.map(e => `<div style="margin-bottom: 4px;">• ${escapeHtml(e.text)}</div>`).join('')}
+                        ${summary.event_log.map(e => `<div style="margin-bottom: 4px;">• ${e.linkedTo ? `<span style="font-size: 0.8rem; color: var(--text-muted);">[${escapeHtml(e.linkedTo)}]</span> ` : ''}${escapeHtml(e.text)}</div>`).join('')}
                     </div>
                 </div>
             `;
@@ -8957,7 +9091,7 @@ function updateDMSidebar() {
                 .slice(-5) // Show last 5
                 .map(tp => `
                     <div class="sidebar-event">
-                        <div class="sidebar-event-text" style="color: var(--accent-gold);">⚡ ${escapeHtml(tp.description)}</div>
+                        <div class="sidebar-event-text" style="color: var(--accent-gold);">⚡ ${tp.linkedTo ? `[${escapeHtml(tp.linkedTo)}] ` : ''}${escapeHtml(tp.description)}</div>
                         ${tp.consequence ? `<div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">→ ${escapeHtml(tp.consequence)}</div>` : ''}
                     </div>
                 `).join('');
@@ -8977,7 +9111,7 @@ function updateDMSidebar() {
                 .map(event => `
                     <div class="sidebar-event">
                         <div class="sidebar-event-time">${escapeHtml(event.timestamp)}</div>
-                        <div class="sidebar-event-text">${escapeHtml(event.text)}</div>
+                        <div class="sidebar-event-text">${event.linkedTo ? `[${escapeHtml(event.linkedTo)}] ` : ''}${escapeHtml(event.text)}</div>
                     </div>
                 `).join('');
         }
@@ -8986,12 +9120,14 @@ function updateDMSidebar() {
 
 // Quick actions for sidebar
 function quickAddEvent() {
-    const text = prompt('Enter event note:');
+    const input = document.getElementById('sidebar-event-input');
+    const text = input ? input.value : '';
     if (text && text.trim()) {
         if (!sessionData.eventLog) sessionData.eventLog = [];
         const now = new Date();
         const timestamp = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
         sessionData.eventLog.push({ timestamp, text: text.trim() });
+        if (input) input.value = '';
         renderEventLogList();
         updateDMSidebar();
         triggerAutoSave();
@@ -8999,10 +9135,12 @@ function quickAddEvent() {
 }
 
 function quickAddTurningPoint() {
-    const description = prompt('Enter turning point:');
+    const input = document.getElementById('sidebar-tp-input');
+    const description = input ? input.value : '';
     if (description && description.trim()) {
         if (!sessionData.turningPoints) sessionData.turningPoints = [];
         sessionData.turningPoints.push({ description: description.trim(), consequence: '' });
+        if (input) input.value = '';
         renderTurningPointsList();
         updateDMSidebar();
         triggerAutoSave();

@@ -1,6 +1,6 @@
 services:
   aedelore-proffs-db:
-    image: postgres:16-alpine
+    image: docker.io/library/postgres:16-alpine
     container_name: aedelore-proffs-db
     restart: unless-stopped
     environment:
@@ -16,7 +16,7 @@ services:
       retries: 5
 
   aedelore-proffs-redis:
-    image: redis:7-alpine
+    image: docker.io/library/redis:7-alpine
     container_name: aedelore-proffs-redis
     restart: unless-stopped
     volumes:
@@ -28,11 +28,11 @@ services:
       retries: 5
 
   aedelore-proffs-web:
-    image: nginx:alpine
+    image: docker.io/library/nginx:alpine
     container_name: aedelore-proffs-web
     restart: unless-stopped
     ports:
-      - "9020:80"
+      - "127.0.0.1:9020:80"
     volumes:
       - ./html:/usr/share/nginx/html:ro
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
@@ -53,6 +53,16 @@ services:
       SMTP_PASS: ${SMTP_PASS}
       SMTP_FROM: ${SMTP_FROM}
       APP_URL: ${APP_URL}
+      AUTH_MODE: ${AUTH_MODE:-local}
+      OIDC_CALLBACK_URL: ${OIDC_CALLBACK_URL:-}
+      OIDC_1_ISSUER_URL: ${OIDC_1_ISSUER_URL:-}
+      OIDC_1_CLIENT_ID: ${OIDC_1_CLIENT_ID:-}
+      OIDC_1_CLIENT_SECRET: ${OIDC_1_CLIENT_SECRET:-}
+      OIDC_1_PROVIDER_NAME: ${OIDC_1_PROVIDER_NAME:-}
+      OIDC_2_ISSUER_URL: ${OIDC_2_ISSUER_URL:-}
+      OIDC_2_CLIENT_ID: ${OIDC_2_CLIENT_ID:-}
+      OIDC_2_CLIENT_SECRET: ${OIDC_2_CLIENT_SECRET:-}
+      OIDC_2_PROVIDER_NAME: ${OIDC_2_PROVIDER_NAME:-}
     volumes:
       - ./api/data:/app/data
       - ./html/uploads:/app/uploads
@@ -64,8 +74,38 @@ services:
       aedelore-proffs-redis:
         condition: service_healthy
 
+  aedelore-mcp:
+    build: ./mcp
+    container_name: aedelore-mcp
+    restart: unless-stopped
+    environment:
+      API_URL: http://aedelore-proffs-api:3000
+      PUBLIC_URL: ${APP_URL:-https://aedelore.nu}
+      GAME_DATA_DIR: /game-data
+      AUTH_MODE: ${AUTH_MODE:-local}
+      OIDC_1_ISSUER_URL: ${OIDC_1_ISSUER_URL:-}
+      OIDC_1_CLIENT_ID: ${OIDC_1_CLIENT_ID:-}
+      OIDC_1_CLIENT_SECRET: ${OIDC_1_CLIENT_SECRET:-}
+      OIDC_1_PROVIDER_NAME: ${OIDC_1_PROVIDER_NAME:-}
+      OIDC_2_ISSUER_URL: ${OIDC_2_ISSUER_URL:-}
+      OIDC_2_CLIENT_ID: ${OIDC_2_CLIENT_ID:-}
+      OIDC_2_CLIENT_SECRET: ${OIDC_2_CLIENT_SECRET:-}
+      OIDC_2_PROVIDER_NAME: ${OIDC_2_PROVIDER_NAME:-}
+    volumes:
+      - ./html/data:/game-data:ro
+      - ./html/ai-reference:/lore-pages:ro
+    ports:
+      - "127.0.0.1:9022:3100"
+    depends_on:
+      - aedelore-proffs-api
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+
   aedelore-umami-db:
-    image: postgres:16-alpine
+    image: docker.io/library/postgres:16-alpine
     container_name: aedelore-umami-db
     restart: unless-stopped
     environment:
@@ -88,12 +128,40 @@ services:
       DATABASE_URL: postgresql://umami:${UMAMI_DB_PASSWORD}@aedelore-umami-db:5432/umami
       APP_SECRET: ${UMAMI_APP_SECRET}
     ports:
-      - "9021:3000"
+      - "127.0.0.1:9021:3000"
     expose:
       - "3000"
     depends_on:
       aedelore-umami-db:
         condition: service_healthy
+
+  aedelore-anubis:
+    image: ghcr.io/techarohq/anubis:latest
+    container_name: aedelore-anubis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9023:8923"
+    environment:
+      BIND: ":8923"
+      TARGET: "http://host.containers.internal:8888"
+      DIFFICULTY: "4"
+      SERVE_ROBOTS_TXT: "true"
+      OG_PASSTHROUGH: "true"
+      OG_EXPIRY_TIME: "24h"
+
+  itdetektiven-anubis:
+    image: ghcr.io/techarohq/anubis:latest
+    container_name: itdetektiven-anubis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9024:8923"
+    environment:
+      BIND: ":8923"
+      TARGET: "http://host.containers.internal:8889"
+      DIFFICULTY: "4"
+      SERVE_ROBOTS_TXT: "true"
+      OG_PASSTHROUGH: "true"
+      OG_EXPIRY_TIME: "24h"
 
 volumes:
   aedelore-pgdata:

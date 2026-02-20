@@ -686,6 +686,130 @@
             color: var(--text-base);
         }
 
+        /* Spoiler Modal */
+        .wiki-spoiler-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .wiki-spoiler-modal.active {
+            display: flex;
+        }
+
+        .wiki-spoiler-modal-content {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-default);
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 480px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .wiki-spoiler-icon {
+            color: var(--accent-gold);
+            margin-bottom: 16px;
+        }
+
+        .wiki-spoiler-modal-content h3 {
+            font-family: 'Crimson Text', serif;
+            font-size: 1.5rem;
+            color: var(--accent-gold);
+            margin-bottom: 16px;
+        }
+
+        .wiki-spoiler-modal-content p {
+            color: var(--text-subdued);
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .wiki-spoiler-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        .wiki-spoiler-btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .wiki-spoiler-btn-confirm {
+            background: linear-gradient(135deg, var(--accent-purple), #7c3aed);
+            color: white;
+        }
+
+        .wiki-spoiler-btn-confirm:hover {
+            filter: brightness(1.15);
+        }
+
+        .wiki-spoiler-btn-cancel {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-subdued);
+        }
+
+        .wiki-spoiler-btn-cancel:hover {
+            border-color: var(--border-default);
+            color: var(--text-base);
+        }
+
+        /* Login Gate Message */
+        .wiki-login-gate {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(59, 158, 255, 0.08));
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-radius: 12px;
+            padding: 32px;
+            text-align: center;
+            margin-top: 24px;
+        }
+
+        .wiki-login-gate p {
+            color: var(--text-subdued);
+            line-height: 1.7;
+            font-size: 0.95rem;
+            margin-bottom: 16px;
+        }
+
+        .wiki-login-gate a {
+            display: inline-block;
+            padding: 10px 24px;
+            background: linear-gradient(135deg, var(--accent-purple), #7c3aed);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: filter 0.2s;
+        }
+
+        .wiki-login-gate a:hover {
+            filter: brightness(1.15);
+        }
+
+        /* Locked page indicator in book view */
+        .wiki-page-locked {
+            opacity: 0.5;
+        }
+
+        .wiki-page-locked::after {
+            content: ' \1F512';
+            font-size: 0.8em;
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
             .wiki-container {
@@ -821,6 +945,24 @@
             </div>
         </div>
     </main>
+
+    <!-- Spoiler Confirmation Modal -->
+    <div class="wiki-spoiler-modal" id="spoiler-modal">
+        <div class="wiki-spoiler-modal-content">
+            <div class="wiki-spoiler-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M12 9v4m0 4h.01M3 12l9-9 9 9-9 9-9-9z"/>
+                </svg>
+            </div>
+            <h3>Spoiler Warning</h3>
+            <p>This section contains ready-to-play adventures with full story details, encounters, and secrets meant for the Game Master.</p>
+            <p style="margin-top: 12px; color: var(--text-subdued);">I am a dungeon master or game master and want to learn. I am not a player wanting to ruin the fun.</p>
+            <div class="wiki-spoiler-actions">
+                <button class="wiki-spoiler-btn wiki-spoiler-btn-confirm" onclick="confirmSpoilerWarning()">Yes, I am the GM</button>
+                <button class="wiki-spoiler-btn wiki-spoiler-btn-cancel" onclick="cancelSpoilerWarning()">Take me back</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Image Lightbox -->
     <div class="wiki-lightbox" id="wiki-lightbox" onclick="closeLightbox()">
