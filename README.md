@@ -75,11 +75,14 @@ Built for the Aedelore RPG system, but supports other systems like D&D 5e, Pathf
 - Give loot items to specific players
 - Event log and turning points
 
-**AI Assistant**
-- Works with Claude and ChatGPT
-- Generate NPCs, encounters, locations
-- Import AI-generated content directly
-- Session recap generation
+**AI Assistant (MCP)**
+- Model Context Protocol server for direct AI integration
+- 39 tools (24 DM + 15 player) and 12 prompt templates
+- OAuth 2.0 with PKCE authentication
+- DM tools: plan sessions, create NPCs/encounters, import content, manage campaigns
+- Player tools: build characters, equip gear, track HP/inventory, run solo adventures
+- AI updates the character sheet in real-time during play
+- Works with Claude Desktop, Cursor, and other MCP-compatible clients
 
 **Player View**
 - Share session summaries with players
@@ -94,6 +97,9 @@ Built for the Aedelore RPG system, but supports other systems like D&D 5e, Pathf
 | Backend API | Node.js + Express |
 | Database | PostgreSQL 16 |
 | Web Server | nginx |
+| MCP Server | Node.js + @modelcontextprotocol/sdk |
+| Auth | OAuth 2.0 with PKCE, OIDC/Keycloak |
+| Cache | Redis 7 |
 | Email | Nodemailer (SMTP) |
 | Container | Docker Compose |
 
