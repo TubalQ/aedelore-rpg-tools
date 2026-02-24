@@ -70,7 +70,7 @@
     }
     </script>
 
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css?v=6">
 </head>
 <body>
     <!-- Cloud Autosave Indicator -->
@@ -139,7 +139,7 @@
                 <div class="step-number">6</div>
                 <div class="step-content">
                     <div class="step-title">Distribute attribute points</div>
-                    <div class="step-desc">Go to <strong>Stats</strong> tab <span class="step-arrow">→</span> Spend your <strong>10 points</strong></div>
+                    <div class="step-desc">Go to <strong>Stats</strong> tab <span class="step-arrow">→</span> Spend your <strong>7 points</strong></div>
                 </div>
                 <div class="step-check"></div>
             </div>
@@ -361,6 +361,11 @@
                     <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                 </button>
                 <div class="dropdown-menu">
+                    <button class="dropdown-item new-character" onclick="clearCharacter(); closeDropdowns();">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                        New Character
+                    </button>
+                    <div class="dropdown-divider"></div>
                     <div class="dropdown-label">Local Storage</div>
                     <button class="dropdown-item" onclick="saveCharacter(); closeDropdowns();">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -398,6 +403,32 @@
                 </div>
             </div>
 
+            <!-- Login/Account Button (standalone) -->
+            <div id="auth-btn-logged-out">
+                <button class="dropdown-trigger auth-standalone-btn" onclick="showAuthModal('login')">
+                    <svg class="icon-main" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                    Login
+                </button>
+            </div>
+            <div id="auth-btn-logged-in" class="dropdown" style="display: none;">
+                <button class="dropdown-trigger" onclick="toggleDropdown('auth-btn-logged-in')">
+                    <svg class="icon-main" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span id="auth-btn-username">Account</span>
+                    <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div class="dropdown-menu">
+                    <button class="dropdown-item" onclick="doLogout(); closeDropdowns();">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        Logout
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item danger" onclick="deleteAccount(); closeDropdowns();">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                        Delete Account
+                    </button>
+                </div>
+            </div>
+
             <!-- Server/Cloud Dropdown -->
             <div class="dropdown dropdown-server" id="server-dropdown">
                 <button class="dropdown-trigger" onclick="toggleDropdown('server-dropdown')">
@@ -408,10 +439,6 @@
                 <div class="dropdown-menu">
                     <!-- Logged out state -->
                     <div id="server-logged-out">
-                        <button class="dropdown-item" onclick="showAuthModal('login'); closeDropdowns();">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                            Login
-                        </button>
                         <button class="dropdown-item" onclick="showAuthModal('register'); closeDropdowns();">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
                             Register
@@ -419,7 +446,6 @@
                     </div>
                     <!-- Logged in state -->
                     <div id="server-logged-in" style="display: none;">
-                        <div class="dropdown-label">Logged in as <span id="server-username"></span></div>
                         <button class="dropdown-item" onclick="saveToServer(); closeDropdowns();">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                             Save to Cloud
@@ -432,23 +458,16 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                             Trash
                         </button>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="/dm-session" onclick="closeDropdowns();">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                            DM Session
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <button class="dropdown-item" onclick="doLogout(); closeDropdowns();">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                            Logout
-                        </button>
-                        <div class="dropdown-divider"></div>
-                        <button class="dropdown-item danger" onclick="deleteAccount(); closeDropdowns();">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                            Delete Account
-                        </button>
                     </div>
                 </div>
+            </div>
+
+            <!-- DM Session link -->
+            <div class="dropdown dm-session-wrapper">
+                <a href="/dm-session" class="dropdown-trigger dm-session-link">
+                    <svg class="icon-main" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    <span>DM Session</span>
+                </a>
             </div>
 
             <!-- Theme Dropdown -->
@@ -592,6 +611,7 @@
             <div class="tab" onclick="switchTab('page-spells')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg> Abilities</div>
             <div class="tab" onclick="switchTab('page-gear')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg> Gear</div>
             <div class="tab" onclick="switchTab('page-tools')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/></svg> Tools</div>
+            <div class="tab" id="tab-ai" onclick="switchTab('page-ai')" style="display:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1.27A7 7 0 0 1 14 22h-4a7 7 0 0 1-6.73-3H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/><circle cx="10" cy="15" r="1"/><circle cx="14" cy="15" r="1"/></svg> AI</div>
             <div class="tab" onclick="openWikiSearch()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> Wiki</div>
         </div>
 
@@ -888,7 +908,7 @@
                             <option value="Druid">Druid</option>
                         </select>
                     </div>
-                    <div class="field-group">
+                    <div class="field-group religion-field">
                         <label>Religion</label>
                         <select id="religion">
                             <option value="">Select Religion...</option>
@@ -911,12 +931,42 @@
                     </div>
                 </div>
 
-                <!-- Character Progression (compact, inside basic info) -->
-                <div class="progression-compact" id="progression-section" style="display: none;">
-                    <span class="progression-xp" id="xp-value">0 XP</span>
-                    <span class="progression-locks"><span id="lock-rc-icon">🔓</span>R/C <span id="lock-attr-icon">🔓</span>Attr <span id="lock-abil-icon">🔓</span>Abil</span>
-                    <span class="progression-points" id="xp-available" style="display: none;"><strong id="available-points">0</strong>pt</span>
-                    <button class="btn-tiny btn-gold" id="lock-race-class-btn" onclick="lockRaceClass()">🔒 Lock</button>
+                <!-- Character Progression Stepper -->
+                <div class="lock-stepper" id="progression-section" style="display: none;">
+                    <div class="lock-stepper-xp">
+                        <span id="xp-value">0 XP</span>
+                        <span class="progression-points" id="xp-available" style="display: none;">
+                            <strong id="available-points">0</strong>pt
+                        </span>
+                    </div>
+                    <div class="lock-stepper-steps">
+                        <div class="lock-step" id="lock-step-rc">
+                            <div class="lock-step-number">1</div>
+                            <div class="lock-step-content">
+                                <div class="lock-step-title">Character</div>
+                                <div class="lock-step-desc">Select race, class & religion</div>
+                            </div>
+                            <button class="btn-small btn-gold lock-step-btn" id="lock-race-class-btn" onclick="lockRaceClass()">Lock</button>
+                        </div>
+                        <div class="lock-step-arrow">→</div>
+                        <div class="lock-step" id="lock-step-attr">
+                            <div class="lock-step-number">2</div>
+                            <div class="lock-step-content">
+                                <div class="lock-step-title">Stats</div>
+                                <div class="lock-step-desc">Distribute 7 points (max 3 each)</div>
+                            </div>
+                            <button class="btn-small btn-gold lock-step-btn" id="lock-attributes-stepper-btn" onclick="lockAttributes()" style="display:none;">Lock</button>
+                        </div>
+                        <div class="lock-step-arrow">→</div>
+                        <div class="lock-step" id="lock-step-abil">
+                            <div class="lock-step-number">3</div>
+                            <div class="lock-step-content">
+                                <div class="lock-step-title">Abilities</div>
+                                <div class="lock-step-desc">Choose spells & abilities</div>
+                            </div>
+                            <button class="btn-small btn-gold lock-step-btn" id="lock-abilities-stepper-btn" onclick="lockAbilities()" style="display:none;">Lock</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -927,6 +977,20 @@
 
                 <h3 style="color: var(--accent-gold); margin-top: 20px; margin-bottom: 10px;">Background</h3>
                 <textarea id="background" placeholder="Enter your character's background story, history, and personality..." rows="6"></textarea>
+            </div>
+
+            <!-- Relationships -->
+            <div class="section collapsible" data-section-id="info-relationships">
+                <h2 class="section-title" style="display: flex; align-items: center; justify-content: space-between;">
+                    <span>Relationships</span>
+                    <div style="display: flex; gap: 6px;">
+                        <button onclick="showRelArchive()" style="font-size: 0.75rem; padding: 4px 10px; background: rgba(100, 100, 100, 0.3); border: 1px solid rgba(150, 150, 150, 0.3); border-radius: 6px; color: var(--text-secondary); cursor: pointer;" title="View archived">Archive</button>
+                        <button class="btn-tiny" onclick="showRelEditModal()" title="Add relationship" style="font-size: 0.85rem; padding: 2px 10px;">+</button>
+                    </div>
+                </h2>
+                <div id="relationships-container">
+                    <p style="color: var(--text-muted); font-style: italic; text-align: center; padding: var(--space-4);">No relationships yet.</p>
+                </div>
             </div>
 
             <!-- Campaign Section -->
@@ -962,7 +1026,7 @@
             <!-- Willpower & Health -->
             <div class="section collapsible" data-section-id="stats-health">
                 <h2 class="section-title">Willpower & Health</h2>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="two-col-grid">
                     <!-- Willpower Slider -->
                     <div class="slider-container">
                         <div class="slider-label">
@@ -983,29 +1047,11 @@
                 </div>
             </div>
 
-            <!-- Attribute Lock Status Bar (only visible when cloud-saved) -->
-            <div class="attr-lock-bar" id="attr-lock-bar" style="display: none;">
-                <!-- When race/class NOT locked -->
-                <div id="attr-lock-msg-need-rc" class="lock-message lock-warning">
-                    🔓 Lock Race & Class first (in Character tab) before distributing points
-                </div>
-                <!-- When race/class locked but attributes NOT locked -->
-                <div id="attr-lock-msg-ready" class="lock-message lock-ready" style="display: none;">
-                    ✓ Distribute your 10 points, then click:
-                    <button class="btn-small btn-gold" id="lock-attributes-btn" onclick="lockAttributes()">🔒 Lock Attributes</button>
-                </div>
-                <!-- When attributes ARE locked -->
-                <div id="attr-lock-msg-locked" class="lock-message lock-done" style="display: none;">
-                    🔒 Attributes locked
-                    <span id="attr-lock-xp-info"></span>
-                </div>
-            </div>
-
             <!-- Race/Class/Religion Bonuses -->
             <div class="section collapsible" data-section-id="stats-bonuses">
                 <h2 class="section-title">Race, Class & Religion Bonuses</h2>
                 <p id="free-points-note" style="color: var(--accent-gold); margin-bottom: 15px; padding: 12px 15px; background: linear-gradient(135deg, rgba(240, 192, 64, 0.15) 0%, rgba(240, 192, 64, 0.05) 100%); border-radius: 8px; border-left: 3px solid var(--accent-gold);">
-                    <strong>Note:</strong> You have <strong>+10 free points</strong> to distribute among your attributes as you wish! No single talent may exceed 5 points at the start.
+                    <strong>Note:</strong> You have <strong>+7 free points</strong> to distribute among your attributes as you wish! No single talent may exceed 3 points at the start.
                 </p>
                 <div class="grid grid-3">
                     <div style="background: linear-gradient(180deg, rgba(59, 158, 255, 0.1) 0%, rgba(59, 158, 255, 0.02) 100%); padding: 15px; border-radius: 8px; border: 1px solid rgba(59, 158, 255, 0.3);">
@@ -1030,8 +1076,7 @@
             </div>
 
             <div class="section collapsible" data-section-id="stats-attributes">
-                <h2 class="section-title">Attributes <span id="attr-locked-badge">🔒 Locked</span></h2>
-                <div id="attributes-progression-msg" class="progression-message" style="display: none;"></div>
+                <h2 class="section-title">Attributes <span id="attr-locked-badge" style="display: none;"></span></h2>
                 <div class="grid grid-2">
                     <!-- Strength -->
                     <div class="attribute-section collapsible" data-attr-id="attr-strength">
@@ -1633,6 +1678,10 @@
                                         <option value="Chakram">Chakram</option>
                                         <option value="Flamberge">Flamberge</option>
                                         <option value="Bone Club">Bone Club</option>
+                                        <option value="Starlight Blade">Starlight Blade</option>
+                                        <option value="Nightdagger">Nightdagger</option>
+                                        <option value="Duskbow">Duskbow</option>
+                                        <option value="Eclipse Staff">Eclipse Staff</option>
                                     </select>
                                 </td>
                                 <td><input type="text" id="weapon_1_atk" placeholder="+X"></td>
@@ -1690,6 +1739,10 @@
                                         <option value="Chakram">Chakram</option>
                                         <option value="Flamberge">Flamberge</option>
                                         <option value="Bone Club">Bone Club</option>
+                                        <option value="Starlight Blade">Starlight Blade</option>
+                                        <option value="Nightdagger">Nightdagger</option>
+                                        <option value="Duskbow">Duskbow</option>
+                                        <option value="Eclipse Staff">Eclipse Staff</option>
                                     </select>
                                 </td>
                                 <td><input type="text" id="weapon_2_atk" placeholder="+X"></td>
@@ -1747,6 +1800,10 @@
                                         <option value="Chakram">Chakram</option>
                                         <option value="Flamberge">Flamberge</option>
                                         <option value="Bone Club">Bone Club</option>
+                                        <option value="Starlight Blade">Starlight Blade</option>
+                                        <option value="Nightdagger">Nightdagger</option>
+                                        <option value="Duskbow">Duskbow</option>
+                                        <option value="Eclipse Staff">Eclipse Staff</option>
                                     </select>
                                 </td>
                                 <td><input type="text" id="weapon_3_atk" placeholder="+X"></td>
@@ -1806,6 +1863,10 @@
                     <option value="Chakram">
                     <option value="Flamberge">
                     <option value="Bone Club">
+                    <option value="Starlight Blade">
+                    <option value="Nightdagger">
+                    <option value="Duskbow">
+                    <option value="Eclipse Staff">
                 </datalist>
             </div>
 
@@ -1829,7 +1890,7 @@
                 <h2 class="section-title" style="color: #ef4444;">Injuries</h2>
                 <div style="padding: 15px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 8px;">
                     <p style="color: var(--text-secondary); margin-bottom: 10px; font-size: 0.9rem;">
-                        If injured you get to use Bonus while Injured (+1D10)
+                        If injured you get to use Bonus while Injured (+1 to rolls)
                     </p>
                     <div class="field-group" style="margin-bottom: 15px;">
                         <label>Injury Details</label>
@@ -1837,7 +1898,7 @@
                     </div>
 
                     <!-- Bleed and Weakened Sliders (side by side) -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="two-col-grid">
                         <!-- Bleed Slider -->
                         <div class="slider-container">
                             <div class="slider-label">
@@ -1865,10 +1926,10 @@
                             <!-- Weakened warning at 6 -->
                             <div id="weakened-warning" style="display: none; margin-top: 10px; padding: 10px; background: rgba(239, 68, 68, 0.2); border: 2px solid #ef4444; border-radius: 5px; color: #fca5a5; font-size: 0.9rem;">
                                 <strong><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Exhausted!</strong><br>
-                                Roll 1D10 + Toughness:<br>
-                                • 1-2: Death<br>
-                                • 3-5: Fainting<br>
-                                • 6-10: Can move but cannot fight
+                                Roll 1D20 + Toughness modifier vs DC 10:<br>
+                                • Nat 1: Death<br>
+                                • Under DC: Fainting<br>
+                                • Meet/beat DC: Can move but cannot fight
                             </div>
                         </div>
                     </div>
@@ -1881,9 +1942,8 @@
             <!-- Spells -->
             <div class="section collapsible" data-section-id="abilities-spells">
                 <h2 class="section-title">Spells & Abilities <span id="abil-locked-badge" class="locked-badge" style="display: none;"></span></h2>
-                <div id="abilities-progression-msg" class="progression-message" style="display: none;"></div>
                 <p style="color: var(--text-secondary); margin-bottom: 10px; font-size: 0.9rem;">
-                    Check: Arkana + 1D10 minimum 1 success
+                    Spells: 1D20 + INT vs spell DC. Abilities: 1D20 + stat vs DC.
                 </p>
                 <div class="table-section">
                     <table>
@@ -2071,9 +2131,9 @@
         <div id="page-tools" class="tab-content">
             <!-- Sub-navigation for Tools -->
             <div class="tools-subnav">
-                <button class="tools-tab active" onclick="switchToolsTab('tools-dice')">🎲 Dice Roller</button>
-                <button class="tools-tab" onclick="switchToolsTab('tools-rules')">📖 Rules</button>
-                <button class="tools-tab" onclick="switchToolsTab('tools-help')">❓ Help</button>
+                <button class="tools-tab active" onclick="switchToolsTab('tools-dice', this)">🎲 Dice Roller</button>
+                <button class="tools-tab" onclick="switchToolsTab('tools-rules', this)">📖 Rules</button>
+                <button class="tools-tab" onclick="switchToolsTab('tools-help', this)">❓ Help</button>
             </div>
 
             <!-- Dice Roller Sub-section -->
@@ -2084,44 +2144,53 @@
                     <div style="margin-bottom: 12px; padding: 12px 15px; background: linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(59, 158, 255, 0.1) 100%); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 8px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                         <label for="roll-mode" style="color: var(--accent-gold); font-size: 0.9rem; font-weight: 600;">Roll Mode:</label>
                         <select id="roll-mode" style="font-size: 0.9rem; padding: 8px 12px; flex: 1; min-width: 200px; border: 1px solid rgba(168, 85, 247, 0.4); background: rgba(10, 10, 15, 0.8);">
-                            <option value="successes">Successes (Ability/Spell Checks)</option>
+                            <option value="d20check">D20 Check (Attack/Skill/Spell)</option>
+                            <option value="damage">Damage Roll</option>
                             <option value="initiative">Initiative (Turn Order)</option>
                             <option value="food-water">Food & Water (Daily Survival)</option>
                             <option value="arrows">Arrows (Post-Battle)</option>
                         </select>
                         <p id="mode-description" style="color: var(--text-secondary); font-style: italic; font-size: 0.8rem; margin: 0; width: 100%;">
-                            Roll D10 per ability point. 5-6 = barely, 7-9 = success, 10 = critical (reroll)
+                            Roll 1D20 + modifier vs DC. Nat 20 = Critical hit! Nat 1 = Auto-miss.
                         </p>
                     </div>
 
-                    <!-- Successes mode: dice sliders -->
-                    <div id="dice-sliders-successes" class="dice-stepper-container">
+                    <!-- D20 Check mode: modifier + DC -->
+                    <div id="dice-d20-check" class="dice-stepper-container">
                         <div class="dice-stepper-item">
-                            <span class="dice-stepper-label">D10</span>
+                            <span class="dice-stepper-label">Modifier</span>
                             <div class="dice-stepper-controls">
-                                <button type="button" class="dice-stepper-btn" onclick="adjustDice('d10', -1)">−</button>
-                                <span id="d10-count" class="dice-stepper-value">0</span>
-                                <button type="button" class="dice-stepper-btn" onclick="adjustDice('d10', 1)">+</button>
+                                <button type="button" class="dice-stepper-btn" onclick="adjustModifier(-1)">−</button>
+                                <input type="number" id="d20-modifier" value="0" min="-10" max="20" style="width: 50px; text-align: center; font-size: 1.1rem; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 4px;">
+                                <button type="button" class="dice-stepper-btn" onclick="adjustModifier(1)">+</button>
                             </div>
-                            <input type="hidden" id="d10-slider" value="0">
                         </div>
                         <div class="dice-stepper-item">
-                            <span class="dice-stepper-label">D12</span>
+                            <span class="dice-stepper-label">DC</span>
                             <div class="dice-stepper-controls">
-                                <button type="button" class="dice-stepper-btn" onclick="adjustDice('d12', -1)">−</button>
-                                <span id="d12-count" class="dice-stepper-value">0</span>
-                                <button type="button" class="dice-stepper-btn" onclick="adjustDice('d12', 1)">+</button>
+                                <button type="button" class="dice-stepper-btn" onclick="adjustDC(-1)">−</button>
+                                <input type="number" id="d20-dc" value="10" min="1" max="30" style="width: 50px; text-align: center; font-size: 1.1rem; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 4px;">
+                                <button type="button" class="dice-stepper-btn" onclick="adjustDC(1)">+</button>
                             </div>
-                            <input type="hidden" id="d12-slider" value="0">
+                        </div>
+                    </div>
+
+                    <!-- Damage roll mode: count + die type -->
+                    <div id="dice-damage-roll" class="dice-stepper-container" style="display: none;">
+                        <div class="dice-stepper-item">
+                            <span class="dice-stepper-label">Dice</span>
+                            <div class="dice-stepper-controls">
+                                <button type="button" class="dice-stepper-btn" onclick="adjustDamageDice(-1)">−</button>
+                                <input type="number" id="damage-dice-count" value="1" min="1" max="10" style="width: 50px; text-align: center; font-size: 1.1rem; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 4px;">
+                                <button type="button" class="dice-stepper-btn" onclick="adjustDamageDice(1)">+</button>
+                            </div>
                         </div>
                         <div class="dice-stepper-item">
-                            <span class="dice-stepper-label">D20</span>
-                            <div class="dice-stepper-controls">
-                                <button type="button" class="dice-stepper-btn" onclick="adjustDice('d20', -1)">−</button>
-                                <span id="d20-count" class="dice-stepper-value">0</span>
-                                <button type="button" class="dice-stepper-btn" onclick="adjustDice('d20', 1)">+</button>
-                            </div>
-                            <input type="hidden" id="d20-slider" value="0">
+                            <span class="dice-stepper-label">Type</span>
+                            <select id="damage-die-type" style="font-size: 1rem; padding: 6px 10px; background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 4px;">
+                                <option value="d6">D6</option>
+                                <option value="d10">D10</option>
+                            </select>
                         </div>
                     </div>
 
@@ -2167,10 +2236,10 @@
                     <div id="dice-results-section" style="display: none; padding: 15px; margin-top: 15px; background: var(--bg-surface); border-radius: 8px;">
                         <div id="success-summary" style="text-align: center; margin-bottom: 15px;">
                             <p style="font-size: 1.3rem; color: var(--accent-gold); margin: 0;">
-                                <strong>Successes: <span id="total-successes">0</span></strong>
+                                <strong>Result: <span id="total-successes">-</span></strong>
                             </p>
-                            <p style="font-size: 1rem; color: var(--accent-blue); margin: 5px 0;">
-                                Barely: <span id="total-barely">0</span>
+                            <p style="font-size: 1rem; color: var(--accent-blue); margin: 5px 0; display: none;">
+                                <span id="total-barely">0</span>
                             </p>
                             <div id="success-breakdown" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 10px;"></div>
                         </div>
@@ -2188,53 +2257,41 @@
 
                         <!-- Core Dice System -->
                         <details class="rules-section" open>
-                            <summary>Core Dice System (D10)</summary>
+                            <summary>Core Dice System (D20)</summary>
                             <div class="rules-content">
-                                <p><strong>Dice Pool:</strong> Points in abilities convert to D10 dice:</p>
-                                <ul>
-                                    <li>1-2 points: 1D10</li>
-                                    <li>3-4 points: 2D10</li>
-                                    <li>5-6 points: 3D10</li>
-                                    <li>7-8 points: 4D10</li>
-                                    <li>9-10 points: 5D10</li>
-                                    <li>11+ points: 6D10</li>
-                                </ul>
-                                <p><strong style="color: #ef4444;">Maximum 8 dice per action</strong> (unless class ability allows more)</p>
-                                <p style="margin-top: 10px;"><strong>Combined Check:</strong> Core Ability + Skill (convert each to dice, max 8 total)</p>
-                                <p><em>Example: Strength 4 (2D10) + Athletics 3 (2D10) = 4D10</em></p>
+                                <p><strong>All checks:</strong> Roll 1D20 + modifier vs DC (Difficulty Class)</p>
+                                <p style="margin-top: 10px;"><strong>Modifier:</strong> Your points = your modifier. 3 points in Acrobatics = +3.</p>
+                                <p style="margin-top: 10px;"><strong>Usually ONE:</strong> DM picks either Attribute or Skill. Only the DM can decide if stacking is allowed.</p>
+                                <p><em>Example: "Jump the ravine" → 1D20 + Acrobatics modifier</em></p>
                             </div>
                         </details>
 
-                        <!-- Success Levels -->
+                        <!-- Critical Hits -->
                         <details class="rules-section">
-                            <summary>Success Levels</summary>
+                            <summary>Critical Hits & Misses</summary>
                             <div class="rules-content">
-                                <p>Each die is evaluated individually:</p>
                                 <ul>
-                                    <li><strong>1-4:</strong> Failure</li>
-                                    <li><strong>5-6:</strong> Barely a success (minimal effect, may have consequences)</li>
-                                    <li><strong>7-9:</strong> Success (full effect)</li>
-                                    <li><strong>10:</strong> Critical success (reroll and add result)</li>
+                                    <li><strong>Natural 20:</strong> Critical hit — always succeeds, double damage dice</li>
+                                    <li><strong>Natural 1:</strong> Auto-miss — always fails, possible backlash (DM decides)</li>
                                 </ul>
-                                <p style="margin-top: 10px;"><strong>Critical (10):</strong> Count as success, reroll the die, add result. If reroll is also 10, chain continues!</p>
-                                <p><em>Example: Roll 10 → reroll 8 = 2 successes + possible critical effect (DM decides)</em></p>
+                                <p style="margin-top: 10px;"><em>Example: Nat 20 with Longsword → roll 2D10 damage instead of 1D10</em></p>
                             </div>
                         </details>
 
                         <!-- Difficulty -->
                         <details class="rules-section">
-                            <summary>Difficulty Levels</summary>
+                            <summary>Difficulty Classes (DC)</summary>
                             <div class="rules-content">
-                                <p>DM sets the number of successes required:</p>
+                                <p>DM sets the DC:</p>
                                 <ul>
-                                    <li><strong>Trivial:</strong> 1 success</li>
-                                    <li><strong>Easy:</strong> 2 successes</li>
-                                    <li><strong>Normal:</strong> 3 successes</li>
-                                    <li><strong>Hard:</strong> 4 successes</li>
-                                    <li><strong>Very Hard:</strong> 5 successes</li>
-                                    <li><strong>Nearly Impossible:</strong> 6+ successes</li>
+                                    <li><strong>Trivial:</strong> DC 5</li>
+                                    <li><strong>Easy:</strong> DC 10</li>
+                                    <li><strong>Normal:</strong> DC 13</li>
+                                    <li><strong>Hard:</strong> DC 16</li>
+                                    <li><strong>Very Hard:</strong> DC 19</li>
+                                    <li><strong>Nearly Impossible:</strong> DC 22</li>
                                 </ul>
-                                <p style="margin-top: 10px;"><strong>Contested Check:</strong> Both parties roll, most successes wins. Tie = DM decides (usually defender wins).</p>
+                                <p style="margin-top: 10px;"><strong>Opposed Check:</strong> Both roll 1D20 + modifier. Highest total wins. Tie = defender wins.</p>
                             </div>
                         </details>
 
@@ -2244,25 +2301,24 @@
                             <div class="rules-content">
                                 <p><strong>Initiative:</strong> Roll D6 (D10 if 6+ participants). Highest goes first.</p>
 
-                                <p style="margin-top: 12px;"><strong>Attack Pool:</strong></p>
-                                <p style="margin-left: 10px;">Core Ability + Weapon Attack Bonus (max 8 dice)</p>
+                                <p style="margin-top: 12px;"><strong>Attack:</strong> 1D20 + Weapon ATK + STR/DEX modifier</p>
                                 <ul style="margin-left: 10px; font-size: 0.9em;">
                                     <li><strong>Strength weapons:</strong> Longsword, axes, clubs, hammers, spears</li>
                                     <li><strong>Dexterity weapons:</strong> Dagger, rapier, bows, light crossbow</li>
                                     <li><strong>Str/Dex choice:</strong> Katana</li>
                                 </ul>
 
-                                <p style="margin-top: 12px;"><strong>Attack Results:</strong></p>
+                                <p style="margin-top: 12px;"><strong>Attack vs Defense (Opposed Roll):</strong></p>
                                 <ul>
-                                    <li><strong>0 successes:</strong> Miss - no damage</li>
-                                    <li><strong>1 success:</strong> Glancing blow - 50% damage</li>
-                                    <li><strong>2+ successes:</strong> Full hit - full damage</li>
-                                    <li><strong>Critical (10):</strong> Extra effect (DM decides)</li>
+                                    <li>Attacker: 1D20 + Weapon ATK + Attribute modifier</li>
+                                    <li>Defender: 1D20 + Defense bonus</li>
+                                    <li>Attacker wins → Roll weapon damage dice → Apply to armor HP</li>
+                                    <li>Nat 20 → Double damage dice</li>
                                 </ul>
 
                                 <p style="margin-top: 12px;"><strong>Damage:</strong> Roll weapon's damage dice (e.g., Longsword = 1D10)</p>
 
-                                <p style="margin-top: 12px;"><strong>Assistance:</strong> Give up your action to grant ally +1D10 on their next roll. Max 1 assist per round.</p>
+                                <p style="margin-top: 12px;"><strong>Assistance:</strong> Give up your action to grant ally +2 on their next roll. Max 1 assist per round.</p>
                             </div>
                         </details>
 
@@ -2270,41 +2326,26 @@
                         <details class="rules-section">
                             <summary>Defense Options</summary>
                             <div class="rules-content">
-                                <p>When attacked, choose <strong>one</strong> reaction:</p>
+                                <p>When attacked, choose <strong>one</strong> reaction (opposed roll vs attacker):</p>
 
-                                <p style="margin-top: 12px;"><strong>Block</strong> (Pool: Strength + Shield Block) - Requires shield</p>
-                                <ul>
-                                    <li><strong>2+ successes:</strong> Full block - Shield HP takes damage (DM rec: 50%)</li>
-                                    <li><strong>1 success:</strong> Partial block - Shield absorbs (Block value), rest goes to Shield HP</li>
-                                    <li><strong>0 successes:</strong> Fail - Armor HP takes damage (DM chooses body part)</li>
-                                </ul>
+                                <p style="margin-top: 12px;"><strong>Dodge</strong> (1D20 + Acrobatics)</p>
+                                <p style="margin-left: 10px; font-size: 0.9em;">Win → No damage. Lose → Full damage to Armor HP.</p>
 
-                                <p style="margin-top: 12px;"><strong>Dodge</strong> (Pool: Agility OR Acrobatics, whichever is higher)</p>
-                                <ul>
-                                    <li><strong>2+ successes:</strong> Full dodge - no damage</li>
-                                    <li><strong>1 success:</strong> Partial dodge - half damage to Armor HP</li>
-                                    <li><strong>0 successes:</strong> Fail - full damage to Armor HP (DM chooses body part)</li>
-                                </ul>
+                                <p style="margin-top: 12px;"><strong>Parry</strong> (1D20 + Weapon ATK + Attribute mod) - Requires weapon</p>
+                                <p style="margin-left: 10px; font-size: 0.9em;">Win → No damage. Lose → Full damage to Armor HP.</p>
 
-                                <p style="margin-top: 12px;"><strong>Parry</strong> (Pool: Weapon Atk Bonus + Strength) - Requires weapon</p>
-                                <ul>
-                                    <li><strong>2+ successes:</strong> Full parry - no damage</li>
-                                    <li><strong>1 success:</strong> Partial parry - half damage to Armor HP</li>
-                                    <li><strong>0 successes:</strong> Fail - full damage to Armor HP (DM chooses body part)</li>
-                                </ul>
+                                <p style="margin-top: 12px;"><strong>Block</strong> (1D20 + Shield Defence) - Requires shield</p>
+                                <p style="margin-left: 10px; font-size: 0.9em;">Win → Shield HP absorbs damage. Lose → Armor HP takes damage.</p>
+                                <p style="margin-left: 10px; font-size: 0.85em; color: var(--text-secondary);">Shield values: Small +1, Wooden +2, Metal +3, Spiked +2, Tower +5</p>
 
-                                <p style="margin-top: 12px;"><strong>Take Hit</strong> (Pool: Toughness + Armor Block)</p>
-                                <ul>
-                                    <li><strong>2+ successes:</strong> Full control - Armor Block absorbs, minimal damage</li>
-                                    <li><strong>1 success:</strong> Partial control - Armor Block absorbs, rest goes to Armor HP</li>
-                                    <li><strong>0 successes:</strong> Fail - full damage to Armor HP (no absorption) + Stun/Knockback</li>
-                                </ul>
+                                <p style="margin-top: 12px;"><strong>Take Hit</strong> (1D20 + Toughness or Armor Bonus)</p>
+                                <p style="margin-left: 10px; font-size: 0.9em;">Win → Armor absorbs, minimal damage. Lose → Full damage + Stun/Knockback.</p>
 
                                 <p style="margin-top: 16px; padding: 10px; background: rgba(168, 85, 247, 0.15); border-radius: 6px;">
                                     <strong style="color: #a855f7;">Special Maneuver:</strong><br>
                                     Want to do something beyond the four options? Tell your DM what you want to do.<br>
-                                    DM decides: which pool to roll, difficulty, and consequences.<br>
-                                    <span style="font-size: 0.9em;"><em>Example: "I want to duck under the sword and roll behind the enemy" → DM may say "Roll Agility + Acrobatics, need 3 successes"</em></span>
+                                    DM decides: which stat, DC, and consequences.<br>
+                                    <span style="font-size: 0.9em;"><em>Example: "I want to duck under the sword and roll behind the enemy" → DM may say "Roll 1D20 + Acrobatics, DC 16"</em></span>
                                 </p>
 
                                 <p style="margin-top: 16px; padding: 10px; background: rgba(239, 68, 68, 0.15); border-radius: 6px;">
@@ -2325,7 +2366,7 @@
                                     <li><strong>Knockback:</strong> Pushed back 1-2 meters, may lose balance</li>
                                     <li><strong>Disarm:</strong> Drop weapon (if hit on hand)</li>
                                     <li><strong>Prone:</strong> Fall to ground (if hit on leg)</li>
-                                    <li><strong>Dazed:</strong> -1D10 on next roll</li>
+                                    <li><strong>Dazed:</strong> -2 on next roll</li>
                                 </ul>
 
                                 <p style="margin-top: 12px;"><strong>Body Parts</strong> (DM chooses for narrative):</p>
@@ -2348,13 +2389,14 @@
 
                                 <p style="margin-top: 12px;"><strong>Casting a Spell:</strong></p>
                                 <ul>
-                                    <li>Roll 1D10 per point in Arcana (Mage) or Nature (Druid)</li>
-                                    <li>Need at least 1 success</li>
-                                    <li>Pay Arcana cost (see spell description)</li>
-                                    <li>Critical success amplifies effect (DM decides)</li>
+                                    <li>Roll 1D20 + Intelligence modifier</li>
+                                    <li>Beat the spell's DC (listed on each spell)</li>
+                                    <li>Pay Arcana cost from your pool</li>
+                                    <li>Nat 20: Critical — double damage dice</li>
                                 </ul>
 
-                                <p style="margin-top: 12px;"><strong>Failed Cast (0 successes):</strong> Spell fizzles, Arcana consumed. DM may add backlash.</p>
+                                <p style="margin-top: 12px;"><strong>Failed Cast (under DC):</strong> Spell fizzles, Arcana still consumed.</p>
+                                <p><strong>Nat 1:</strong> Backlash — DM decides the effect.</p>
 
                                 <p style="margin-top: 12px;"><strong>Changing Spells:</strong> Only in safe areas (town/village). Old spells become inactive, not forgotten.</p>
 
@@ -2370,11 +2412,11 @@
                                 <p>Using melee class abilities costs Weakened.</p>
 
                                 <p style="margin-top: 12px;"><strong>When Weakened = 0:</strong></p>
-                                <p>Roll <strong>1D10 + Toughness</strong>:</p>
+                                <p>Roll <strong>1D20 + Toughness modifier vs DC 10</strong>:</p>
                                 <ul>
-                                    <li><strong>1-2:</strong> Death (total collapse)</li>
-                                    <li><strong>3-5:</strong> Faint (unconscious)</li>
-                                    <li><strong>6-10:</strong> Exhausted (can move but not fight)</li>
+                                    <li><strong>Nat 1:</strong> Death (total collapse)</li>
+                                    <li><strong>Fail:</strong> Faint (unconscious)</li>
+                                    <li><strong>Meet DC:</strong> Exhausted (can move but not fight)</li>
                                 </ul>
 
                                 <p style="margin-top: 12px;"><strong>Recovery:</strong></p>
@@ -2407,18 +2449,18 @@
 
                                 <p style="margin-top: 12px;"><strong>Stopping Bleeding:</strong></p>
                                 <ul>
-                                    <li>Medicine check (1 success per Bleed level)</li>
+                                    <li>Medicine check (1D20 + Medicine vs DC 10 per Bleed level)</li>
                                     <li>Bandage: Stops Bleed 1 automatically</li>
                                     <li>Healing magic: Stops all bleeding</li>
                                 </ul>
 
                                 <p style="margin-top: 12px;"><strong>HP = 0 from Bleeding:</strong></p>
-                                <p>Roll <strong>1D10 + Toughness</strong>:</p>
+                                <p>Roll <strong>1D20 + Toughness modifier vs DC 10</strong>:</p>
                                 <ul>
-                                    <li><strong>1-2:</strong> Death</li>
-                                    <li><strong>3-4:</strong> Barely alive (needs immediate care)</li>
-                                    <li><strong>5-6:</strong> Fainted but stable</li>
-                                    <li><strong>7+:</strong> Conscious but weakened</li>
+                                    <li><strong>Nat 1:</strong> Death</li>
+                                    <li><strong>Fail by 5+:</strong> Barely alive (needs immediate care)</li>
+                                    <li><strong>Fail:</strong> Fainted but stable</li>
+                                    <li><strong>Meet DC:</strong> Conscious but weakened</li>
                                 </ul>
                             </div>
                         </details>
@@ -2428,12 +2470,12 @@
                             <summary>Status Effects</summary>
                             <div class="rules-content">
                                 <ul>
-                                    <li><strong>Poisoned:</strong> -1D10 on all rolls, 1 damage/round</li>
+                                    <li><strong>Poisoned:</strong> -2 on all rolls, 1 damage/round</li>
                                     <li><strong>Stunned:</strong> Cannot act this round</li>
-                                    <li><strong>Blinded:</strong> -2D10 on attacks and perception</li>
-                                    <li><strong>Deafened:</strong> Cannot hear, -1D10 perception</li>
-                                    <li><strong>Frightened:</strong> Cannot approach fear source, -1D10 attacks</li>
-                                    <li><strong>Prone:</strong> -1D10 attacks, enemies get +1D10 in melee</li>
+                                    <li><strong>Blinded:</strong> -4 on attacks and perception</li>
+                                    <li><strong>Deafened:</strong> Cannot hear, -2 perception</li>
+                                    <li><strong>Frightened:</strong> Cannot approach fear source, -2 attacks</li>
+                                    <li><strong>Prone:</strong> -2 attacks, enemies get +2 in melee</li>
                                 </ul>
                             </div>
                         </details>
@@ -2448,17 +2490,17 @@
                                     <li><strong>Long rest (8 hours):</strong> All HP restored, all Weakened restored</li>
                                 </ul>
 
-                                <p style="margin-top: 12px;"><strong>Medicine Check:</strong></p>
+                                <p style="margin-top: 12px;"><strong>Medicine Check (1D20 + Medicine vs DC 10):</strong></p>
                                 <ul>
-                                    <li>1 success: +1D6 HP to patient</li>
-                                    <li>2+ successes: +2D6 HP</li>
-                                    <li>Critical: +3D6 HP</li>
+                                    <li>Meet DC: +1D6 HP to patient</li>
+                                    <li>Beat DC by 5+: +2D6 HP</li>
+                                    <li>Natural 20: +3D6 HP</li>
                                 </ul>
 
                                 <p style="margin-top: 12px;"><strong>Potions:</strong></p>
                                 <ul>
                                     <li><strong>Healing Potion:</strong> +1D10 HP</li>
-                                    <li><strong>Adrenaline:</strong> +2D10 on next action</li>
+                                    <li><strong>Adrenaline:</strong> +3 on next action</li>
                                     <li><strong>Antidote:</strong> Cures Poisoned</li>
                                 </ul>
                             </div>
@@ -2478,8 +2520,8 @@
                                 <p style="margin-top: 12px;"><strong>Without Food/Water:</strong></p>
                                 <ul>
                                     <li>Day 1: No effect</li>
-                                    <li>Day 2: -1D10 on all rolls</li>
-                                    <li>Day 3+: 1 damage/day, -2D10 on all rolls</li>
+                                    <li>Day 2: -2 on all rolls</li>
+                                    <li>Day 3+: 1 damage/day, -4 on all rolls</li>
                                 </ul>
 
                                 <p style="margin-top: 12px;"><strong>Arrows (after combat):</strong> Roll 1D6</p>
@@ -2583,7 +2625,7 @@
                                 <span style="background: var(--accent-gold); color: #000; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem; flex-shrink: 0;">2</span>
                                 <div>
                                     <strong style="color: var(--text-base); font-size: 0.9rem;">Lock Attributes</strong>
-                                    <p style="color: var(--text-secondary); margin: 2px 0 0 0; font-size: 0.8rem;">Distribute 10 points across attributes (max 5 each). Lock to enable Abilities tab.</p>
+                                    <p style="color: var(--text-secondary); margin: 2px 0 0 0; font-size: 0.8rem;">Distribute 7 points across attributes (max 3 each). Lock to enable Abilities tab.</p>
                                 </div>
                             </div>
                             <div style="display: flex; align-items: flex-start; gap: 10px;">
@@ -2729,7 +2771,7 @@
                         <ul style="color: var(--text-secondary); margin: 0; padding-left: 20px; font-size: 0.85rem; line-height: 1.8;">
                             <li>Your DM awards XP during sessions (via DM Session tool)</li>
                             <li>Every <strong>10 XP</strong> = <strong>1 attribute point</strong></li>
-                            <li>Attribute points still have max 5 per attribute</li>
+                            <li>Attribute points still have max 3 per attribute</li>
                             <li>XP shows on your dashboard next to your character name</li>
                         </ul>
                     </div>
@@ -2741,7 +2783,8 @@
                             The dice roller (Tools tab) has 4 modes:
                         </p>
                         <ul style="color: var(--text-secondary); margin: 0; padding-left: 20px; font-size: 0.85rem; line-height: 1.8;">
-                            <li><strong>Successes</strong> - Roll D10s for ability/spell checks (5-6 barely, 7-9 success, 10 critical)</li>
+                            <li><strong>D20 Check</strong> - Roll 1D20 + modifier vs DC for attacks, skills, spells</li>
+                            <li><strong>Damage</strong> - Roll damage dice (D6/D10)</li>
                             <li><strong>Initiative</strong> - Roll single die for turn order</li>
                             <li><strong>Food & Water</strong> - Daily survival rolls</li>
                             <li><strong>Arrows</strong> - Post-battle arrow recovery</li>
@@ -2774,9 +2817,85 @@
             </div>
         </div>
 
+        <!-- Page: AI Chat -->
+        <div id="page-ai" class="tab-content">
+            <div class="ai-chat-container">
+                <!-- Top bar -->
+                <div class="ai-top-bar">
+                    <div class="ai-top-left">
+                        <button class="ai-sidebar-toggle" onclick="toggleAIConversations()" title="Conversations">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        </button>
+                        <select id="ai-model-select" class="ai-model-select" onchange="onModelChange()">
+                            <option value="">Loading models...</option>
+                        </select>
+                    </div>
+                    <div class="ai-top-right">
+                        <span class="ai-credits-display" id="ai-credits-display" title="AI Credits">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v12"/><path d="M15.5 9.5a3 3 0 0 0-7 0 3 3 0 0 0 7 0z"/></svg>
+                            <span id="ai-credits-amount">0</span>
+                        </span>
+                        <button class="ai-buy-btn" onclick="openBuyCredits()">Buy Credits</button>
+                    </div>
+                </div>
+
+                <!-- Conversations sidebar (overlay) -->
+                <div class="ai-sidebar" id="ai-sidebar" style="display:none;">
+                    <div class="ai-sidebar-header">
+                        <h3>Conversations</h3>
+                        <button class="ai-sidebar-close" onclick="toggleAIConversations()">&times;</button>
+                    </div>
+                    <button class="ai-new-conv-btn" onclick="newAIConversation()">+ New Conversation</button>
+                    <div class="ai-conv-list" id="ai-conv-list"></div>
+                </div>
+
+                <!-- Chat area -->
+                <div class="ai-messages" id="ai-messages">
+                    <div class="ai-welcome" id="ai-welcome">
+                        <div class="ai-welcome-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent-purple)" stroke-width="1.5"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1.27A7 7 0 0 1 14 22h-4a7 7 0 0 1-6.73-3H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/><circle cx="10" cy="15" r="1"/><circle cx="14" cy="15" r="1"/></svg>
+                        </div>
+                        <h3>Aedelore AI</h3>
+                        <p>Solo adventures, character help, lore questions, and rules.</p>
+                        <div class="ai-quick-actions">
+                            <button onclick="sendQuickMessage('Start a solo adventure for my character')">Solo Adventure</button>
+                            <button onclick="sendQuickMessage('Help me build my character')">Build Character</button>
+                            <button onclick="sendQuickMessage('What are the combat rules?')">Combat Rules</button>
+                            <button onclick="sendQuickMessage('Tell me about the world of Aedelore')">World Lore</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input area -->
+                <div class="ai-input-area">
+                    <div class="ai-input-wrapper">
+                        <textarea id="ai-input" class="ai-input" placeholder="Type your message..." rows="1" onkeydown="handleAIKeydown(event)" oninput="autoResizeAIInput()"></textarea>
+                        <button class="ai-save-btn" id="ai-save-btn" onclick="saveAIAdventure()" title="Save adventure progress">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        </button>
+                        <button class="ai-send-btn" id="ai-send-btn" onclick="sendAIMessage()" title="Send">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9z"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
         </div><!-- /.app-main -->
     </div><!-- /.app-wrapper -->
+
+    <!-- Buy Credits Modal -->
+    <div id="ai-buy-modal" class="modal-overlay" style="display:none;" onclick="if(event.target === this) closeBuyCredits();">
+        <div class="modal-content" style="max-width: 500px;">
+            <button class="modal-close" onclick="closeBuyCredits()">&times;</button>
+            <h2 style="margin-bottom: 16px; text-align: center;">Buy AI Credits</h2>
+            <p style="color: var(--text-secondary); text-align: center; margin-bottom: 20px; font-size: 0.85rem;">
+                Credits are used for AI conversations. More complex models cost more credits per message.
+            </p>
+            <div class="ai-packages" id="ai-packages"></div>
+        </div>
+    </div>
 
     <!-- Error Logger (load first to catch all errors) -->
     <script src="js/error-logger.js"></script>
@@ -2788,32 +2907,34 @@
     <script src="data/weapons.js"></script>
     <script src="data/armor.js"></script>
     <script src="data/starting-equipment.js"></script>
-    <script src="data/spells.js"></script>
+    <script src="data/spells.js?v=3"></script>
 
     <!-- Load JS Modules -->
     <script src="js/tabs.js"></script>
     <script src="js/sliders.js"></script>
-    <script src="js/spells.js"></script>
+    <script src="js/spells.js?v=2"></script>
     <script src="js/weapons.js"></script>
     <script src="js/armor.js"></script>
-    <script src="js/diceroller.js"></script>
+    <script src="js/diceroller.js?v=2"></script>
     <script src="js/focus-fix.js"></script>
     <script src="js/init.js"></script>
-    <script src="js/dashboard.js"></script>
+    <script src="js/dashboard.js?v=3"></script>
+    <script src="js/ai-chat.js?v=5"></script>
 
     <!-- Main.js Modules (load in order) -->
     <script src="js/modules/core-api.js"></script>
     <script src="js/modules/character-data.js"></script>
     <script src="js/modules/ui-common.js"></script>
-    <script src="js/modules/auth.js"></script>
-    <script src="js/modules/persistence.js"></script>
+    <script src="js/modules/auth.js?v=2"></script>
+    <script src="js/modules/persistence.js?v=5"></script>
     <script src="js/modules/campaigns.js"></script>
-    <script src="js/modules/progression.js"></script>
+    <script src="js/modules/progression.js?v=2"></script>
     <script src="js/modules/onboarding.js"></script>
+    <script src="js/modules/activity-monitor.js"></script>
     <script src="js/main.js"></script>
 
     <!-- Multi-System Support -->
-    <script src="js/systems/system-config.js"></script>
+    <script src="js/systems/system-config.js?v=2"></script>
     <script src="js/systems/dnd5e.js"></script>
     <script src="js/systems/pathfinder2e.js"></script>
     <script src="js/systems/storyteller.js"></script>
@@ -2919,9 +3040,11 @@
 
             // Add check information
             if (checkEl) {
-                if (isConjurer) {
-                    // For spells: Show arcane check
-                    checkEl.textContent = 'Check: Arkana + 1D10 minimum 1 success';
+                if (isConjurer && spell.dc) {
+                    // For spells: Show the spell's specific DC
+                    checkEl.textContent = `DC ${spell.dc} — Roll 1D20 + INT modifier to cast`;
+                } else if (isConjurer) {
+                    checkEl.textContent = 'Roll 1D20 + INT modifier vs spell DC';
                 } else {
                     // For melee abilities: Use check field which contains the check info
                     if (spell.check) {
@@ -2981,10 +3104,10 @@
                         const pointsUsed = typeof getFreePointsUsed === 'function' ? getFreePointsUsed() : 0;
                         if (typeof xpSpendingMode !== 'undefined' && xpSpendingMode) {
                             alert('All available XP points have been distributed.');
-                        } else if (pointsUsed >= 10) {
-                            alert('All 10 free points have been distributed.');
+                        } else if (pointsUsed >= (window.FREE_POINTS_TOTAL || 7)) {
+                            alert(`All ${window.FREE_POINTS_TOTAL || 7} free points have been distributed.`);
                         } else {
-                            alert('Maximum 5 total per attribute at character creation.');
+                            alert('Maximum 3 total per attribute at character creation.');
                         }
                     }
                     return;
@@ -3153,7 +3276,7 @@
             // Reset all equipment fields first
             const fieldsToReset = [
                 'weapon_1_type', 'weapon_2_type',
-                'armor_1_type', 'armor_2_type', 'armor_3_type', 'armor_5_type',
+                'armor_1_type', 'armor_2_type', 'armor_3_type', 'armor_4_type', 'armor_5_type',
                 'shield_type'
             ];
             fieldsToReset.forEach(fieldId => {
@@ -3635,26 +3758,34 @@
             <button class="modal-close" onclick="hideAuthModal()">&times;</button>
             <h2 id="auth-modal-title">Login</h2>
             <div class="modal-form">
-                <div class="field-group">
-                    <label>Username</label>
-                    <input type="text" id="auth-username" placeholder="Enter username">
+                <!-- OIDC login buttons (populated by JS) -->
+                <div id="auth-oidc-section" style="display:none;"></div>
+                <div id="auth-oidc-separator" class="auth-separator" style="display:none;">
+                    <span>or</span>
                 </div>
-                <div class="field-group" id="auth-email-group" style="display: none;">
-                    <label>Email</label>
-                    <input type="email" id="auth-email" placeholder="Enter email">
+                <!-- Local login fields -->
+                <div id="auth-local-section">
+                    <div class="field-group">
+                        <label>Username</label>
+                        <input type="text" id="auth-username" placeholder="Enter username">
+                    </div>
+                    <div class="field-group" id="auth-email-group" style="display: none;">
+                        <label>Email</label>
+                        <input type="email" id="auth-email" placeholder="Enter email">
+                    </div>
+                    <div class="field-group">
+                        <label>Password</label>
+                        <input type="password" id="auth-password" placeholder="Enter password">
+                    </div>
+                    <div class="field-group" id="auth-confirm-group" style="display: none;">
+                        <label>Confirm Password</label>
+                        <input type="password" id="auth-confirm-password" placeholder="Confirm password">
+                    </div>
+                    <p id="auth-error" class="error-text"></p>
+                    <button id="auth-submit-btn" class="modal-submit">Login</button>
+                    <p id="auth-toggle-text" class="toggle-text"></p>
+                    <p id="auth-forgot-text" class="toggle-text"><a href="#" onclick="showForgotPasswordModal(); return false;">Forgot password?</a></p>
                 </div>
-                <div class="field-group">
-                    <label>Password</label>
-                    <input type="password" id="auth-password" placeholder="Enter password">
-                </div>
-                <div class="field-group" id="auth-confirm-group" style="display: none;">
-                    <label>Confirm Password</label>
-                    <input type="password" id="auth-confirm-password" placeholder="Confirm password">
-                </div>
-                <p id="auth-error" class="error-text"></p>
-                <button id="auth-submit-btn" class="modal-submit">Login</button>
-                <p id="auth-toggle-text" class="toggle-text"></p>
-                <p id="auth-forgot-text" class="toggle-text"><a href="#" onclick="showForgotPasswordModal(); return false;">Forgot password?</a></p>
             </div>
         </div>
     </div>
@@ -3715,6 +3846,78 @@
                     <input type="text" id="campaign-share-code" placeholder="Enter code (e.g., A1B2C3D4)" style="text-transform: uppercase;">
                 </div>
                 <button class="modal-submit" onclick="linkCharacterToCampaign()">Link Character</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Relationship Detail Modal -->
+    <div id="rel-detail-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content" style="max-width: 400px;">
+            <button class="modal-close" onclick="hideRelDetailModal()">&times;</button>
+            <h2 id="rel-detail-title" style="color: var(--accent-blue); margin-bottom: 4px;"></h2>
+            <p id="rel-detail-relation" style="color: var(--accent-blue); font-size: 0.85rem; margin-bottom: 12px; opacity: 0.8;"></p>
+            <div id="rel-detail-body" style="margin-bottom: 20px;">
+                <p id="rel-detail-notes" style="color: var(--text-secondary); line-height: 1.6; white-space: pre-wrap;"></p>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button onclick="archiveCurrentRel()" style="padding: 8px 16px; background: rgba(100, 100, 100, 0.3); border: 1px solid rgba(150, 150, 150, 0.3); border-radius: 6px; color: var(--text-secondary); cursor: pointer;">Archive</button>
+                <button onclick="editCurrentRel()" style="padding: 8px 16px; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 6px; color: var(--accent-blue); cursor: pointer;">Edit</button>
+                <button onclick="hideRelDetailModal()" style="padding: 8px 16px; background: var(--primary-green); border: none; border-radius: 6px; color: white; cursor: pointer;">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ability Detail Modal -->
+    <div id="ability-detail-modal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)hideAbilityDetailModal()">
+        <div class="modal-content" style="max-width: 380px;">
+            <button class="modal-close" onclick="hideAbilityDetailModal()">&times;</button>
+            <h2 id="ability-detail-name" style="margin-bottom: 4px;"></h2>
+            <p id="ability-detail-type" style="font-size: 0.8rem; margin-bottom: 16px; opacity: 0.7;"></p>
+            <div id="ability-detail-body" style="margin-bottom: 16px;"></div>
+            <button onclick="hideAbilityDetailModal()" style="width: 100%; padding: 10px; background: var(--bg-surface-hover); border: 1px solid var(--border-default); border-radius: 6px; color: var(--text-base); cursor: pointer;">Close</button>
+        </div>
+    </div>
+
+    <!-- Relationship Edit Modal -->
+    <div id="rel-edit-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content" style="max-width: 400px;">
+            <button class="modal-close" onclick="hideRelEditModal()">&times;</button>
+            <h2 id="rel-edit-title" style="color: var(--accent-blue); margin-bottom: 16px;">Add Relationship</h2>
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                <input type="text" id="rel-edit-name" placeholder="Name" style="width: 100%; padding: 10px 12px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 6px; color: var(--text-base); font-size: 0.95rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <select id="rel-edit-relation-select" onchange="onRelTypeChange()" style="width: 100%; padding: 10px 12px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 6px; color: var(--text-base); font-size: 0.95rem;">
+                        <option value="">-- Type --</option>
+                        <option value="Ally">Ally</option>
+                        <option value="Friend">Friend</option>
+                        <option value="Mentor">Mentor</option>
+                        <option value="Partner">Partner</option>
+                        <option value="Spouse">Spouse</option>
+                        <option value="Family">Family</option>
+                        <option value="Rival">Rival</option>
+                        <option value="Enemy">Enemy</option>
+                        <option value="Neutral">Neutral</option>
+                        <option value="_other">Other...</option>
+                    </select>
+                    <input type="text" id="rel-edit-relation-other" placeholder="Custom type" style="width: 100%; padding: 10px 12px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 6px; color: var(--text-base); font-size: 0.95rem; display: none;">
+                </div>
+                <textarea id="rel-edit-notes" placeholder="Notes" rows="3" style="width: 100%; padding: 10px 12px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 6px; color: var(--text-base); font-size: 0.95rem; resize: vertical;"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button id="rel-edit-delete-btn" onclick="deleteCurrentRel()" style="padding: 8px 16px; background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 6px; color: var(--accent-red); cursor: pointer; margin-right: auto; display: none;">Delete</button>
+                <button onclick="hideRelEditModal()" style="padding: 8px 16px; background: rgba(100, 100, 100, 0.3); border: 1px solid rgba(150, 150, 150, 0.3); border-radius: 6px; color: var(--text-secondary); cursor: pointer;">Cancel</button>
+                <button onclick="saveRelEdit()" style="padding: 8px 16px; background: var(--primary-green); border: none; border-radius: 6px; color: white; cursor: pointer;">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Relationship Archive Modal -->
+    <div id="rel-archive-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content" style="max-width: 500px; max-height: 80vh; overflow-y: auto;">
+            <button class="modal-close" onclick="hideRelArchive()">&times;</button>
+            <h2 style="color: var(--text-muted); margin-bottom: 16px;">Archived Relationships</h2>
+            <div id="rel-archive-content">
+                <p style="color: var(--text-muted); font-style: italic; text-align: center;">No archived relationships.</p>
             </div>
         </div>
     </div>
@@ -3891,16 +4094,71 @@
             }
         }
 
-        // Register service worker
+        // Register service worker with update detection
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/service-worker.js')
                     .then(registration => {
                         console.log('PWA: Service Worker registered', registration.scope);
+
+                        // Check for updates periodically
+                        setInterval(() => registration.update(), 60000);
+
+                        // Detect when new SW is waiting
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    showUpdateNotification();
+                                }
+                            });
+                        });
                     })
                     .catch(error => {
                         console.log('PWA: Service Worker registration failed', error);
                     });
+
+                // Listen for update messages from SW
+                navigator.serviceWorker.addEventListener('message', event => {
+                    if (event.data && event.data.type === 'UPDATE_AVAILABLE') {
+                        showUpdateNotification();
+                    }
+                });
+
+                // Reload when new SW takes control
+                let refreshing = false;
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (!refreshing) {
+                        refreshing = true;
+                        window.location.reload();
+                    }
+                });
+            });
+        }
+
+        function showUpdateNotification() {
+            // Don't show if already visible
+            if (document.getElementById('update-notification')) return;
+
+            const notification = document.createElement('div');
+            notification.id = 'update-notification';
+            notification.innerHTML = `
+                <div style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--bg-elevated); border: 1px solid var(--accent-gold); border-radius: 8px; padding: 12px 20px; display: flex; align-items: center; gap: 12px; z-index: 10000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                    <span style="color: var(--text-primary);">🔄 New version available</span>
+                    <button onclick="updateApp()" style="padding: 6px 12px; background: var(--accent-gold); color: #000; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">Update</button>
+                    <button onclick="this.parentElement.parentElement.remove()" style="padding: 6px 8px; background: transparent; color: var(--text-muted); border: none; cursor: pointer;">✕</button>
+                </div>
+            `;
+            document.body.appendChild(notification);
+        }
+
+        function updateApp() {
+            navigator.serviceWorker.getRegistration().then(reg => {
+                if (reg && reg.waiting) {
+                    reg.waiting.postMessage('skipWaiting');
+                } else {
+                    window.location.reload();
+                }
             });
         }
     </script>
@@ -4008,6 +4266,10 @@
         <div class="mobile-tab-panel-item" onclick="switchTabMobile('page-tools')">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/></svg>
             <span>Tools</span>
+        </div>
+        <div class="mobile-tab-panel-item" id="mobile-tab-ai" onclick="switchTabMobile('page-ai')" style="display:none">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1.27A7 7 0 0 1 14 22h-4a7 7 0 0 1-6.73-3H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/><circle cx="10" cy="15" r="1"/><circle cx="14" cy="15" r="1"/></svg>
+            <span>AI</span>
         </div>
         <div class="mobile-tab-panel-item" onclick="openWikiSearch(); closeMobileTabMenu();">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>

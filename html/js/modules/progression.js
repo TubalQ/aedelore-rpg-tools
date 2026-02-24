@@ -22,8 +22,8 @@ const ALL_ATTRIBUTE_IDS = [
     'force_of_will_deception', 'force_of_will_intimidation', 'force_of_will_performance', 'force_of_will_persuasion'
 ];
 
-const FREE_POINTS_TOTAL = 10;
-const MAX_POINTS_PER_ATTRIBUTE = 5;
+const FREE_POINTS_TOTAL = 7;
+const MAX_POINTS_PER_ATTRIBUTE = 3;
 window.baseAttributeValues = {};
 let xpSpendingMode = false;
 window.attributeTotalAtSpendStart = 0;
@@ -149,6 +149,7 @@ function canAddAttributePoint(fieldId, delta) {
 
 function updatePointsDisplay() {
     updateAttributeBadge();
+    updateStepperState();
 }
 
 // Quest items
@@ -316,79 +317,105 @@ function updateAttributeBadge() {
     const usedPoints = Math.floor(window.characterXPSpent / 10);
     const availableXPPoints = earnedPoints - usedPoints;
 
-    if (!window.raceClassLocked) {
-        badge.style.display = 'inline';
-        badge.innerHTML = '⚠️ Lock Race/Class first';
-    } else if (xpSpendingMode) {
+    if (xpSpendingMode) {
         const currentTotal = getCurrentAttributeTotal();
         const pointsAdded = currentTotal - window.attributeTotalAtSpendStart;
         badge.style.display = 'inline';
-        badge.innerHTML = `✨ <strong>${pointsAdded}/${xpPointsAvailableAtSpendStart}</strong> pt <button class="btn-tiny btn-gold" onclick="lockAttributes()">🔒 Lock</button>`;
-    } else if (!window.attributesLocked) {
-        const pointsUsed = getFreePointsUsed();
-        badge.style.display = 'inline';
-        badge.innerHTML = `✓ <strong>${pointsUsed}/${FREE_POINTS_TOTAL}</strong> pts <button class="btn-tiny btn-gold" onclick="lockAttributes()">🔒 Lock</button>`;
-    } else {
+        badge.innerHTML = `<strong>${pointsAdded}/${xpPointsAvailableAtSpendStart}</strong> pt`;
+        badge.style.color = 'var(--accent-gold)';
+    } else if (window.attributesLocked) {
         badge.style.display = 'inline';
         if (availableXPPoints > 0) {
-            badge.innerHTML = `🔒 <strong>${availableXPPoints}</strong> pt <button class="btn-tiny btn-gold" onclick="spendAttributePoint()">✨ Spend</button>`;
+            badge.innerHTML = `<strong>${availableXPPoints}</strong> pt <button class="btn-tiny btn-gold" onclick="spendAttributePoint()">Spend</button>`;
+            badge.style.color = 'var(--accent-gold)';
         } else {
-            badge.innerHTML = '🔒 Locked';
+            badge.innerHTML = 'Locked';
+            badge.style.color = 'var(--accent-green)';
         }
+    } else {
+        badge.style.display = 'none';
     }
 }
 
 function updateAbilitiesBadge() {
     const badge = document.getElementById('abil-locked-badge');
-    const progressMsg = document.getElementById('abilities-progression-msg');
+    if (!badge) return;
 
     if (!window.currentCharacterId || !window.authToken) {
-        if (badge) badge.style.display = 'none';
-        if (progressMsg) progressMsg.style.display = 'none';
+        badge.style.display = 'none';
         return;
     }
 
-    if (!window.raceClassLocked) {
-        if (badge) { badge.style.display = 'inline'; badge.innerHTML = '⚠️ Lock Race/Class first'; }
-        if (progressMsg) { progressMsg.style.display = 'block'; progressMsg.innerHTML = '📋 <strong>Step 1:</strong> Go to Character tab, select race and class, then lock.'; }
-    } else if (!window.attributesLocked && !xpSpendingMode) {
-        if (badge) { badge.style.display = 'inline'; badge.innerHTML = '⚠️ Lock Attributes first'; }
-        if (progressMsg) { progressMsg.style.display = 'block'; progressMsg.innerHTML = '📋 <strong>Step 2:</strong> Go to Attributes tab, distribute 10 points, then lock.'; }
-    } else if (xpSpendingMode) {
-        if (badge) { badge.style.display = 'inline'; badge.innerHTML = '⚠️ Finish spending points'; }
-        if (progressMsg) progressMsg.style.display = 'none';
-    } else if (!window.abilitiesLocked) {
-        if (badge) { badge.style.display = 'inline'; badge.innerHTML = `<button class="btn-tiny btn-gold" onclick="lockAbilities()">🔒 Lock Abilities</button>`; }
-        if (progressMsg) { progressMsg.style.display = 'block'; progressMsg.innerHTML = '📋 <strong>Step 3:</strong> Select your abilities below, then lock to complete.'; }
+    if (window.abilitiesLocked) {
+        badge.style.display = 'inline';
+        badge.innerHTML = 'Locked';
+        badge.style.color = 'var(--accent-green)';
     } else {
-        if (badge) { badge.style.display = 'inline'; badge.innerHTML = '🔒 Locked'; }
-        if (progressMsg) { progressMsg.style.display = 'block'; progressMsg.innerHTML = '✅ <strong>Complete!</strong> All locked.'; }
+        badge.style.display = 'none';
     }
 }
 
-function updateAttributesProgressionMsg() {
-    const progressMsg = document.getElementById('attributes-progression-msg');
-    if (!window.currentCharacterId || !window.authToken) {
-        if (progressMsg) progressMsg.style.display = 'none';
-        return;
+function updateStepperState() {
+    const stepRC = document.getElementById('lock-step-rc');
+    const stepAttr = document.getElementById('lock-step-attr');
+    const stepAbil = document.getElementById('lock-step-abil');
+    const btnRC = document.getElementById('lock-race-class-btn');
+    const btnAttr = document.getElementById('lock-attributes-stepper-btn');
+    const btnAbil = document.getElementById('lock-abilities-stepper-btn');
+    const descAttr = stepAttr ? stepAttr.querySelector('.lock-step-desc') : null;
+    const descAbil = stepAbil ? stepAbil.querySelector('.lock-step-desc') : null;
+    if (!stepRC) return;
+
+    // Step 1: Race/Class
+    if (window.raceClassLocked) {
+        stepRC.className = 'lock-step completed';
+        btnRC.style.display = 'none';
+    } else {
+        stepRC.className = 'lock-step active';
+        btnRC.style.display = '';
     }
 
+    // Step 2: Attributes
     if (!window.raceClassLocked) {
-        if (progressMsg) { progressMsg.style.display = 'block'; progressMsg.innerHTML = '📋 <strong>Step 1:</strong> Go to Character tab, select race and class, then lock.'; }
-    } else if (!window.attributesLocked && !xpSpendingMode) {
-        if (progressMsg) { progressMsg.style.display = 'block'; progressMsg.innerHTML = '📋 <strong>Step 2:</strong> Distribute your 10 points below, then lock.'; }
+        stepAttr.className = 'lock-step waiting';
+        btnAttr.style.display = 'none';
+        if (descAttr) descAttr.textContent = 'Distribute 7 points (max 3 each)';
+    } else if (window.attributesLocked && !xpSpendingMode) {
+        stepAttr.className = 'lock-step completed';
+        btnAttr.style.display = 'none';
+        if (descAttr) descAttr.textContent = 'Distribute 7 points (max 3 each)';
+    } else if (xpSpendingMode) {
+        stepAttr.className = 'lock-step active';
+        btnAttr.style.display = '';
+        const currentTotal = getCurrentAttributeTotal();
+        const pointsAdded = currentTotal - window.attributeTotalAtSpendStart;
+        if (descAttr) descAttr.textContent = `Spending XP: ${pointsAdded}/${xpPointsAvailableAtSpendStart} points placed`;
     } else {
-        if (progressMsg) progressMsg.style.display = 'none';
+        // raceClassLocked, !attributesLocked, !xpSpending → initial distribution
+        stepAttr.className = 'lock-step active';
+        btnAttr.style.display = '';
+        const pointsUsed = getFreePointsUsed();
+        if (descAttr) descAttr.textContent = `Distribute points: ${pointsUsed}/${FREE_POINTS_TOTAL} used`;
+    }
+
+    // Step 3: Abilities
+    if (!window.attributesLocked || xpSpendingMode) {
+        stepAbil.className = 'lock-step waiting';
+        btnAbil.style.display = 'none';
+    } else if (window.abilitiesLocked) {
+        stepAbil.className = 'lock-step completed';
+        btnAbil.style.display = 'none';
+    } else {
+        stepAbil.className = 'lock-step active';
+        btnAbil.style.display = '';
     }
 }
 
 function updateProgressionSection() {
     const section = document.getElementById('progression-section');
-    const attrLockBar = document.getElementById('attr-lock-bar');
 
     if (!window.currentCharacterId || !window.authToken) {
         if (section) section.style.display = 'none';
-        if (attrLockBar) attrLockBar.style.display = 'none';
         return;
     }
 
@@ -414,22 +441,9 @@ function updateProgressionSection() {
         }
     }
 
-    const raceClassIcon = document.getElementById('lock-rc-icon');
-    const attrIcon = document.getElementById('lock-attr-icon');
-    const abilIcon = document.getElementById('lock-abil-icon');
-
-    if (raceClassIcon) raceClassIcon.textContent = window.raceClassLocked ? '🔒' : '🔓';
-    if (attrIcon) attrIcon.textContent = window.attributesLocked ? '🔒' : '🔓';
-    if (abilIcon) abilIcon.textContent = window.abilitiesLocked ? '🔒' : '🔓';
-
-    const lockRaceBtn = document.getElementById('lock-race-class-btn');
-    if (lockRaceBtn) lockRaceBtn.style.display = window.raceClassLocked ? 'none' : 'inline-flex';
-
-    if (attrLockBar) attrLockBar.style.display = 'none';
-
+    updateStepperState();
     updateAttributeBadge();
     updateAbilitiesBadge();
-    updateAttributesProgressionMsg();
 
     const freePointsNote = document.getElementById('free-points-note');
     if (freePointsNote) {
@@ -548,7 +562,7 @@ async function lockAttributes() {
     } else {
         const pointsUsed = getFreePointsUsed();
         if (pointsUsed < FREE_POINTS_TOTAL) {
-            alert(`You still have ${FREE_POINTS_TOTAL - pointsUsed} points to distribute. Use all 10 points before locking.`);
+            alert(`You still have ${FREE_POINTS_TOTAL - pointsUsed} points to distribute. Use all ${FREE_POINTS_TOTAL} points before locking.`);
             return;
         }
         if (pointsUsed > FREE_POINTS_TOTAL) {
@@ -690,7 +704,7 @@ window.hideQuestArchive = hideQuestArchive;
 window.unarchiveQuestItem = unarchiveQuestItem;
 window.updateAttributeBadge = updateAttributeBadge;
 window.updateAbilitiesBadge = updateAbilitiesBadge;
-window.updateAttributesProgressionMsg = updateAttributesProgressionMsg;
+window.updateStepperState = updateStepperState;
 window.updateProgressionSection = updateProgressionSection;
 window.applyLockState = applyLockState;
 window.lockRaceClass = lockRaceClass;
