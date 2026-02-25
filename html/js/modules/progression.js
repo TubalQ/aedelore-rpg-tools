@@ -207,7 +207,7 @@ async function archiveCurrentQuestItem() {
     if (index === null || index === undefined) return;
 
     if (!window.currentCharacterId || !window.authToken) {
-        alert('Please save character to cloud first');
+        showToast('Please save character to cloud first', 'warning');
         return;
     }
 
@@ -224,11 +224,11 @@ async function archiveCurrentQuestItem() {
             renderQuestItems(window._questItems);
             hideQuestItemModal();
         } else {
-            alert('Failed to archive: ' + (data.error || 'Unknown error'));
+            showToast('Failed to archive: ' + (data.error || 'Unknown error'), 'error');
         }
     } catch (error) {
         console.error('Archive error:', error);
-        alert('Failed to archive item');
+        showToast('Failed to archive item', 'error');
     }
 }
 
@@ -279,7 +279,7 @@ function hideQuestArchive() {
 
 async function unarchiveQuestItem(archiveIndex) {
     if (!window.currentCharacterId || !window.authToken) {
-        alert('Please save character to cloud first');
+        showToast('Please save character to cloud first', 'warning');
         return;
     }
 
@@ -296,11 +296,11 @@ async function unarchiveQuestItem(archiveIndex) {
             renderQuestItems(window._questItems);
             showQuestArchive();
         } else {
-            alert('Failed to restore: ' + (data.error || 'Unknown error'));
+            showToast('Failed to restore: ' + (data.error || 'Unknown error'), 'error');
         }
     } catch (error) {
         console.error('Unarchive error:', error);
-        alert('Failed to restore item');
+        showToast('Failed to restore item', 'error');
     }
 }
 
@@ -505,7 +505,7 @@ function applyLockState() {
 
 async function lockRaceClass() {
     if (!window.currentCharacterId || !window.authToken) {
-        alert('You must save your character to cloud first.');
+        showToast('You must save your character to cloud first.', 'warning');
         return;
     }
 
@@ -513,11 +513,11 @@ async function lockRaceClass() {
     const classSelect = document.getElementById('class');
 
     if (!raceSelect?.value || !classSelect?.value) {
-        alert('You must select race and class before locking.');
+        showToast('You must select race and class before locking.', 'warning');
         return;
     }
 
-    if (!confirm('Are you sure you want to lock race and class? Only your DM can unlock this.')) {
+    if (!await showConfirm('Are you sure you want to lock race and class? Only your DM can unlock this.', { confirmText: 'Lock', danger: false })) {
         return;
     }
 
@@ -528,7 +528,7 @@ async function lockRaceClass() {
 
         if (!res.ok) {
             const data = await res.json();
-            alert(`❌ ${data.error || 'Could not lock race/class'}`);
+            showToast(data.error || 'Could not lock race/class', 'error');
             return;
         }
 
@@ -536,20 +536,20 @@ async function lockRaceClass() {
         window.baseAttributeValues = calculateBaseAttributeValues();
         updateProgressionSection();
         updatePointsDisplay();
-        alert('✅ Race and class locked. You can now distribute your ' + FREE_POINTS_TOTAL + ' attribute points.');
+        showToast('Race and class locked. You can now distribute your ' + FREE_POINTS_TOTAL + ' attribute points.', 'success');
     } catch (error) {
-        alert('❌ Connection error. Please try again.');
+        showToast('Connection error. Please try again.', 'error');
     }
 }
 
 async function lockAttributes() {
     if (!window.currentCharacterId || !window.authToken) {
-        alert('You must save your character to cloud first.');
+        showToast('You must save your character to cloud first.', 'warning');
         return;
     }
 
     if (!window.raceClassLocked) {
-        alert('You must lock race and class first.');
+        showToast('You must lock race and class first.', 'warning');
         return;
     }
 
@@ -558,26 +558,26 @@ async function lockAttributes() {
 
     if (xpSpendingMode) {
         if (pointsAdded < 1) {
-            alert('You must add at least 1 point to an attribute before locking.');
+            showToast('You must add at least 1 point to an attribute before locking.', 'warning');
             return;
         }
         if (pointsAdded > xpPointsAvailableAtSpendStart) {
-            alert(`You can only add ${xpPointsAvailableAtSpendStart} points. Please remove ${pointsAdded - xpPointsAvailableAtSpendStart} points.`);
+            showToast(`You can only add ${xpPointsAvailableAtSpendStart} points. Please remove ${pointsAdded - xpPointsAvailableAtSpendStart} points.`, 'warning');
             return;
         }
     } else {
         const pointsUsed = getFreePointsUsed();
         if (pointsUsed < FREE_POINTS_TOTAL) {
-            alert(`You still have ${FREE_POINTS_TOTAL - pointsUsed} points to distribute. Use all ${FREE_POINTS_TOTAL} points before locking.`);
+            showToast(`You still have ${FREE_POINTS_TOTAL - pointsUsed} points to distribute. Use all ${FREE_POINTS_TOTAL} points before locking.`, 'warning');
             return;
         }
         if (pointsUsed > FREE_POINTS_TOTAL) {
-            alert(`You have distributed ${pointsUsed} points, but only ${FREE_POINTS_TOTAL} are allowed. Please remove ${pointsUsed - FREE_POINTS_TOTAL} points.`);
+            showToast(`You have distributed ${pointsUsed} points, but only ${FREE_POINTS_TOTAL} are allowed. Please remove ${pointsUsed - FREE_POINTS_TOTAL} points.`, 'warning');
             return;
         }
     }
 
-    if (!confirm('Are you sure you want to lock attributes? Only your DM can unlock this.')) {
+    if (!await showConfirm('Are you sure you want to lock attributes? Only your DM can unlock this.', { confirmText: 'Lock', danger: false })) {
         return;
     }
 
@@ -593,7 +593,7 @@ async function lockAttributes() {
 
             if (!spendRes.ok) {
                 const data = await spendRes.json();
-                alert(`❌ ${data.error || 'Could not spend XP'}`);
+                showToast(data.error || 'Could not spend XP', 'error');
                 return;
             }
 
@@ -607,7 +607,7 @@ async function lockAttributes() {
 
         if (!res.ok) {
             const data = await res.json();
-            alert(`❌ ${data.error || 'Could not lock attributes'}`);
+            showToast(data.error || 'Could not lock attributes', 'error');
             return;
         }
 
@@ -615,30 +615,30 @@ async function lockAttributes() {
         xpSpendingMode = false;
         xpPointsAvailableAtSpendStart = 0;
         updateProgressionSection();
-        alert('✅ Attributes locked!');
+        showToast('Attributes locked!', 'success');
     } catch (error) {
         console.error('Lock attributes error:', error);
-        alert(`❌ Error: ${error.name}: ${error.message}`);
+        showToast(`Error: ${error.name}: ${error.message}`, 'error');
     }
 }
 
 async function lockAbilities() {
     if (!window.currentCharacterId || !window.authToken) {
-        alert('You must save your character to cloud first.');
+        showToast('You must save your character to cloud first.', 'warning');
         return;
     }
 
     if (!window.raceClassLocked) {
-        alert('You must lock race and class first.');
+        showToast('You must lock race and class first.', 'warning');
         return;
     }
 
     if (!window.attributesLocked) {
-        alert('You must lock attributes first.');
+        showToast('You must lock attributes first.', 'warning');
         return;
     }
 
-    if (!confirm('Are you sure you want to lock abilities? Only your DM can unlock this.')) {
+    if (!await showConfirm('Are you sure you want to lock abilities? Only your DM can unlock this.', { confirmText: 'Lock', danger: false })) {
         return;
     }
 
@@ -652,27 +652,27 @@ async function lockAbilities() {
 
         if (!res.ok) {
             const data = await res.json();
-            alert(`❌ ${data.error || 'Could not lock abilities'}`);
+            showToast(data.error || 'Could not lock abilities', 'error');
             return;
         }
 
         window.abilitiesLocked = true;
         updateProgressionSection();
-        alert('✅ Abilities locked! Character creation complete.');
+        showToast('Abilities locked! Character creation complete.', 'success');
     } catch (error) {
         console.error('Lock abilities error:', error);
-        alert(`❌ Error: ${error.name}: ${error.message}`);
+        showToast(`Error: ${error.name}: ${error.message}`, 'error');
     }
 }
 
 function spendAttributePoint() {
     if (!window.currentCharacterId || !window.authToken) {
-        alert('You must save your character to cloud first.');
+        showToast('You must save your character to cloud first.', 'warning');
         return;
     }
 
     if (!window.attributesLocked) {
-        alert('Attributes must be locked before spending XP points.');
+        showToast('Attributes must be locked before spending XP points.', 'warning');
         return;
     }
 
@@ -681,7 +681,7 @@ function spendAttributePoint() {
     const availablePoints = earnedPoints - usedPoints;
 
     if (availablePoints <= 0) {
-        alert('You have no attribute points to spend.');
+        showToast('You have no attribute points to spend.', 'warning');
         return;
     }
 

@@ -1433,7 +1433,7 @@ function rollCoDAttribute(attrId) {
 
 // Spend willpower
 function codSpendWillpower() {
-    alert('Willpower spent!\n\n+3 dice to your next roll.\n\n(Track spent WP manually in the Combat tab)');
+    showToast('Willpower spent! +3 dice to your next roll.', 'success');
 }
 
 // Set up overview listeners

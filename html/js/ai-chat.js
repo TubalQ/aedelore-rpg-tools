@@ -71,6 +71,8 @@ function saveAIAdventure() {
         showAIError('No active conversation to save');
         return;
     }
+    const saveBtn = document.getElementById('ai-save-btn');
+    if (saveBtn) saveBtn.disabled = true;
     doSendMessage('[SAVE] Save all progress from this adventure. Use the save_adventure_progress tool to store a summary of everything that happened, all NPCs we met, key events, and turning points. Include where my character currently is.');
 }
 
@@ -89,16 +91,23 @@ async function doSendMessage(message) {
     const welcome = document.getElementById('ai-welcome');
     if (welcome) welcome.style.display = 'none';
 
+    // Show friendly text for internal commands
+    const displayMessage = message.startsWith('[SAVE]') ? 'Saving adventure progress...' : message;
+
     // Add user message to UI
-    appendMessage('user', message);
+    appendMessage('user', displayMessage);
 
     // Prepare the assistant message container
     const assistantEl = appendMessage('assistant', '');
     const contentEl = assistantEl.querySelector('.ai-msg-content');
 
-    // Disable send button
+    // Switch send button to stop mode
     const sendBtn = document.getElementById('ai-send-btn');
-    if (sendBtn) sendBtn.disabled = true;
+    if (sendBtn) {
+        sendBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>';
+        sendBtn.classList.add('ai-stop-mode');
+        sendBtn.onclick = () => { if (aiAbortController) aiAbortController.abort(); };
+    }
 
     // Get character ID from the current character
     const characterId = window.currentCharacterId || null;
@@ -129,7 +138,11 @@ async function doSendMessage(message) {
                 contentEl.textContent = `Error: ${err.error || 'Unknown error'}`;
             }
             aiIsStreaming = false;
-            if (sendBtn) sendBtn.disabled = false;
+            if (sendBtn) {
+                sendBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>';
+                sendBtn.classList.remove('ai-stop-mode');
+                sendBtn.onclick = sendAIMessage;
+            }
             return;
         }
 
@@ -197,7 +210,13 @@ async function doSendMessage(message) {
     } finally {
         aiIsStreaming = false;
         aiAbortController = null;
-        if (sendBtn) sendBtn.disabled = false;
+        if (sendBtn) {
+            sendBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>';
+            sendBtn.classList.remove('ai-stop-mode');
+            sendBtn.onclick = sendAIMessage;
+        }
+        const saveBtn = document.getElementById('ai-save-btn');
+        if (saveBtn) saveBtn.disabled = false;
         scrollAIToBottom();
     }
 }
@@ -276,17 +295,32 @@ function updateToolCard(parentEl, toolName, result) {
                 }
                 card.appendChild(resultEl);
             }
+
+            // Show summary for character-modifying tools
+            if (['update_hp', 'update_equipment_hp', 'update_inventory', 'equip_weapon', 'equip_armor', 'give_xp', 'give_item', 'remove_item', 'add_notes', 'update_relationships', 'save_adventure_progress'].includes(toolName) && result) {
+                const resultEl = document.createElement('div');
+                resultEl.className = 'ai-tool-result';
+                const msg = result.message || result.error || '';
+                if (msg) resultEl.textContent = msg;
+                else resultEl.textContent = 'Done';
+                card.appendChild(resultEl);
+            }
             break;
         }
     }
 }
 
 function collapseToolCards(parentEl) {
-    const keepVisible = ['roll_dice'];
+    const keepExpanded = ['roll_dice'];
     const cards = parentEl.querySelectorAll('.ai-tool-card');
     for (const card of cards) {
-        if (keepVisible.includes(card.dataset.toolName)) continue;
-        card.classList.add('ai-tool-collapsed');
+        if (keepExpanded.includes(card.dataset.toolName)) continue;
+        // If the card has a result, collapse to just the header + result
+        if (card.querySelector('.ai-tool-result')) {
+            card.classList.add('ai-tool-compact');
+        } else {
+            card.classList.add('ai-tool-collapsed');
+        }
     }
 }
 
@@ -451,7 +485,7 @@ async function newAIConversation() {
 }
 
 async function deleteAIConversation(id) {
-    if (!confirm('Delete this conversation?')) return;
+    if (!await showConfirm('Delete this conversation?', { confirmText: 'Delete', danger: true })) return;
     try {
         await fetch(`/api/ai/conversations/${id}`, {
             method: 'DELETE',
@@ -509,7 +543,7 @@ async function buyPackage(packageId) {
         });
         if (!res.ok) {
             const err = await res.json().catch(() => ({}));
-            alert(err.error || 'Payment error');
+            showToast(err.error || 'Payment error', 'error');
             return;
         }
         const data = await res.json();
@@ -517,7 +551,7 @@ async function buyPackage(packageId) {
             window.location.href = data.url;
         }
     } catch (e) {
-        alert('Payment service error');
+        showToast('Payment service error', 'error');
     }
 }
 

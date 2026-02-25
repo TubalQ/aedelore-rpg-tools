@@ -268,7 +268,7 @@ async function apiRequest(method, endpoint, data = null) {
 // Show status message
 function showStatus(message, isError = false) {
     const el = document.getElementById('status-message');
-    el.innerHTML = `<div class="status ${isError ? 'status-error' : 'status-success'}">${message}</div>`;
+    el.innerHTML = `<div class="status ${isError ? 'status-error' : 'status-success'}">${escapeHtml(message)}</div>`;
     setTimeout(() => { el.innerHTML = ''; }, 5000);
 }
 
@@ -519,7 +519,7 @@ async function saveBook() {
 }
 
 async function deleteBook(id, title) {
-    if (!confirm(`Delete "${title}"? This will also delete all chapters and pages in this book.`)) {
+    if (!await showConfirm(`Delete "${title}"? This will also delete all chapters and pages in this book.`, { confirmText: 'Delete', danger: true })) {
         return;
     }
 
@@ -595,7 +595,7 @@ async function saveChapter() {
 }
 
 async function deleteChapter(id, title) {
-    if (!confirm(`Delete "${title}"? Pages in this chapter will become standalone pages.`)) {
+    if (!await showConfirm(`Delete "${title}"? Pages in this chapter will become standalone pages.`, { confirmText: 'Delete', danger: true })) {
         return;
     }
 
@@ -702,7 +702,7 @@ async function savePage() {
 }
 
 async function deletePage(id, title) {
-    if (!confirm(`Delete "${title}"?`)) {
+    if (!await showConfirm(`Delete "${title}"?`, { confirmText: 'Delete', danger: true })) {
         return;
     }
 
@@ -759,7 +759,7 @@ async function importData() {
         document.getElementById('import-json').value = '';
         await loadBooks();
     } catch (error) {
-        resultContainer.innerHTML = `<div class="status status-error">Import failed: ${error.message}</div>`;
+        resultContainer.innerHTML = `<div class="status status-error">Import failed: ${escapeHtml(error.message)}</div>`;
     }
 }
 

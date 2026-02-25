@@ -1249,40 +1249,33 @@ function pfRefocus() {
         if (current < max) {
             focusInput.value = Math.min(max, current + 1);
             updatePFOverview();
-            alert('Refocus: Regained 1 Focus Point.\n\nYou can Refocus during exploration by spending 10 minutes.');
+            showToast('Refocus: Regained 1 Focus Point. You can Refocus during exploration by spending 10 minutes.', 'success');
         } else {
-            alert('Focus Pool is already full!');
+            showToast('Focus Pool is already full!', 'warning');
         }
     } else {
-        alert('No Focus Pool set up.\n\nAdd Focus Points in the Combat tab if your class uses them.');
+        showToast('No Focus Pool set up. Add Focus Points in the Combat tab if your class uses them.', 'warning');
     }
 }
 
 // Treat Wounds
 function pfTreatWounds() {
-    alert('Treat Wounds (Medicine check):\n\n' +
-          '• DC 15: Heal 2d8\n' +
-          '• DC 20 (Expert): Heal 2d8+10\n' +
-          '• DC 30 (Master): Heal 2d8+30\n' +
-          '• DC 40 (Legendary): Heal 2d8+50\n\n' +
-          'Critical Success: Double healing\n' +
-          'Critical Failure: Deal 1d8 damage\n\n' +
-          'Takes 10 minutes. Target is immune for 1 hour.');
+    showToast('Treat Wounds (Medicine): DC 15 = 2d8, DC 20 = 2d8+10, DC 30 = 2d8+30, DC 40 = 2d8+50. Crit success doubles healing, crit fail deals 1d8 damage. Takes 10 min, target immune 1 hour.', 'info');
 }
 
 // Rest
-function pfRest() {
+async function pfRest() {
     const hpMax = document.getElementById('pf_hp_max')?.value || '10';
     const hpInput = document.getElementById('pf_hp_current');
     const focusInput = document.getElementById('pf_focus_current');
     const focusMax = document.getElementById('pf_focus_max')?.value || '0';
 
-    if (confirm('Take a full 8-hour rest?\n\n• Regain all HP\n• Regain all Focus Points\n• Regain all spell slots')) {
+    if (await showConfirm('Take a full 8-hour rest?\n\nRegain all HP, all Focus Points, and all spell slots.', { confirmText: 'Rest' })) {
         if (hpInput) hpInput.value = hpMax;
         if (focusInput && parseInt(focusMax) > 0) focusInput.value = focusMax;
 
         updatePFOverview();
-        alert('Rest complete!\n\nHP and Focus Points restored.');
+        showToast('Rest complete! HP and Focus Points restored.', 'success');
     }
 }
 

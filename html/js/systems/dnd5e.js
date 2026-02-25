@@ -1247,7 +1247,7 @@ function rollDnDDeathSave() {
         }
 
         updateDnDOverview();
-        alert(`Death Save: Natural 20!\n\nYou regain 1 HP and wake up!`);
+        showToast('Death Save: Natural 20! You regain 1 HP and wake up!', 'success');
         return;
     }
 
@@ -1271,9 +1271,9 @@ function rollDnDDeathSave() {
         }
 
         if (totalFails >= 3) {
-            alert(`Death Save: Natural 1! (2 failures)\n\nRoll: ${roll}\n\n💀 You have died.`);
+            showToast(`Death Save: Natural 1! (2 failures) Roll: ${roll} — You have died.`, 'error');
         } else {
-            alert(`Death Save: Natural 1! (2 failures)\n\nRoll: ${roll}\nTotal failures: ${totalFails}/3`);
+            showToast(`Death Save: Natural 1! (2 failures) Roll: ${roll} — Total failures: ${totalFails}/3`, 'error');
         }
         return;
     }
@@ -1298,9 +1298,9 @@ function rollDnDDeathSave() {
         }
 
         if (totalSuccesses >= 3) {
-            alert(`Death Save: Success!\n\nRoll: ${roll}\n\n🛡️ You are stabilized!`);
+            showToast(`Death Save: Success! Roll: ${roll} — You are stabilized!`, 'success');
         } else {
-            alert(`Death Save: Success!\n\nRoll: ${roll}\nTotal successes: ${totalSuccesses}/3`);
+            showToast(`Death Save: Success! Roll: ${roll} — Total successes: ${totalSuccesses}/3`, 'success');
         }
     } else {
         // Add a failure
@@ -1321,26 +1321,26 @@ function rollDnDDeathSave() {
         }
 
         if (totalFails >= 3) {
-            alert(`Death Save: Failure\n\nRoll: ${roll}\n\n💀 You have died.`);
+            showToast(`Death Save: Failure. Roll: ${roll} — You have died.`, 'error');
         } else {
-            alert(`Death Save: Failure\n\nRoll: ${roll}\nTotal failures: ${totalFails}/3`);
+            showToast(`Death Save: Failure. Roll: ${roll} — Total failures: ${totalFails}/3`, 'warning');
         }
     }
 }
 
 // Short rest
 function dndShortRest() {
-    alert('Short Rest: You can spend Hit Dice to heal.\nSelect Hit Dice in the Combat tab to roll for healing.');
+    showToast('Short Rest: You can spend Hit Dice to heal. Select Hit Dice in the Combat tab to roll for healing.', 'info');
 }
 
 // Long rest
-function dndLongRest() {
+async function dndLongRest() {
     const hpMax = document.getElementById('dnd_hp_max')?.value || '10';
     const hpInput = document.getElementById('dnd_hp_current');
     const hdTotalInput = document.getElementById('dnd_hit_dice_total');
     const hdRemainingInput = document.getElementById('dnd_hit_dice_remaining');
 
-    if (confirm('Take a Long Rest?\n\n• Restore all HP\n• Regain half total Hit Dice (minimum 1)\n• Regain all spell slots\n• Reduce exhaustion by 1')) {
+    if (await showConfirm('Take a Long Rest?\n\nRestore all HP, regain half total Hit Dice (minimum 1), regain all spell slots, reduce exhaustion by 1.', { confirmText: 'Rest' })) {
         // Restore HP
         if (hpInput) hpInput.value = hpMax;
 
@@ -1377,7 +1377,7 @@ function dndLongRest() {
         updateDnDOverview();
 
         const regained = hdTotalInput ? Math.max(1, Math.floor(parseInt(hdTotalInput.value) / 2)) : 0;
-        alert(`Long Rest complete!\n\n• HP restored to ${hpMax}\n• Regained ${regained} Hit Dice\n• Spell slots restored\n• Exhaustion reduced by 1`);
+        showToast(`Long Rest complete! HP restored to ${hpMax}, regained ${regained} Hit Dice, spell slots restored, exhaustion reduced by 1.`, 'success');
     }
 }
 

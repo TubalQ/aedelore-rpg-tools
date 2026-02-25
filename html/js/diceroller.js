@@ -1,53 +1,42 @@
-// Dice Roller functionality
+// Dice Roller functionality — D20 System
 
 // Current roll mode
-let currentRollMode = 'successes';
+let currentRollMode = 'd20check';
 
 // Selected dice for single-die modes
 let selectedSingleDie = null;
 let selectedFoodDie = null;
 let selectedWaterDie = null;
 
-// Dice count limits
-const DICE_MIN = 0;
-const DICE_MAX = 10;
+// Adjust modifier with +/- buttons
+function adjustModifier(delta) {
+    const input = document.getElementById('d20-modifier');
+    if (!input) return;
+    let val = parseInt(input.value) || 0;
+    val = Math.max(-10, Math.min(20, val + delta));
+    input.value = val;
+}
 
-// Adjust dice count with +/- buttons
-function adjustDice(diceType, delta) {
-    const slider = document.getElementById(`${diceType}-slider`);
-    const countDisplay = document.getElementById(`${diceType}-count`);
+// Adjust DC with +/- buttons
+function adjustDC(delta) {
+    const input = document.getElementById('d20-dc');
+    if (!input) return;
+    let val = parseInt(input.value) || 10;
+    val = Math.max(1, Math.min(30, val + delta));
+    input.value = val;
+}
 
-    if (!slider || !countDisplay) return;
-
-    let currentValue = parseInt(slider.value) || 0;
-    let newValue = currentValue + delta;
-
-    // Clamp to min/max
-    newValue = Math.max(DICE_MIN, Math.min(DICE_MAX, newValue));
-
-    slider.value = newValue;
-    countDisplay.textContent = newValue;
+// Adjust damage dice count
+function adjustDamageDice(delta) {
+    const input = document.getElementById('damage-dice-count');
+    if (!input) return;
+    let val = parseInt(input.value) || 1;
+    val = Math.max(1, Math.min(10, val + delta));
+    input.value = val;
 }
 
 // Initialize dice controls
 function initializeDiceSliders() {
-    const diceTypes = ['d10', 'd12', 'd20'];
-
-    diceTypes.forEach(type => {
-        const slider = document.getElementById(`${type}-slider`);
-        const count = document.getElementById(`${type}-count`);
-
-        if (slider && count) {
-            // Support both slider and stepper modes
-            slider.addEventListener('input', function() {
-                count.textContent = this.value;
-            });
-
-            // Initialize display
-            count.textContent = slider.value;
-        }
-    });
-
     // Initialize roll mode selector
     const rollModeSelect = document.getElementById('roll-mode');
     if (rollModeSelect) {
@@ -58,7 +47,7 @@ function initializeDiceSliders() {
         updateModeUI();
     }
 
-    console.log('✓ Dice controls initialized');
+    console.log('✓ Dice controls initialized (D20 system)');
 }
 
 // Select single die for initiative/arrows
@@ -97,7 +86,8 @@ function updateModeUI() {
     if (!modeDesc) return;
 
     const descriptions = {
-        'successes': 'Roll D10/D12/D20 per ability point. D10: 10=critical (reroll), 7-9=success, 5-6=barely, 1-4=fail',
+        'd20check': 'Roll 1D20 + modifier vs DC. Nat 20 = Critical hit! Nat 1 = Auto-miss.',
+        'damage': 'Roll damage dice (D6 or D10). Used after a successful attack or spell.',
         'initiative': 'Roll D6 (≤6 players) or D10 (>6 players). Highest roll goes first.',
         'food-water': 'Roll one die for food and one for water. 6-10 = keep at 1D10, 1-5 = reduce to 1D6.',
         'arrows': 'Roll after battle to determine arrow losses or gains.'
@@ -106,28 +96,30 @@ function updateModeUI() {
     modeDesc.textContent = descriptions[currentRollMode] || '';
 
     // Show/hide different UI elements based on mode
-    const successesUI = document.getElementById('dice-sliders-successes');
+    const d20UI = document.getElementById('dice-d20-check');
+    const damageUI = document.getElementById('dice-damage-roll');
     const singleUI = document.getElementById('dice-selector-single');
     const foodWaterUI = document.getElementById('dice-selector-food-water');
 
     // Hide all first
-    if (successesUI) successesUI.style.display = 'none';
+    if (d20UI) d20UI.style.display = 'none';
+    if (damageUI) damageUI.style.display = 'none';
     if (singleUI) singleUI.style.display = 'none';
     if (foodWaterUI) foodWaterUI.style.display = 'none';
 
     // Show appropriate UI
-    if (currentRollMode === 'successes') {
-        if (successesUI) successesUI.style.display = 'grid';
+    if (currentRollMode === 'd20check') {
+        if (d20UI) d20UI.style.display = 'block';
+    } else if (currentRollMode === 'damage') {
+        if (damageUI) damageUI.style.display = 'block';
     } else if (currentRollMode === 'initiative' || currentRollMode === 'arrows') {
         if (singleUI) singleUI.style.display = 'block';
-        // Reset selection
         selectedSingleDie = null;
         document.getElementById('select-d6-single')?.classList.remove('selected');
         document.getElementById('select-d10-single')?.classList.remove('selected');
         document.getElementById('selected-die-display').textContent = 'Selected: None';
     } else if (currentRollMode === 'food-water') {
         if (foodWaterUI) foodWaterUI.style.display = 'block';
-        // Reset selections
         selectedFoodDie = null;
         selectedWaterDie = null;
         document.getElementById('select-d6-food')?.classList.remove('selected');
@@ -139,458 +131,294 @@ function updateModeUI() {
     }
 }
 
-// Determine success level based on dice type, result, and current mode
-function getSuccessLevel(diceType, result) {
-    // Mode-specific logic
-    if (currentRollMode === 'initiative') {
-        // Initiative: just show the number, no label
-        return { success: true, type: 'neutral', label: '' };
-    }
-
-    if (currentRollMode === 'food-water') {
-        // Food & Water: 6-10 keep 1D10, 1-5 reduce to 1D6
-        // Still track success/failure for summary, but don't show label on dice
-        if (result >= 6) {
-            return { success: true, type: 'neutral', label: '' };
-        } else {
-            return { success: false, type: 'neutral', label: '' };
-        }
-    }
-
-    if (currentRollMode === 'arrows') {
-        // Arrows: just show the number, no label
-        return { success: true, type: 'neutral', label: '' };
-    }
-
-    // Successes mode (default for ability/spell checks)
-    // All dice scaled to match D10 percentages: 50% fail, 20% barely, 20% success, 7% critical
-
-    if (diceType === 'd10') {
-        // D10: 1-4 fail, 5-6 barely, 7-9 success, 10 critical (reroll)
-        if (result >= 10) return { success: true, type: 'critical', label: 'Critical!' };
-        if (result >= 7) return { success: true, type: 'success', label: 'Success' };
-        if (result >= 5) return { success: true, type: 'barely', label: 'Barely' };
-        return { success: false, type: 'failure', label: 'Fail' };
-    }
-
-    if (diceType === 'd12') {
-        // D12: 1-4 fail (33%), 5-7 barely (25%), 8-11 success (33%), 12 critical (8%)
-        if (result >= 12) return { success: true, type: 'critical', label: 'Critical!' };
-        if (result >= 8) return { success: true, type: 'success', label: 'Success' };
-        if (result >= 5) return { success: true, type: 'barely', label: 'Barely' };
-        return { success: false, type: 'failure', label: 'Fail' };
-    }
-
-    if (diceType === 'd20') {
-        // D20: 1-8 fail (40%), 9-12 barely (20%), 13-19 success (35%), 20 critical (5%)
-        if (result >= 20) return { success: true, type: 'critical', label: 'Critical!' };
-        if (result >= 13) return { success: true, type: 'success', label: 'Success' };
-        if (result >= 9) return { success: true, type: 'barely', label: 'Barely' };
-        return { success: false, type: 'failure', label: 'Fail' };
-    }
-
-    // For other dice modes (initiative, food-water, arrows) - just return the value
-    const max = parseInt(diceType.substring(1));
-    const threshold = Math.ceil(max * 0.5);
-    const successThreshold = Math.ceil(max * 0.7);
-
-    if (result >= successThreshold) return { success: true, type: 'success', label: 'Success' };
-    if (result >= threshold) return { success: true, type: 'barely', label: 'Barely' };
-    return { success: false, type: 'failure', label: 'Fail' };
-}
-
-// Roll a single die
+// Roll a single die (fair roll for all dice)
 function rollDie(sides) {
-    // Special weighted roll for D10: make 10 more rare (2% chance)
-    if (sides === 10) {
-        const random = Math.random();
-        if (random < 0.02) {
-            // 2% chance to roll a 10
-            return 10;
-        } else {
-            // 98% chance to roll 1-9 (evenly distributed)
-            return Math.floor(Math.random() * 9) + 1;
-        }
-    }
-
-    // Regular dice rolling for other types
     return Math.floor(Math.random() * sides) + 1;
 }
-
-// Store critical information for rerolls
-let criticalRerollData = {};
 
 // Main function to roll all dice
 function rollAllDice() {
     const resultsContainer = document.getElementById('dice-results-container');
     const resultsSection = document.getElementById('dice-results-section');
-    const totalSuccessesSpan = document.getElementById('total-successes');
-    const successBreakdown = document.getElementById('success-breakdown');
-
-    // Clear previous results and critical data
-    resultsContainer.innerHTML = '';
-    criticalRerollData = {};
-
-    let totalFullSuccesses = 0;
-    let totalBarelySuccesses = 0;
-    let criticalCount = 0;
-    let fullSuccessCount = 0;
-    let barelyCount = 0;
-    let failCount = 0;
-    let hasAnyDice = false;
-    let animationDelay = 0;
-
-    // Determine which dice to roll based on mode
-    let diceToRoll = [];
-
-    if (currentRollMode === 'successes') {
-        // Get dice from sliders
-        const diceTypes = [
-            { name: 'd10', sides: 10 },
-            { name: 'd12', sides: 12 },
-            { name: 'd20', sides: 20 }
-        ];
-        diceTypes.forEach(diceType => {
-            const slider = document.getElementById(`${diceType.name}-slider`);
-            if (slider) {
-                const count = parseInt(slider.value);
-                if (count > 0) {
-                    diceToRoll.push({ name: diceType.name, sides: diceType.sides, count: count });
-                }
-            }
-        });
-    } else if (currentRollMode === 'initiative' || currentRollMode === 'arrows') {
-        // Single die selection
-        if (!selectedSingleDie) {
-            alert('Please select a die type first!');
-            return;
-        }
-        const sides = selectedSingleDie === 'd6' ? 6 : 10;
-        diceToRoll.push({ name: selectedSingleDie, sides: sides, count: 1, label: currentRollMode === 'initiative' ? 'Initiative' : 'Arrows' });
-    } else if (currentRollMode === 'food-water') {
-        // Food & Water: two separate rolls
-        if (!selectedFoodDie || !selectedWaterDie) {
-            alert('Please select both food and water die types!');
-            return;
-        }
-        const foodSides = selectedFoodDie === 'd6' ? 6 : 10;
-        const waterSides = selectedWaterDie === 'd6' ? 6 : 10;
-        diceToRoll.push({ name: selectedFoodDie, sides: foodSides, count: 1, label: 'Food' });
-        diceToRoll.push({ name: selectedWaterDie, sides: waterSides, count: 1, label: 'Water' });
-    }
-
-    if (diceToRoll.length === 0) {
-        alert('Please select at least one die to roll!');
-        return;
-    }
-
-    // Roll each dice type
-    diceToRoll.forEach(diceType => {
-        const count = diceType.count;
-
-        if (count > 0) {
-            hasAnyDice = true;
-            const diceContainer = document.createElement('div');
-            diceContainer.className = 'dice-container';
-            diceContainer.id = `dice-container-${diceType.name}`;
-
-            const header = document.createElement('div');
-            header.className = 'dice-type-header';
-            const displayLabel = diceType.label || diceType.name.toUpperCase();
-            header.textContent = count === 1 ? displayLabel : `${diceType.name.toUpperCase()} (${count} dice)`;
-            diceContainer.appendChild(header);
-
-            const diceGrid = document.createElement('div');
-            diceGrid.className = 'dice-results-grid';
-            diceGrid.id = `dice-grid-${diceType.name}`;
-
-            let diceTypeCriticals = 0;
-
-            // Roll each die
-            for (let i = 0; i < count; i++) {
-                const result = rollDie(diceType.sides);
-                const successInfo = getSuccessLevel(diceType.name, result);
-
-                // Count successes
-                if (successInfo.success) {
-                    if (successInfo.type === 'critical') {
-                        criticalCount++;
-                        diceTypeCriticals++;
-                        totalFullSuccesses++; // Criticals count as full successes
-                    } else if (successInfo.type === 'success') {
-                        fullSuccessCount++;
-                        totalFullSuccesses++; // Full successes
-                    } else if (successInfo.type === 'barely') {
-                        barelyCount++;
-                        totalBarelySuccesses++; // Barely successes counted separately
-                    }
-                } else {
-                    failCount++;
-                }
-
-                // Create dice element with delay for animation
-                setTimeout(() => {
-                    const diceElement = document.createElement('div');
-                    diceElement.className = `dice ${successInfo.type}`;
-                    diceElement.textContent = result;
-
-                    // Only show label for successes mode
-                    if (successInfo.label) {
-                        const label = document.createElement('div');
-                        label.className = 'dice-result-label';
-                        label.textContent = successInfo.label;
-                        diceElement.appendChild(label);
-                    }
-
-                    diceGrid.appendChild(diceElement);
-                }, animationDelay);
-
-                animationDelay += 100;
-            }
-
-            // Store critical data for this dice type
-            if (diceTypeCriticals > 0) {
-                criticalRerollData[diceType.name] = {
-                    count: diceTypeCriticals,
-                    sides: diceType.sides
-                };
-            }
-
-            diceContainer.appendChild(diceGrid);
-            resultsContainer.appendChild(diceContainer);
-        }
-    });
-
-    if (!hasAnyDice) {
-        resultsSection.style.display = 'none';
-        alert('Please select at least one die to roll!');
-        return;
-    }
-
-    // Update success summary
-    setTimeout(() => {
-        const totalBarelySpan = document.getElementById('total-barely');
-        const successSummary = document.getElementById('success-summary');
-
-        // Mode-specific summary display
-        if (currentRollMode === 'successes') {
-            // Successes mode: show full summary
-            successSummary.style.display = 'block';
-            totalSuccessesSpan.textContent = totalFullSuccesses;
-            totalBarelySpan.parentElement.style.display = 'block';
-            totalBarelySpan.textContent = totalBarelySuccesses;
-
-            let breakdownHTML = '';
-            if (criticalCount > 0) {
-                breakdownHTML += `<span class="success-type critical">🌟 ${criticalCount} Critical</span>`;
-            }
-            if (fullSuccessCount > 0) {
-                breakdownHTML += `<span class="success-type full">✓ ${fullSuccessCount} Full Success</span>`;
-            }
-            if (barelyCount > 0) {
-                breakdownHTML += `<span class="success-type barely">~ ${barelyCount} Barely</span>`;
-            }
-            if (failCount > 0) {
-                breakdownHTML += `<span style="color: var(--text-secondary); margin: 0 10px;">✗ ${failCount} Failures</span>`;
-            }
-            successBreakdown.innerHTML = breakdownHTML;
-        } else {
-            // For all other modes: hide the summary completely
-            successSummary.style.display = 'none';
-        }
-
-        resultsSection.style.display = 'block';
-
-        // Show reroll buttons if there are criticals (successes mode only)
-        showRerollButtons();
-
-        // Scroll to results
-        resultsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }, animationDelay + 300);
-}
-
-// Show reroll button for all critical dice
-function showRerollButtons() {
+    const successSummary = document.getElementById('success-summary');
     const rerollContainer = document.getElementById('reroll-buttons-container');
-    rerollContainer.innerHTML = '';
 
-    // Only show reroll buttons in successes mode
-    if (currentRollMode !== 'successes') {
-        rerollContainer.style.display = 'none';
-        return;
+    // Clear previous results
+    resultsContainer.innerHTML = '';
+    if (rerollContainer) rerollContainer.innerHTML = '';
+
+    if (currentRollMode === 'd20check') {
+        rollD20Check(resultsContainer, successSummary);
+    } else if (currentRollMode === 'damage') {
+        rollDamage(resultsContainer, successSummary);
+    } else if (currentRollMode === 'initiative' || currentRollMode === 'arrows') {
+        rollSingleDie(resultsContainer, successSummary);
+    } else if (currentRollMode === 'food-water') {
+        rollFoodWater(resultsContainer, successSummary);
     }
 
-    let totalCriticals = 0;
-    Object.keys(criticalRerollData).forEach(diceType => {
-        totalCriticals += criticalRerollData[diceType].count;
-    });
+    resultsSection.style.display = 'block';
+    resultsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
 
-    if (totalCriticals > 0) {
+// D20 Check: 1D20 + modifier vs DC
+function rollD20Check(container, summary) {
+    const modifier = parseInt(document.getElementById('d20-modifier')?.value) || 0;
+    const dc = parseInt(document.getElementById('d20-dc')?.value) || 10;
+
+    const roll = rollDie(20);
+    const total = roll + modifier;
+
+    const isNat20 = roll === 20;
+    const isNat1 = roll === 1;
+    const success = isNat20 || (!isNat1 && total >= dc);
+
+    // Build result display
+    const diceContainer = document.createElement('div');
+    diceContainer.className = 'dice-container';
+
+    const header = document.createElement('div');
+    header.className = 'dice-type-header';
+    header.textContent = `1D20 + ${modifier} vs DC ${dc}`;
+    diceContainer.appendChild(header);
+
+    const diceGrid = document.createElement('div');
+    diceGrid.className = 'dice-results-grid';
+
+    // The D20 die
+    const diceElement = document.createElement('div');
+    let resultType = 'failure';
+    if (isNat20) resultType = 'critical';
+    else if (isNat1) resultType = 'failure';
+    else if (success) resultType = 'success';
+    diceElement.className = `dice ${resultType}`;
+    diceElement.textContent = roll;
+
+    const label = document.createElement('div');
+    label.className = 'dice-result-label';
+    if (isNat20) label.textContent = 'NAT 20!';
+    else if (isNat1) label.textContent = 'NAT 1';
+    else label.textContent = modifier >= 0 ? `+${modifier}` : `${modifier}`;
+    diceElement.appendChild(label);
+
+    diceGrid.appendChild(diceElement);
+    diceContainer.appendChild(diceGrid);
+    container.appendChild(diceContainer);
+
+    // Summary
+    if (summary) {
+        summary.style.display = 'block';
+        const totalSpan = document.getElementById('total-successes');
+        const barelyLine = document.getElementById('total-barely')?.parentElement;
+        const breakdown = document.getElementById('success-breakdown');
+
+        if (barelyLine) barelyLine.style.display = 'none';
+
+        if (totalSpan) totalSpan.textContent = total;
+        // Rename label for D20 mode
+        const totalLabel = totalSpan?.previousElementSibling || totalSpan?.parentElement?.querySelector('.summary-label');
+
+        let resultHTML = '';
+        if (isNat20) {
+            resultHTML = `<span class="success-type critical">🌟 CRITICAL HIT! (Natural 20) — Total: ${total}</span>`;
+        } else if (isNat1) {
+            resultHTML = `<span style="color: var(--text-secondary);">✗ AUTO-MISS (Natural 1) — Total: ${total}</span>`;
+        } else if (success) {
+            resultHTML = `<span class="success-type success">✓ HIT! ${total} vs DC ${dc} (beat by ${total - dc})</span>`;
+        } else {
+            resultHTML = `<span style="color: var(--text-secondary);">✗ MISS. ${total} vs DC ${dc} (short by ${dc - total})</span>`;
+        }
+        if (breakdown) breakdown.innerHTML = resultHTML;
+    }
+
+    // Show damage roll button on hit
+    if (success && document.getElementById('reroll-buttons-container')) {
+        const rerollContainer = document.getElementById('reroll-buttons-container');
         rerollContainer.style.display = 'block';
-
-        const button = document.createElement('button');
-        button.textContent = `🎲 Reroll ${totalCriticals} Critical${totalCriticals > 1 ? 's' : ''}`;
-        button.style.fontSize = '1.2rem';
-        button.style.padding = '15px 40px';
-        button.onclick = () => rerollAllCriticals();
-        rerollContainer.appendChild(button);
-    } else {
-        rerollContainer.style.display = 'none';
+        const dmgBtn = document.createElement('button');
+        dmgBtn.textContent = isNat20 ? '⚔️ Roll Critical Damage (double dice)' : '⚔️ Roll Damage';
+        dmgBtn.style.fontSize = '1.2rem';
+        dmgBtn.style.padding = '15px 40px';
+        dmgBtn.onclick = () => {
+            // Switch to damage mode with critical flag
+            currentRollMode = 'damage';
+            const rollModeSelect = document.getElementById('roll-mode');
+            if (rollModeSelect) rollModeSelect.value = 'damage';
+            updateModeUI();
+            if (isNat20) {
+                // Double the dice count for critical
+                const countInput = document.getElementById('damage-dice-count');
+                if (countInput) {
+                    const current = parseInt(countInput.value) || 1;
+                    countInput.value = current * 2;
+                }
+            }
+        };
+        rerollContainer.appendChild(dmgBtn);
     }
 }
 
-// Reroll all critical dice at once
-function rerollAllCriticals() {
-    const resultsContainer = document.getElementById('dice-results-container');
+// Damage roll: XdY
+function rollDamage(container, summary) {
+    const count = parseInt(document.getElementById('damage-dice-count')?.value) || 1;
+    const dieType = document.getElementById('damage-die-type')?.value || 'd6';
+    const sides = parseInt(dieType.substring(1));
 
-    // Create a reroll section for all criticals
-    let rerollSection = document.getElementById('all-rerolls-section');
-    if (!rerollSection) {
-        rerollSection = document.createElement('div');
-        rerollSection.id = 'all-rerolls-section';
-        rerollSection.className = 'dice-container';
-        rerollSection.style.marginTop = '30px';
-        rerollSection.style.background = 'rgba(251, 191, 36, 0.1)';
-        rerollSection.style.borderColor = 'var(--accent-gold)';
+    const diceContainer = document.createElement('div');
+    diceContainer.className = 'dice-container';
 
-        const rerollHeader = document.createElement('div');
-        rerollHeader.className = 'dice-type-header';
-        rerollHeader.style.color = 'var(--accent-gold)';
-        rerollHeader.textContent = '🌟 Critical Rerolls';
-        rerollSection.appendChild(rerollHeader);
+    const header = document.createElement('div');
+    header.className = 'dice-type-header';
+    header.textContent = `${count}${dieType.toUpperCase()} Damage`;
+    diceContainer.appendChild(header);
 
-        const rerollGrid = document.createElement('div');
-        rerollGrid.className = 'dice-results-grid';
-        rerollGrid.id = 'all-rerolls-grid';
-        rerollSection.appendChild(rerollGrid);
+    const diceGrid = document.createElement('div');
+    diceGrid.className = 'dice-results-grid';
 
-        resultsContainer.appendChild(rerollSection);
+    let total = 0;
+    let animationDelay = 0;
+
+    for (let i = 0; i < count; i++) {
+        const result = rollDie(sides);
+        total += result;
+
+        setTimeout(() => {
+            const diceElement = document.createElement('div');
+            diceElement.className = 'dice success';
+            diceElement.textContent = result;
+            diceGrid.appendChild(diceElement);
+        }, animationDelay);
+        animationDelay += 100;
     }
 
-    const rerollGrid = document.getElementById('all-rerolls-grid');
+    diceContainer.appendChild(diceGrid);
+    container.appendChild(diceContainer);
 
-    let newCriticals = 0;
-    let newFullSuccess = 0;
-    let newBarely = 0;
-    let newFullSuccessTotal = 0;  // Total full successes to add
-    let newBarelyTotal = 0;       // Total barely successes to add
-    let animationDelay = 0;
-    const newCriticalData = {};
-
-    // Roll all critical dice
-    Object.keys(criticalRerollData).forEach(diceType => {
-        const data = criticalRerollData[diceType];
-
-        for (let i = 0; i < data.count; i++) {
-            const result = rollDie(data.sides);
-            const successInfo = getSuccessLevel(diceType, result);
-
-            // Count what the reroll resulted in
-            // Critical rerolls that result in success/critical/barely add to total
-            if (successInfo.type === 'critical') {
-                newCriticals++;
-                newFullSuccessTotal++;
-                if (!newCriticalData[diceType]) {
-                    newCriticalData[diceType] = { count: 0, sides: data.sides };
-                }
-                newCriticalData[diceType].count++;
-            } else if (successInfo.type === 'success') {
-                newFullSuccess++;
-                newFullSuccessTotal++;
-            } else if (successInfo.type === 'barely') {
-                newBarely++;
-                newBarelyTotal++;
-            }
-            // Failures on reroll add nothing extra (original critical already counted)
-
-            // Create dice element with delay for animation
-            setTimeout(() => {
-                const diceElement = document.createElement('div');
-                diceElement.className = `dice ${successInfo.type}`;
-                diceElement.textContent = result;
-
-                // Only show label for successes mode
-                if (successInfo.label) {
-                    const label = document.createElement('div');
-                    label.className = 'dice-result-label';
-                    label.textContent = `${diceType.toUpperCase()}: ${successInfo.label}`;
-                    diceElement.appendChild(label);
-                }
-
-                rerollGrid.appendChild(diceElement);
-            }, animationDelay);
-
-            animationDelay += 100;
-        }
-    });
-
-    // Update total successes and breakdown
+    // Summary
     setTimeout(() => {
-        const totalSuccessesSpan = document.getElementById('total-successes');
-        const totalBarelySpan = document.getElementById('total-barely');
+        if (summary) {
+            summary.style.display = 'block';
+            const totalSpan = document.getElementById('total-successes');
+            const barelyLine = document.getElementById('total-barely')?.parentElement;
+            const breakdown = document.getElementById('success-breakdown');
 
-        const currentFullTotal = parseInt(totalSuccessesSpan.textContent) || 0;
-        const currentBarelyTotal = parseInt(totalBarelySpan.textContent) || 0;
-
-        totalSuccessesSpan.textContent = currentFullTotal + newFullSuccessTotal;
-        totalBarelySpan.textContent = currentBarelyTotal + newBarelyTotal;
-
-        // Update breakdown with new counts
-        updateBreakdown(newCriticals, newFullSuccess, newBarely);
-
-        // Update critical reroll data with new criticals
-        criticalRerollData = newCriticalData;
-        showRerollButtons();
+            if (barelyLine) barelyLine.style.display = 'none';
+            if (totalSpan) totalSpan.textContent = total;
+            if (breakdown) breakdown.innerHTML = `<span class="success-type success">⚔️ ${total} damage (${count}${dieType.toUpperCase()})</span>`;
+        }
     }, animationDelay + 100);
 }
 
-// Update success breakdown display
-function updateBreakdown(addCriticals, addFullSuccess, addBarely) {
-    const successBreakdown = document.getElementById('success-breakdown');
-    const breakdownHTML = successBreakdown.innerHTML;
-
-    // Parse current counts from breakdown
-    let criticalCount = 0;
-    let fullSuccessCount = 0;
-    let barelyCount = 0;
-
-    const criticalMatch = breakdownHTML.match(/(\d+)\s+Critical/);
-    if (criticalMatch) criticalCount = parseInt(criticalMatch[1]);
-
-    const fullMatch = breakdownHTML.match(/(\d+)\s+Full Success/);
-    if (fullMatch) fullSuccessCount = parseInt(fullMatch[1]);
-
-    const barelyMatch = breakdownHTML.match(/(\d+)\s+Barely/);
-    if (barelyMatch) barelyCount = parseInt(barelyMatch[1]);
-
-    // Add new counts
-    criticalCount += addCriticals;
-    fullSuccessCount += addFullSuccess;
-    barelyCount += addBarely;
-
-    // Rebuild breakdown HTML
-    let newBreakdownHTML = '';
-    if (criticalCount > 0) {
-        newBreakdownHTML += `<span class="success-type critical">🌟 ${criticalCount} Critical</span>`;
+// Roll single die (initiative / arrows)
+function rollSingleDie(container, summary) {
+    if (!selectedSingleDie) {
+        showToast('Please select a die type first!', 'warning');
+        return;
     }
-    if (fullSuccessCount > 0) {
-        newBreakdownHTML += `<span class="success-type full">✓ ${fullSuccessCount} Full Success</span>`;
+    const sides = selectedSingleDie === 'd6' ? 6 : 10;
+    const result = rollDie(sides);
+
+    const diceContainer = document.createElement('div');
+    diceContainer.className = 'dice-container';
+
+    const header = document.createElement('div');
+    header.className = 'dice-type-header';
+    header.textContent = currentRollMode === 'initiative' ? 'Initiative' : 'Arrows';
+    diceContainer.appendChild(header);
+
+    const diceGrid = document.createElement('div');
+    diceGrid.className = 'dice-results-grid';
+
+    const diceElement = document.createElement('div');
+    diceElement.className = 'dice neutral';
+    diceElement.textContent = result;
+    diceGrid.appendChild(diceElement);
+
+    diceContainer.appendChild(diceGrid);
+    container.appendChild(diceContainer);
+
+    if (summary) {
+        summary.style.display = 'block';
+        const totalSpan = document.getElementById('total-successes');
+        const barelyLine = document.getElementById('total-barely')?.parentElement;
+        const breakdown = document.getElementById('success-breakdown');
+
+        if (barelyLine) barelyLine.style.display = 'none';
+        if (totalSpan) totalSpan.textContent = result;
+        if (breakdown) breakdown.innerHTML = `<span class="success-type full">${currentRollMode === 'initiative' ? '⚡' : '🏹'} ${result}</span>`;
     }
-    if (barelyCount > 0) {
-        newBreakdownHTML += `<span class="success-type barely">~ ${barelyCount} Barely</span>`;
+}
+
+// Roll food/water dice
+function rollFoodWater(container, summary) {
+    if (!selectedFoodDie || !selectedWaterDie) {
+        showToast('Please select both food and water die types!', 'warning');
+        return;
     }
 
-    // Keep failures display (we don't change it in rerolls)
-    const failMatch = breakdownHTML.match(/✗\s+(\d+)\s+Failures/);
-    if (failMatch) {
-        newBreakdownHTML += `<span style="color: var(--text-secondary); margin: 0 10px;">✗ ${failMatch[1]} Failures</span>`;
-    }
+    const foodSides = selectedFoodDie === 'd6' ? 6 : 10;
+    const waterSides = selectedWaterDie === 'd6' ? 6 : 10;
+    const foodResult = rollDie(foodSides);
+    const waterResult = rollDie(waterSides);
 
-    successBreakdown.innerHTML = newBreakdownHTML;
+    const diceContainer = document.createElement('div');
+    diceContainer.className = 'dice-container';
+
+    const header = document.createElement('div');
+    header.className = 'dice-type-header';
+    header.textContent = 'Food & Water';
+    diceContainer.appendChild(header);
+
+    const diceGrid = document.createElement('div');
+    diceGrid.className = 'dice-results-grid';
+
+    // Food die
+    const foodElement = document.createElement('div');
+    foodElement.className = `dice ${foodResult >= 6 ? 'success' : 'failure'}`;
+    foodElement.textContent = foodResult;
+    const foodLabel = document.createElement('div');
+    foodLabel.className = 'dice-result-label';
+    foodLabel.textContent = foodResult >= 6 ? 'Food OK' : 'Food ↓';
+    foodElement.appendChild(foodLabel);
+    diceGrid.appendChild(foodElement);
+
+    // Water die
+    const waterElement = document.createElement('div');
+    waterElement.className = `dice ${waterResult >= 6 ? 'success' : 'failure'}`;
+    waterElement.textContent = waterResult;
+    const waterLabel = document.createElement('div');
+    waterLabel.className = 'dice-result-label';
+    waterLabel.textContent = waterResult >= 6 ? 'Water OK' : 'Water ↓';
+    waterElement.appendChild(waterLabel);
+    diceGrid.appendChild(waterElement);
+
+    diceContainer.appendChild(diceGrid);
+    container.appendChild(diceContainer);
+
+    if (summary) {
+        summary.style.display = 'block';
+        const breakdown = document.getElementById('success-breakdown');
+        const barelyLine = document.getElementById('total-barely')?.parentElement;
+        const totalSpan = document.getElementById('total-successes');
+
+        if (barelyLine) barelyLine.style.display = 'none';
+        if (totalSpan) totalSpan.textContent = '';
+
+        let html = '';
+        html += foodResult >= 6
+            ? `<span class="success-type success">🍖 Food: ${foodResult} — keep 1D10</span>`
+            : `<span style="color: var(--text-secondary);">🍖 Food: ${foodResult} — reduce to 1D6</span>`;
+        html += waterResult >= 6
+            ? `<span class="success-type success">💧 Water: ${waterResult} — keep 1D10</span>`
+            : `<span style="color: var(--text-secondary);">💧 Water: ${waterResult} — reduce to 1D6</span>`;
+        if (breakdown) breakdown.innerHTML = html;
+    }
 }
 
 // Expose functions to global scope for onclick handlers
-window.adjustDice = adjustDice;
+window.adjustModifier = adjustModifier;
+window.adjustDC = adjustDC;
+window.adjustDamageDice = adjustDamageDice;
 window.selectSingleDie = selectSingleDie;
 window.selectFoodWaterDie = selectFoodWaterDie;
 window.rollAllDice = rollAllDice;

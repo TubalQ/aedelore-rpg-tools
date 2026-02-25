@@ -91,11 +91,9 @@ function initCollapsibleSections() {
         const sectionId = section.getAttribute('data-section-id');
         if (sectionId && window.innerWidth <= 1024) {
             const collapsedSections = JSON.parse(localStorage.getItem('collapsedSections') || '{}');
-            if (collapsedSections[sectionId] === undefined || collapsedSections[sectionId] === true) {
+            if (collapsedSections[sectionId] === true) {
                 section.classList.add('collapsed');
             }
-        } else if (window.innerWidth <= 1024) {
-            section.classList.add('collapsed');
         }
     });
 }
@@ -109,11 +107,9 @@ function handleCollapsibleResize() {
             const sectionId = section.getAttribute('data-section-id');
             if (sectionId) {
                 const collapsedSections = JSON.parse(localStorage.getItem('collapsedSections') || '{}');
-                if (collapsedSections[sectionId] === undefined || collapsedSections[sectionId] === true) {
+                if (collapsedSections[sectionId] === true) {
                     section.classList.add('collapsed');
                 }
-            } else {
-                section.classList.add('collapsed');
             }
         });
     }
@@ -336,13 +332,13 @@ function handleAvatarUpload(event) {
 
     const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
     if (!validTypes.includes(file.type)) {
-        alert('Please select a valid image file (JPG, PNG, WebP, or GIF)');
+        showToast('Please select a valid image file (JPG, PNG, WebP, or GIF)', 'warning');
         return;
     }
 
     const maxSize = 2 * 1024 * 1024;
     if (file.size > maxSize) {
-        alert('Image is too large. Maximum size is 2MB.');
+        showToast('Image is too large. Maximum size is 2MB.', 'warning');
         return;
     }
 

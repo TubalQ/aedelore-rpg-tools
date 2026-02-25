@@ -61,13 +61,13 @@ function hideLinkCampaignModal() {
 
 async function linkCharacterToCampaign() {
     if (!window.currentCharacterId || !window.authToken) {
-        alert('You must save your character to the server first.');
+        showToast('You must save your character to the server first.', 'warning');
         return;
     }
 
     const shareCode = document.getElementById('campaign-share-code').value.trim();
     if (!shareCode) {
-        alert('Please enter a campaign code.');
+        showToast('Please enter a campaign code.', 'warning');
         return;
     }
 
@@ -80,21 +80,21 @@ async function linkCharacterToCampaign() {
         const data = await res.json();
 
         if (!res.ok) {
-            alert(`❌ ${data.error || 'Failed to link campaign'}`);
+            showToast(data.error || 'Failed to link campaign', 'error');
             return;
         }
 
         hideLinkCampaignModal();
         location.reload();
     } catch (error) {
-        alert('❌ Connection error. Please try again.');
+        showToast('Connection error. Please try again.', 'error');
     }
 }
 
 async function unlinkCharacterFromCampaign() {
     if (!window.currentCharacterId || !window.authToken) return;
 
-    if (!confirm('Are you sure you want to unlink this character from the campaign?')) {
+    if (!await showConfirm('Are you sure you want to unlink this character from the campaign?', { confirmText: 'Unlink', danger: true })) {
         return;
     }
 
@@ -105,13 +105,13 @@ async function unlinkCharacterFromCampaign() {
 
         if (!res.ok) {
             const data = await res.json();
-            alert(`❌ ${data.error || 'Failed to unlink campaign'}`);
+            showToast(data.error || 'Failed to unlink campaign', 'error');
             return;
         }
 
         location.reload();
     } catch (error) {
-        alert('❌ Connection error. Please try again.');
+        showToast('Connection error. Please try again.', 'error');
     }
 }
 

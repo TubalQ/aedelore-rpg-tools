@@ -618,8 +618,8 @@
     }
 
     // Show system change dialog
-    function showChangeSystemDialog() {
-        if (confirm('Change system? Any unsaved changes will be lost.')) {
+    async function showChangeSystemDialog() {
+        if (await showConfirm('Change system? Any unsaved changes will be lost.', { confirmText: 'Switch System', danger: true })) {
             localStorage.removeItem(STORAGE_KEY);
             localStorage.removeItem(REMEMBER_KEY);
             location.reload();

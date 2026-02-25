@@ -1168,11 +1168,11 @@ function stSpendWillpower() {
         if (boxes[i].textContent === '☐') {
             boxes[i].textContent = '✘';
             boxes[i].classList.add('spent');
-            alert('Willpower spent!\n\n+1 automatic success on your next roll.');
+            showToast('Willpower spent! +1 automatic success on your next roll.', 'success');
             return;
         }
     }
-    alert('No Willpower remaining!');
+    showToast('No Willpower remaining!', 'warning');
 }
 
 // Set up overview listeners

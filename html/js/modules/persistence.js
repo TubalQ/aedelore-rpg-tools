@@ -194,7 +194,7 @@ async function migrateLocalToCloud() {
 function saveCharacter() {
     const data = window.getAllFields();
     localStorage.setItem('aedelore_character', JSON.stringify(data));
-    alert('✅ Character saved successfully!');
+    showToast('Character saved successfully!', 'success');
 }
 
 // Load character from localStorage (manual load button)
@@ -203,9 +203,9 @@ function loadCharacter() {
     if (saved) {
         const data = JSON.parse(saved);
         window.setAllFields(data);
-        alert('✅ Character loaded successfully!');
+        showToast('Character loaded successfully!', 'success');
     } else {
-        alert('❌ No saved character found!');
+        showToast('No saved character found!', 'error');
     }
 }
 
@@ -235,9 +235,9 @@ function importCharacter() {
             try {
                 const data = JSON.parse(event.target.result);
                 window.setAllFields(data);
-                alert('✅ Character imported successfully!');
+                showToast('Character imported successfully!', 'success');
             } catch (error) {
-                alert('❌ Error importing character: Invalid JSON file');
+                showToast('Error importing character: Invalid JSON file', 'error');
             }
         };
         reader.readAsText(file);
@@ -246,8 +246,8 @@ function importCharacter() {
 }
 
 // Clear all fields and start a new character
-function clearCharacter() {
-    if (confirm('⚠️ Are you sure you want to start a new character? This will clear all fields.')) {
+async function clearCharacter() {
+    if (await showConfirm('Are you sure you want to start a new character? This will clear all fields.', { confirmText: 'Start New', danger: true })) {
         // Detach from current character so autosave doesn't overwrite it
         window.currentCharacterId = null;
         localStorage.removeItem('aedelore_current_character_id');
@@ -286,7 +286,7 @@ function clearCharacter() {
         // Reset save state so autosave doesn't immediately save an empty sheet
         lastSavedData = JSON.stringify(window.getAllFields());
 
-        alert('✅ New character started! Fill in the details and save.');
+        showToast('New character started! Fill in the details and save.', 'success');
     }
 }
 
@@ -427,7 +427,7 @@ async function saveToServer(skipReload = false) {
             window.authToken = null;
             localStorage.removeItem('aedelore_auth_token');
             window.updateAuthUI();
-            alert('❌ Session expired. Please login again.');
+            showToast('Session expired. Please login again.', 'error');
             window.showAuthModal('login');
             return false;
         }
@@ -435,7 +435,7 @@ async function saveToServer(skipReload = false) {
         const result = await res.json();
 
         if (!res.ok) {
-            alert(`❌ Error: ${result.error}`);
+            showToast(`Error: ${result.error}`, 'error');
             return false;
         }
 
@@ -450,7 +450,7 @@ async function saveToServer(skipReload = false) {
         showSaveIndicator('cloud');
         return true;
     } catch (error) {
-        alert('❌ Connection error. Please try again.');
+        showToast('Connection error. Please try again.', 'error');
         return false;
     }
 }
@@ -469,7 +469,7 @@ async function loadFromServer() {
             window.authToken = null;
             localStorage.removeItem('aedelore_auth_token');
             window.updateAuthUI();
-            alert('❌ Session expired. Please login again.');
+            showToast('Session expired. Please login again.', 'error');
             window.showAuthModal('login');
             return;
         }
@@ -477,13 +477,13 @@ async function loadFromServer() {
         const characters = await res.json();
 
         if (characters.length === 0) {
-            alert('No saved characters found on server.');
+            showToast('No saved characters found on server.', 'info');
             return;
         }
 
         showCharacterListModal(characters);
     } catch (error) {
-        alert('❌ Connection error. Please try again.');
+        showToast('Connection error. Please try again.', 'error');
     }
 }
 
@@ -531,7 +531,7 @@ async function loadCharacterById(id) {
         const res = await window.apiRequest(`/api/characters/${id}`);
 
         if (!res.ok) {
-            alert('❌ Error loading character');
+            showToast('Error loading character', 'error');
             return false;
         }
 
@@ -550,7 +550,7 @@ async function loadCharacterById(id) {
             const charSystemName = systemNames[charSystem] || charSystem;
             const currentSystemName = systemNames[currentSystem] || currentSystem;
 
-            if (confirm(`This character was created in ${charSystemName}, but you're currently using ${currentSystemName}.\n\nSwitch to ${charSystemName} and load this character?`)) {
+            if (await showConfirm(`This character was created in ${charSystemName}, but you're currently using ${currentSystemName}.\n\nSwitch to ${charSystemName} and load this character?`, { confirmText: 'Switch', danger: false })) {
                 localStorage.setItem('aedelore_selected_system', charSystem);
                 localStorage.setItem('aedelore_current_character_id', id);
                 location.reload();
@@ -593,14 +593,14 @@ async function loadCharacterById(id) {
         startAutoSave();
         return true;
     } catch (error) {
-        alert('❌ Connection error. Please try again.');
+        showToast('Connection error. Please try again.', 'error');
         return false;
     }
 }
 
 async function deleteCharacterById(id) {
     const name = window._characterNames?.[id] || 'this character';
-    if (!confirm(`Are you sure you want to delete "${name}"?`)) {
+    if (!await showConfirm(`Are you sure you want to delete "${name}"?`, { confirmText: 'Delete', danger: true })) {
         return;
     }
 
@@ -610,7 +610,7 @@ async function deleteCharacterById(id) {
         });
 
         if (!res.ok) {
-            alert('❌ Error deleting character');
+            showToast('Error deleting character', 'error');
             return;
         }
 
@@ -623,7 +623,7 @@ async function deleteCharacterById(id) {
 
         loadFromServer();
     } catch (error) {
-        alert('❌ Connection error. Please try again.');
+        showToast('Connection error. Please try again.', 'error');
     }
 }
 
@@ -705,16 +705,16 @@ async function restoreCharacter(id) {
 
         if (!res.ok) throw new Error('Failed to restore');
 
-        alert('Character restored successfully!');
+        showToast('Character restored successfully!', 'success');
         await loadTrashCharacters();
     } catch (err) {
         console.error('Error restoring character:', err);
-        alert('Failed to restore character');
+        showToast('Failed to restore character', 'error');
     }
 }
 
 async function permanentDeleteCharacter(id, name) {
-    if (!confirm(`Are you sure you want to PERMANENTLY delete "${name}"?\n\nThis cannot be undone!`)) {
+    if (!await showConfirm(`Are you sure you want to PERMANENTLY delete "${name}"?\n\nThis cannot be undone!`, { confirmText: 'Delete', danger: true })) {
         return;
     }
 
@@ -725,11 +725,11 @@ async function permanentDeleteCharacter(id, name) {
 
         if (!res.ok) throw new Error('Failed to delete');
 
-        alert('Character permanently deleted.');
+        showToast('Character permanently deleted.', 'success');
         await loadTrashCharacters();
     } catch (err) {
         console.error('Error deleting character:', err);
-        alert('Failed to delete character');
+        showToast('Failed to delete character', 'error');
     }
 }
 
