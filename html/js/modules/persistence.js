@@ -21,6 +21,10 @@ const LOCAL_NOTICE_DISMISSED_KEY = 'aedelore_sync_notice_dismissed';
 // Save character to localStorage (for non-logged-in users)
 function saveLocally() {
     const data = window.getAllFields();
+
+    // Don't save empty character data (no name = nothing worth saving)
+    if (!(data.character_name || '').trim()) return false;
+
     const currentData = JSON.stringify(data);
 
     // Skip if no changes
@@ -111,10 +115,55 @@ async function migrateLocalToCloud() {
     const localData = getLocalCharacter();
     if (!localData || !window.authToken) return false;
 
-    try {
-        const characterName = localData.character_name || 'Unnamed Character';
-        const system = localStorage.getItem('aedelore_selected_system') || 'aedelore';
+    // Don't migrate empty/blank character data (saved by autosave when logged out)
+    const characterName = (localData.character_name || '').trim();
+    if (!characterName) {
+        clearLocalCharacter();
+        return false;
+    }
 
+    try {
+        const system = localStorage.getItem('aedelore_selected_system') || 'aedelore';
+        const existingId = localStorage.getItem('aedelore_current_character_id');
+
+        // If we already have a character ID, update it instead of creating a duplicate
+        if (existingId) {
+            const res = await window.apiRequest(`/api/characters/${existingId}`, {
+                method: 'PUT',
+                body: JSON.stringify({ name: characterName, data: localData, system })
+            });
+
+            if (res.ok) {
+                window.currentCharacterId = parseInt(existingId);
+                clearLocalCharacter();
+                console.log('Local character merged into existing cloud character', existingId);
+                return true;
+            }
+            // PUT failed (deleted/not found) — fall through
+        }
+
+        // Check if user already has a character with this name before creating
+        const listRes = await window.apiRequest('/api/characters');
+        if (listRes.ok) {
+            const chars = await listRes.json();
+            const match = chars.find(c => c.name === characterName);
+            if (match) {
+                // Update existing instead of creating duplicate
+                const updateRes = await window.apiRequest(`/api/characters/${match.id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ name: characterName, data: localData, system })
+                });
+                if (updateRes.ok) {
+                    window.currentCharacterId = match.id;
+                    localStorage.setItem('aedelore_current_character_id', match.id);
+                    clearLocalCharacter();
+                    console.log('Local character merged into existing cloud character (by name)', match.id);
+                    return true;
+                }
+            }
+        }
+
+        // No existing character found — create new (server also deduplicates)
         const res = await window.apiRequest('/api/characters', {
             method: 'POST',
             body: JSON.stringify({ name: characterName, data: localData, system })
@@ -196,9 +245,14 @@ function importCharacter() {
     input.click();
 }
 
-// Clear all fields
+// Clear all fields and start a new character
 function clearCharacter() {
-    if (confirm('⚠️ Are you sure you want to clear all fields? This cannot be undone.')) {
+    if (confirm('⚠️ Are you sure you want to start a new character? This will clear all fields.')) {
+        // Detach from current character so autosave doesn't overwrite it
+        window.currentCharacterId = null;
+        localStorage.removeItem('aedelore_current_character_id');
+
+        // Clear all form fields
         document.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(input => {
             input.value = '';
         });
@@ -212,7 +266,27 @@ function clearCharacter() {
             range.value = range.min || 0;
             range.dispatchEvent(new Event('input'));
         });
-        alert('✅ All fields cleared!');
+
+        // Reset lock states
+        window.raceClassLocked = false;
+        window.attributesLocked = false;
+        window.abilitiesLocked = false;
+
+        // Re-enable all locked fields
+        document.querySelectorAll('.locked').forEach(el => {
+            el.classList.remove('locked');
+            el.disabled = false;
+        });
+
+        // Update progression UI if available
+        if (typeof window.updateProgressUI === 'function') {
+            window.updateProgressUI();
+        }
+
+        // Reset save state so autosave doesn't immediately save an empty sheet
+        lastSavedData = JSON.stringify(window.getAllFields());
+
+        alert('✅ New character started! Fill in the details and save.');
     }
 }
 
@@ -372,11 +446,8 @@ async function saveToServer(skipReload = false) {
 
         lastSavedData = JSON.stringify(window.getAllFields());
 
-        if (!skipReload) {
-            location.reload();
-        } else {
-            startAutoSave();
-        }
+        startAutoSave();
+        showSaveIndicator('cloud');
         return true;
     } catch (error) {
         alert('❌ Connection error. Please try again.');
@@ -461,7 +532,7 @@ async function loadCharacterById(id) {
 
         if (!res.ok) {
             alert('❌ Error loading character');
-            return;
+            return false;
         }
 
         const character = await res.json();
@@ -481,11 +552,11 @@ async function loadCharacterById(id) {
 
             if (confirm(`This character was created in ${charSystemName}, but you're currently using ${currentSystemName}.\n\nSwitch to ${charSystemName} and load this character?`)) {
                 localStorage.setItem('aedelore_selected_system', charSystem);
-                localStorage.setItem('aedelore_pending_character_id', id);
+                localStorage.setItem('aedelore_current_character_id', id);
                 location.reload();
-                return;
+                return true;
             } else {
-                return;
+                return true; // User declined — don't trigger fallback loading
             }
         }
 
@@ -520,8 +591,10 @@ async function loadCharacterById(id) {
 
         lastSavedData = JSON.stringify(window.getAllFields());
         startAutoSave();
+        return true;
     } catch (error) {
         alert('❌ Connection error. Please try again.');
+        return false;
     }
 }
 
@@ -683,9 +756,13 @@ window.addEventListener('pagehide', () => {
         const system = localStorage.getItem('aedelore_selected_system') || 'aedelore';
         const csrfToken = window.getCsrfToken ? window.getCsrfToken() : '';
 
-        const payload = JSON.stringify({ name: characterName, data, system });
+        const payload = JSON.stringify({
+            name: characterName, data, system,
+            token: window.authToken,
+            csrf_token: csrfToken
+        });
         navigator.sendBeacon(
-            `/api/characters/${window.currentCharacterId}?token=${window.authToken}&csrf_token=${csrfToken}`,
+            `/api/characters/${window.currentCharacterId}`,
             new Blob([payload], { type: 'application/json' })
         );
     }
@@ -705,10 +782,27 @@ window.addEventListener('load', async () => {
     window.updateAuthUI();
 
     if (window.authToken) {
-        // Logged in: load from cloud
+        // Logged in: try loading last character, fall back to most recent
+        let loaded = false;
         const pendingCharId = localStorage.getItem('aedelore_current_character_id');
         if (pendingCharId) {
-            await loadCharacterById(parseInt(pendingCharId));
+            loaded = await loadCharacterById(parseInt(pendingCharId));
+        }
+        if (!loaded) {
+            // No last character or load failed — auto-load most recently updated
+            try {
+                const res = await window.apiRequest('/api/characters');
+                if (res.ok) {
+                    const chars = await res.json();
+                    const currentSystem = localStorage.getItem('aedelore_selected_system') || 'aedelore';
+                    const match = chars.find(c => (c.system || 'aedelore') === currentSystem);
+                    if (match) {
+                        await loadCharacterById(parseInt(match.id));
+                    }
+                }
+            } catch (e) {
+                console.warn('Auto-load character failed:', e);
+            }
         }
     } else {
         // Not logged in: load local character if exists

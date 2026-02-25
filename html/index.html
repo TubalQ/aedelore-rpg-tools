@@ -399,6 +399,52 @@
             font-weight: 500;
         }
 
+        .hero-cta-row {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            animation: fadeIn 2s ease-out 2.5s both;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .hero-cta-primary {
+            background: linear-gradient(135deg, var(--accent-gold), #d4a843);
+            color: #0a0a0f;
+        }
+
+        .hero-cta-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(240, 192, 64, 0.4);
+        }
+
+        .hero-cta-secondary {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-secondary);
+        }
+
+        .hero-cta-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-purple);
+            color: var(--text-base);
+        }
+
         /* Verse format for history */
         .verse-text {
             font-family: 'Crimson Text', Georgia, serif;
@@ -1056,6 +1102,10 @@
                 <p class="crisis-hint">
                     <span class="seal-warning">One seal is broken.</span> The sleeper stirs. The hour grows late.
                 </p>
+                <div class="hero-cta-row">
+                    <a href="/character-sheet" class="hero-cta hero-cta-primary">Create Your Character</a>
+                    <a href="/wiki" class="hero-cta hero-cta-secondary">Explore the Wiki</a>
+                </div>
             </div>
             <div class="scroll-indicator">
                 Seek the Light

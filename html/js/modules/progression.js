@@ -474,6 +474,12 @@ function applyLockState() {
     const usedPoints = Math.floor(window.characterXPSpent / 10);
     const availablePoints = earnedPoints - usedPoints;
 
+    // Show hint when attributes are disabled because race/class not locked
+    const attrHint = document.getElementById('attr-locked-hint');
+    if (attrHint) {
+        attrHint.style.display = (!window.raceClassLocked && window.currentCharacterId && window.authToken) ? 'block' : 'none';
+    }
+
     attributeInputs.forEach(input => {
         const shouldLock = !window.raceClassLocked || (window.attributesLocked && availablePoints <= 0);
         input.disabled = shouldLock;
@@ -530,7 +536,7 @@ async function lockRaceClass() {
         window.baseAttributeValues = calculateBaseAttributeValues();
         updateProgressionSection();
         updatePointsDisplay();
-        alert('✅ Race and class locked. You can now distribute your 10 attribute points.');
+        alert('✅ Race and class locked. You can now distribute your ' + FREE_POINTS_TOTAL + ' attribute points.');
     } catch (error) {
         alert('❌ Connection error. Please try again.');
     }
