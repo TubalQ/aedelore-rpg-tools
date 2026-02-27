@@ -1,0 +1,1136 @@
+/* ===========================================
+   AEDELORE - Dark Premium + Color Design System
+   Version 3.1 - Modern dark with vibrant accents
+   =========================================== */
+
+:root {
+    /* Core Colors - Dark Premium */
+    --bg-base: #0a0a0f;
+    --bg-elevated: #0f0f18;
+    --bg-surface: #141420;
+    --bg-surface-hover: #1a1a2e;
+    --bg-highlight: #252538;
+    --bg-press: #2a2a40;
+
+    /* Text Colors */
+    --text-base: #ffffff;
+    --text-subdued: #b0b0c0;
+    --text-muted: #6a6a80;
+
+    /* Primary Accent - Gold */
+    --accent-primary: #f0c040;
+    --accent-primary-hover: #ffd666;
+    --accent-primary-glow: rgba(240, 192, 64, 0.3);
+    --accent-primary-10: rgba(240, 192, 64, 0.1);
+
+    /* Secondary Colors - Vibrant */
+    --accent-green: #22d97f;
+    --accent-green-hover: #2ee88c;
+    --accent-green-glow: rgba(34, 217, 127, 0.25);
+    --accent-green-10: rgba(34, 217, 127, 0.1);
+    --accent-green-15: rgba(34, 217, 127, 0.15);
+    --accent-green-20: rgba(34, 217, 127, 0.2);
+    --accent-green-30: rgba(34, 217, 127, 0.3);
+    --accent-green-35: rgba(34, 217, 127, 0.35);
+    --accent-green-40: rgba(34, 217, 127, 0.4);
+
+    --accent-blue: #3b9eff;
+    --accent-blue-glow: rgba(59, 158, 255, 0.25);
+    --accent-blue-08: rgba(59, 158, 255, 0.08);
+    --accent-blue-10: rgba(59, 158, 255, 0.1);
+    --accent-blue-15: rgba(59, 158, 255, 0.15);
+    --accent-blue-20: rgba(59, 158, 255, 0.2);
+    --accent-blue-30: rgba(59, 158, 255, 0.3);
+    --accent-blue-35: rgba(59, 158, 255, 0.35);
+    --accent-blue-40: rgba(59, 158, 255, 0.4);
+
+    --accent-purple: #a855f7;
+    --accent-purple-glow: rgba(168, 85, 247, 0.25);
+    --accent-purple-04: rgba(168, 85, 247, 0.04);
+    --accent-purple-05: rgba(168, 85, 247, 0.05);
+    --accent-purple-08: rgba(168, 85, 247, 0.08);
+    --accent-purple-10: rgba(168, 85, 247, 0.1);
+    --accent-purple-12: rgba(168, 85, 247, 0.12);
+    --accent-purple-15: rgba(168, 85, 247, 0.15);
+    --accent-purple-20: rgba(168, 85, 247, 0.2);
+    --accent-purple-30: rgba(168, 85, 247, 0.3);
+    --accent-purple-35: rgba(168, 85, 247, 0.35);
+    --accent-purple-40: rgba(168, 85, 247, 0.4);
+
+    --accent-red: #ff5757;
+    --accent-red-glow: rgba(255, 87, 87, 0.25);
+    --accent-red-10: rgba(255, 87, 87, 0.1);
+    --accent-red-20: rgba(255, 87, 87, 0.2);
+    --accent-red-35: rgba(255, 87, 87, 0.35);
+    --accent-red-40: rgba(255, 87, 87, 0.4);
+
+    --accent-amber: #f59e0b;
+    --accent-amber-20: rgba(245, 158, 11, 0.2);
+    --accent-amber-35: rgba(245, 158, 11, 0.35);
+    --accent-amber-40: rgba(245, 158, 11, 0.4);
+
+    /* Gold variants (based on --accent-primary #f0c040) */
+    --accent-gold-08: rgba(240, 192, 64, 0.08);
+    --accent-gold-10: rgba(240, 192, 64, 0.1);
+    --accent-gold-20: rgba(240, 192, 64, 0.2);
+    --accent-gold-30: rgba(240, 192, 64, 0.3);
+    --accent-gold-40: rgba(240, 192, 64, 0.4);
+
+    /* Green variants (missing) */
+    --accent-green-08: rgba(34, 217, 127, 0.08);
+
+    --accent-cyan: #22d3ee;
+    --accent-cyan-glow: rgba(34, 211, 238, 0.25);
+
+    /* Gradient colors for theme compatibility */
+    --gradient-start: var(--accent-purple);
+    --gradient-end: var(--accent-blue);
+    --gradient-tertiary: var(--accent-cyan);
+    --header-gradient-start: var(--accent-purple-15);
+    --header-gradient-end: var(--accent-blue-10);
+    --header-gradient-hover-start: var(--accent-purple-glow);
+    --header-gradient-hover-end: var(--accent-blue-15);
+    --button-gradient-start: var(--accent-purple-30);
+    --button-gradient-end: var(--accent-blue-20);
+
+    /* Legacy aliases for inline styles */
+    --accent-secondary: var(--accent-green);
+    --primary-purple: var(--accent-purple);
+    --primary-blue: var(--accent-blue);
+    --primary-green: var(--accent-green);
+    --accent-gold: var(--accent-primary);
+    --text-secondary: var(--text-subdued);
+    --text-primary: var(--text-base);
+
+    /* Borders - with color hints */
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-default: rgba(255, 255, 255, 0.12);
+    --border-strong: rgba(255, 255, 255, 0.18);
+    --border-gold: rgba(240, 192, 64, 0.4);
+    --border-purple: var(--accent-purple-40);
+    --border-blue: var(--accent-blue-40);
+    --border-accent: var(--accent-primary-glow);
+
+    /* Spacing */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+
+    /* Typography */
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 2rem;
+
+    /* Radius */
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
+    --radius-full: 9999px;
+
+    /* Transitions */
+    --transition-fast: 100ms ease;
+    --transition-base: 200ms ease;
+
+    /* Glass effect variables (used by Dark Glass theme) */
+    --glass-bg: transparent;
+    --glass-blur: 0;
+    --glass-border: var(--border-subtle);
+}
+
+/* ===========================================
+   THEME: Dark Glass
+   Premium dark with silver frames and gold accents
+   =========================================== */
+[data-theme="dark-glass"] {
+    /* Pure black/charcoal background */
+    --bg-base: #050508;
+    --bg-elevated: rgba(255, 255, 255, 0.03);
+    --bg-surface: rgba(255, 255, 255, 0.05);
+    --bg-surface-hover: rgba(255, 255, 255, 0.08);
+    --bg-highlight: rgba(255, 255, 255, 0.10);
+    --bg-press: rgba(255, 255, 255, 0.12);
+
+    /* Text: White to silver */
+    --text-base: #ffffff;
+    --text-subdued: #c0c0c0;
+    --text-muted: #808080;
+
+    /* Primary accent: Bright Gold */
+    --accent-primary: #ffc942;
+    --accent-primary-hover: #ffd866;
+    --accent-primary-glow: rgba(255, 201, 66, 0.5);
+
+    /* Green: Vibrant emerald */
+    --accent-green: #00e676;
+    --accent-green-hover: #69f0ae;
+    --accent-green-glow: rgba(0, 230, 118, 0.5);
+    --accent-green-10: rgba(0, 230, 118, 0.15);
+    --accent-green-15: rgba(0, 230, 118, 0.2);
+    --accent-green-20: rgba(0, 230, 118, 0.25);
+    --accent-green-30: rgba(0, 230, 118, 0.35);
+    --accent-green-35: rgba(0, 230, 118, 0.4);
+    --accent-green-40: rgba(0, 230, 118, 0.5);
+
+    /* Blue: Bright electric blue for Willpower */
+    --accent-blue: #40c4ff;
+    --accent-blue-glow: rgba(64, 196, 255, 0.5);
+    --accent-blue-08: rgba(64, 196, 255, 0.12);
+    --accent-blue-10: rgba(64, 196, 255, 0.15);
+    --accent-blue-15: rgba(64, 196, 255, 0.2);
+    --accent-blue-20: rgba(64, 196, 255, 0.25);
+    --accent-blue-30: rgba(64, 196, 255, 0.35);
+    --accent-blue-35: rgba(64, 196, 255, 0.4);
+    --accent-blue-40: rgba(64, 196, 255, 0.5);
+
+    /* Purple: Vibrant violet for Arcana */
+    --accent-purple: #b388ff;
+    --accent-purple-glow: rgba(179, 136, 255, 0.5);
+    --accent-purple-04: rgba(179, 136, 255, 0.06);
+    --accent-purple-05: rgba(179, 136, 255, 0.08);
+    --accent-purple-08: rgba(179, 136, 255, 0.12);
+    --accent-purple-10: rgba(179, 136, 255, 0.15);
+    --accent-purple-12: rgba(179, 136, 255, 0.18);
+    --accent-purple-15: rgba(179, 136, 255, 0.2);
+    --accent-purple-20: rgba(179, 136, 255, 0.25);
+    --accent-purple-30: rgba(179, 136, 255, 0.35);
+    --accent-purple-35: rgba(179, 136, 255, 0.4);
+    --accent-purple-40: rgba(179, 136, 255, 0.5);
+
+    /* Red: Bright crimson for HP */
+    --accent-red: #ff5252;
+    --accent-red-glow: rgba(255, 82, 82, 0.5);
+    --accent-red-10: rgba(255, 82, 82, 0.15);
+    --accent-red-20: rgba(255, 82, 82, 0.25);
+    --accent-red-35: rgba(255, 82, 82, 0.4);
+    --accent-red-40: rgba(255, 82, 82, 0.5);
+
+    /* Amber: Bright gold */
+    --accent-amber: #ffab00;
+    --accent-amber-20: rgba(255, 171, 0, 0.25);
+    --accent-amber-35: rgba(255, 171, 0, 0.4);
+    --accent-amber-40: rgba(255, 171, 0, 0.5);
+
+    /* Cyan: Bright cyan */
+    --accent-cyan: #18ffff;
+    --accent-cyan-glow: rgba(24, 255, 255, 0.5);
+
+    /* Gradients: Bright Gold to Silver */
+    --gradient-start: #ffc942;
+    --gradient-end: #c0c0c0;
+    --gradient-tertiary: #e0e0e0;
+    --header-gradient-start: rgba(255, 201, 66, 0.15);
+    --header-gradient-end: rgba(192, 192, 192, 0.1);
+    --header-gradient-hover-start: rgba(255, 201, 66, 0.25);
+    --header-gradient-hover-end: rgba(192, 192, 192, 0.2);
+    --button-gradient-start: rgba(255, 201, 66, 0.3);
+    --button-gradient-end: rgba(192, 192, 192, 0.2);
+
+    /* Borders: Brighter silver tones */
+    --border-subtle: rgba(192, 192, 192, 0.15);
+    --border-default: rgba(192, 192, 192, 0.25);
+    --border-strong: rgba(192, 192, 192, 0.4);
+    --border-gold: rgba(255, 201, 66, 0.6);
+    --border-purple: rgba(179, 136, 255, 0.5);
+    --border-blue: rgba(143, 175, 196, 0.4);
+
+    /* Glass effect: Dark with silver edge */
+    --glass-bg: rgba(20, 20, 25, 0.7);
+    --glass-blur: 20px;
+    --glass-border: rgba(192, 192, 192, 0.15);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 1px rgba(192, 192, 192, 0.3);
+    --glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* ===========================================
+   THEME: Midnight Blue
+   Elegant and mysterious, moonlight on water
+   =========================================== */
+[data-theme="midnight"] {
+    --bg-base: #0a1628;
+    --bg-elevated: #0f1f35;
+    --bg-surface: #152845;
+    --bg-surface-hover: #1a3155;
+    --bg-highlight: #203a65;
+    --bg-press: #254575;
+
+    --text-base: #e8f0ff;
+    --text-subdued: #a0b4d4;
+    --text-muted: #6080a8;
+
+    --accent-primary: #c0d8ff;
+    --accent-primary-hover: #d8e8ff;
+    --accent-primary-glow: rgba(192, 216, 255, 0.3);
+
+    --accent-green: #50d890;
+    --accent-green-hover: #70e8a8;
+    --accent-green-glow: rgba(80, 216, 144, 0.25);
+    --accent-green-10: rgba(80, 216, 144, 0.1);
+    --accent-green-15: rgba(80, 216, 144, 0.15);
+    --accent-green-20: rgba(80, 216, 144, 0.2);
+    --accent-green-30: rgba(80, 216, 144, 0.3);
+    --accent-green-35: rgba(80, 216, 144, 0.35);
+    --accent-green-40: rgba(80, 216, 144, 0.4);
+
+    --accent-blue: #60a0ff;
+    --accent-blue-glow: rgba(96, 160, 255, 0.25);
+    --accent-blue-08: rgba(96, 160, 255, 0.08);
+    --accent-blue-10: rgba(96, 160, 255, 0.1);
+    --accent-blue-15: rgba(96, 160, 255, 0.15);
+    --accent-blue-20: rgba(96, 160, 255, 0.2);
+    --accent-blue-30: rgba(96, 160, 255, 0.3);
+    --accent-blue-35: rgba(96, 160, 255, 0.35);
+    --accent-blue-40: rgba(96, 160, 255, 0.4);
+
+    --accent-purple: #a080ff;
+    --accent-purple-glow: rgba(160, 128, 255, 0.25);
+    --accent-purple-04: rgba(160, 128, 255, 0.04);
+    --accent-purple-05: rgba(160, 128, 255, 0.05);
+    --accent-purple-08: rgba(160, 128, 255, 0.08);
+    --accent-purple-10: rgba(160, 128, 255, 0.1);
+    --accent-purple-12: rgba(160, 128, 255, 0.12);
+    --accent-purple-15: rgba(160, 128, 255, 0.15);
+    --accent-purple-20: rgba(160, 128, 255, 0.2);
+    --accent-purple-30: rgba(160, 128, 255, 0.3);
+    --accent-purple-35: rgba(160, 128, 255, 0.35);
+    --accent-purple-40: rgba(160, 128, 255, 0.4);
+
+    --accent-red: #ff6080;
+    --accent-red-glow: rgba(255, 96, 128, 0.25);
+    --accent-red-10: rgba(255, 96, 128, 0.1);
+    --accent-red-20: rgba(255, 96, 128, 0.2);
+    --accent-red-35: rgba(255, 96, 128, 0.35);
+    --accent-red-40: rgba(255, 96, 128, 0.4);
+
+    --accent-amber: #ffa050;
+    --accent-amber-20: rgba(255, 160, 80, 0.2);
+    --accent-amber-35: rgba(255, 160, 80, 0.35);
+    --accent-amber-40: rgba(255, 160, 80, 0.4);
+
+    --accent-cyan: #60d8e8;
+    --accent-cyan-glow: rgba(96, 216, 232, 0.25);
+
+    --gradient-start: var(--accent-blue);
+    --gradient-end: var(--accent-purple);
+    --gradient-tertiary: var(--accent-cyan);
+    --header-gradient-start: rgba(96, 160, 255, 0.15);
+    --header-gradient-end: rgba(160, 128, 255, 0.1);
+    --header-gradient-hover-start: rgba(96, 160, 255, 0.25);
+    --header-gradient-hover-end: rgba(160, 128, 255, 0.15);
+    --button-gradient-start: rgba(96, 160, 255, 0.3);
+    --button-gradient-end: rgba(160, 128, 255, 0.2);
+
+    --border-subtle: rgba(192, 216, 255, 0.08);
+    --border-default: rgba(192, 216, 255, 0.12);
+    --border-strong: rgba(192, 216, 255, 0.2);
+    --border-gold: rgba(192, 216, 255, 0.4);
+    --border-purple: var(--accent-purple-40);
+    --border-blue: rgba(96, 160, 255, 0.4);
+
+    --glass-bg: transparent;
+    --glass-blur: 0;
+    --glass-border: var(--border-subtle);
+}
+
+/* ===========================================
+   THEME: Ember
+   Fiery dark theme with glowing hot accents
+   =========================================== */
+[data-theme="ember"] {
+    /* Deep charcoal background */
+    --bg-base: #0c0806;
+    --bg-elevated: #151010;
+    --bg-surface: #1a1210;
+    --bg-surface-hover: #241815;
+    --bg-highlight: #2e1e1a;
+    --bg-press: #382520;
+
+    /* Text: Warm white to ash */
+    --text-base: #fff5f0;
+    --text-subdued: #c9a89a;
+    --text-muted: #8a6a5a;
+
+    /* Primary accent: Bright Orange */
+    --accent-primary: #ff6a00;
+    --accent-primary-hover: #ff8533;
+    --accent-primary-glow: rgba(255, 106, 0, 0.6);
+
+    /* Green: Warm lime (for success states) */
+    --accent-green: #a0ff00;
+    --accent-green-hover: #b8ff40;
+    --accent-green-glow: rgba(160, 255, 0, 0.5);
+    --accent-green-10: rgba(160, 255, 0, 0.1);
+    --accent-green-15: rgba(160, 255, 0, 0.15);
+    --accent-green-20: rgba(160, 255, 0, 0.2);
+    --accent-green-30: rgba(160, 255, 0, 0.3);
+    --accent-green-35: rgba(160, 255, 0, 0.35);
+    --accent-green-40: rgba(160, 255, 0, 0.4);
+
+    /* Blue: Replaced with hot yellow for Willpower */
+    --accent-blue: #ffcc00;
+    --accent-blue-glow: rgba(255, 204, 0, 0.6);
+    --accent-blue-08: rgba(255, 204, 0, 0.08);
+    --accent-blue-10: rgba(255, 204, 0, 0.1);
+    --accent-blue-15: rgba(255, 204, 0, 0.15);
+    --accent-blue-20: rgba(255, 204, 0, 0.2);
+    --accent-blue-30: rgba(255, 204, 0, 0.3);
+    --accent-blue-35: rgba(255, 204, 0, 0.35);
+    --accent-blue-40: rgba(255, 204, 0, 0.4);
+
+    /* Purple: Replaced with orange for Arcana */
+    --accent-purple: #ff8c00;
+    --accent-purple-glow: rgba(255, 140, 0, 0.6);
+    --accent-purple-04: rgba(255, 140, 0, 0.04);
+    --accent-purple-05: rgba(255, 140, 0, 0.05);
+    --accent-purple-08: rgba(255, 140, 0, 0.08);
+    --accent-purple-10: rgba(255, 140, 0, 0.1);
+    --accent-purple-12: rgba(255, 140, 0, 0.12);
+    --accent-purple-15: rgba(255, 140, 0, 0.15);
+    --accent-purple-20: rgba(255, 140, 0, 0.2);
+    --accent-purple-30: rgba(255, 140, 0, 0.3);
+    --accent-purple-35: rgba(255, 140, 0, 0.35);
+    --accent-purple-40: rgba(255, 140, 0, 0.4);
+
+    /* Red: Blazing crimson for HP */
+    --accent-red: #ff2a2a;
+    --accent-red-glow: rgba(255, 42, 42, 0.7);
+    --accent-red-10: rgba(255, 42, 42, 0.1);
+    --accent-red-20: rgba(255, 42, 42, 0.2);
+    --accent-red-35: rgba(255, 42, 42, 0.35);
+    --accent-red-40: rgba(255, 42, 42, 0.4);
+
+    /* Amber: Hot amber */
+    --accent-amber: #ffaa00;
+    --accent-amber-20: rgba(255, 170, 0, 0.2);
+    --accent-amber-35: rgba(255, 170, 0, 0.35);
+    --accent-amber-40: rgba(255, 170, 0, 0.4);
+
+    /* Cyan: Replaced with bright yellow */
+    --accent-cyan: #ffe033;
+    --accent-cyan-glow: rgba(255, 224, 51, 0.6);
+
+    /* Gradients: Fire gradient orange to red */
+    --gradient-start: #ff6a00;
+    --gradient-end: #ff2a2a;
+    --gradient-tertiary: #ffcc00;
+    --header-gradient-start: rgba(255, 106, 0, 0.2);
+    --header-gradient-end: rgba(255, 42, 42, 0.15);
+    --header-gradient-hover-start: rgba(255, 106, 0, 0.35);
+    --header-gradient-hover-end: rgba(255, 42, 42, 0.25);
+    --button-gradient-start: rgba(255, 106, 0, 0.4);
+    --button-gradient-end: rgba(255, 42, 42, 0.3);
+
+    /* Borders: Ember tones */
+    --border-subtle: rgba(255, 106, 0, 0.1);
+    --border-default: rgba(255, 106, 0, 0.2);
+    --border-strong: rgba(255, 106, 0, 0.4);
+    --border-gold: rgba(255, 170, 0, 0.6);
+    --border-purple: rgba(255, 140, 0, 0.5);
+    --border-blue: rgba(255, 204, 0, 0.4);
+
+    /* Glass effect: Dark with ember glow */
+    --glass-bg: rgba(20, 12, 10, 0.8);
+    --glass-blur: 16px;
+    --glass-border: rgba(255, 106, 0, 0.15);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 2px rgba(255, 106, 0, 0.3);
+    --glass-inset: inset 0 1px 0 rgba(255, 140, 0, 0.1);
+}
+
+/* ===========================================
+   THEME: Forest
+   Deep woods, druids, nature magic
+   =========================================== */
+[data-theme="forest"] {
+    --bg-base: #060a06;
+    --bg-elevated: #0a120a;
+    --bg-surface: #0e1a0e;
+    --bg-surface-hover: #142014;
+    --bg-highlight: #1a2a1a;
+    --bg-press: #203020;
+
+    --text-base: #e8f5e8;
+    --text-subdued: #a0c4a0;
+    --text-muted: #608060;
+
+    --accent-primary: #10b981;
+    --accent-primary-hover: #34d399;
+    --accent-primary-glow: rgba(16, 185, 129, 0.4);
+
+    --accent-green: #22c55e;
+    --accent-green-hover: #4ade80;
+    --accent-green-glow: rgba(34, 197, 94, 0.3);
+    --accent-green-10: rgba(34, 197, 94, 0.1);
+    --accent-green-15: rgba(34, 197, 94, 0.15);
+    --accent-green-20: rgba(34, 197, 94, 0.2);
+    --accent-green-30: rgba(34, 197, 94, 0.3);
+    --accent-green-35: rgba(34, 197, 94, 0.35);
+    --accent-green-40: rgba(34, 197, 94, 0.4);
+
+    --accent-blue: #14b8a6;
+    --accent-blue-glow: rgba(20, 184, 166, 0.3);
+    --accent-blue-08: rgba(20, 184, 166, 0.08);
+    --accent-blue-10: rgba(20, 184, 166, 0.1);
+    --accent-blue-15: rgba(20, 184, 166, 0.15);
+    --accent-blue-20: rgba(20, 184, 166, 0.2);
+    --accent-blue-30: rgba(20, 184, 166, 0.3);
+    --accent-blue-35: rgba(20, 184, 166, 0.35);
+    --accent-blue-40: rgba(20, 184, 166, 0.4);
+
+    --accent-purple: #d4a017;
+    --accent-purple-glow: rgba(212, 160, 23, 0.3);
+    --accent-purple-04: rgba(212, 160, 23, 0.04);
+    --accent-purple-05: rgba(212, 160, 23, 0.05);
+    --accent-purple-08: rgba(212, 160, 23, 0.08);
+    --accent-purple-10: rgba(212, 160, 23, 0.1);
+    --accent-purple-12: rgba(212, 160, 23, 0.12);
+    --accent-purple-15: rgba(212, 160, 23, 0.15);
+    --accent-purple-20: rgba(212, 160, 23, 0.2);
+    --accent-purple-30: rgba(212, 160, 23, 0.3);
+    --accent-purple-35: rgba(212, 160, 23, 0.35);
+    --accent-purple-40: rgba(212, 160, 23, 0.4);
+
+    --accent-red: #ef4444;
+    --accent-red-glow: rgba(239, 68, 68, 0.3);
+    --accent-red-10: rgba(239, 68, 68, 0.1);
+    --accent-red-20: rgba(239, 68, 68, 0.2);
+    --accent-red-35: rgba(239, 68, 68, 0.35);
+    --accent-red-40: rgba(239, 68, 68, 0.4);
+
+    --accent-amber: #d97706;
+    --accent-amber-20: rgba(217, 119, 6, 0.2);
+    --accent-amber-35: rgba(217, 119, 6, 0.35);
+    --accent-amber-40: rgba(217, 119, 6, 0.4);
+
+    --accent-cyan: #2dd4bf;
+    --accent-cyan-glow: rgba(45, 212, 191, 0.3);
+
+    --gradient-start: #10b981;
+    --gradient-end: #22c55e;
+    --gradient-tertiary: #14b8a6;
+    --header-gradient-start: rgba(16, 185, 129, 0.15);
+    --header-gradient-end: rgba(34, 197, 94, 0.1);
+    --header-gradient-hover-start: rgba(16, 185, 129, 0.25);
+    --header-gradient-hover-end: rgba(34, 197, 94, 0.15);
+    --button-gradient-start: rgba(16, 185, 129, 0.3);
+    --button-gradient-end: rgba(34, 197, 94, 0.2);
+
+    --border-subtle: rgba(16, 185, 129, 0.08);
+    --border-default: rgba(16, 185, 129, 0.15);
+    --border-strong: rgba(16, 185, 129, 0.25);
+    --border-gold: rgba(212, 160, 23, 0.5);
+    --border-purple: rgba(212, 160, 23, 0.4);
+    --border-blue: rgba(20, 184, 166, 0.4);
+}
+
+/* ===========================================
+   THEME: Frost
+   Ice, winter, crystalline
+   =========================================== */
+[data-theme="frost"] {
+    --bg-base: #060810;
+    --bg-elevated: #0a0e18;
+    --bg-surface: #0e1420;
+    --bg-surface-hover: #141c2a;
+    --bg-highlight: #1a2435;
+    --bg-press: #202c40;
+
+    --text-base: #f0f8ff;
+    --text-subdued: #a0c4e0;
+    --text-muted: #6090b0;
+
+    --accent-primary: #7dd3fc;
+    --accent-primary-hover: #a5e0fb;
+    --accent-primary-glow: rgba(125, 211, 252, 0.4);
+
+    --accent-green: #4ade80;
+    --accent-green-hover: #86efac;
+    --accent-green-glow: rgba(74, 222, 128, 0.3);
+    --accent-green-10: rgba(74, 222, 128, 0.1);
+    --accent-green-15: rgba(74, 222, 128, 0.15);
+    --accent-green-20: rgba(74, 222, 128, 0.2);
+    --accent-green-30: rgba(74, 222, 128, 0.3);
+    --accent-green-35: rgba(74, 222, 128, 0.35);
+    --accent-green-40: rgba(74, 222, 128, 0.4);
+
+    --accent-blue: #38bdf8;
+    --accent-blue-glow: rgba(56, 189, 248, 0.4);
+    --accent-blue-08: rgba(56, 189, 248, 0.08);
+    --accent-blue-10: rgba(56, 189, 248, 0.1);
+    --accent-blue-15: rgba(56, 189, 248, 0.15);
+    --accent-blue-20: rgba(56, 189, 248, 0.2);
+    --accent-blue-30: rgba(56, 189, 248, 0.3);
+    --accent-blue-35: rgba(56, 189, 248, 0.35);
+    --accent-blue-40: rgba(56, 189, 248, 0.4);
+
+    --accent-purple: #a78bfa;
+    --accent-purple-glow: rgba(167, 139, 250, 0.3);
+    --accent-purple-04: rgba(167, 139, 250, 0.04);
+    --accent-purple-05: rgba(167, 139, 250, 0.05);
+    --accent-purple-08: rgba(167, 139, 250, 0.08);
+    --accent-purple-10: rgba(167, 139, 250, 0.1);
+    --accent-purple-12: rgba(167, 139, 250, 0.12);
+    --accent-purple-15: rgba(167, 139, 250, 0.15);
+    --accent-purple-20: rgba(167, 139, 250, 0.2);
+    --accent-purple-30: rgba(167, 139, 250, 0.3);
+    --accent-purple-35: rgba(167, 139, 250, 0.35);
+    --accent-purple-40: rgba(167, 139, 250, 0.4);
+
+    --accent-red: #f472b6;
+    --accent-red-glow: rgba(244, 114, 182, 0.3);
+    --accent-red-10: rgba(244, 114, 182, 0.1);
+    --accent-red-20: rgba(244, 114, 182, 0.2);
+    --accent-red-35: rgba(244, 114, 182, 0.35);
+    --accent-red-40: rgba(244, 114, 182, 0.4);
+
+    --accent-amber: #fbbf24;
+    --accent-amber-20: rgba(251, 191, 36, 0.2);
+    --accent-amber-35: rgba(251, 191, 36, 0.35);
+    --accent-amber-40: rgba(251, 191, 36, 0.4);
+
+    --accent-cyan: #67e8f9;
+    --accent-cyan-glow: rgba(103, 232, 249, 0.4);
+
+    --gradient-start: #7dd3fc;
+    --gradient-end: #38bdf8;
+    --gradient-tertiary: #67e8f9;
+    --header-gradient-start: rgba(125, 211, 252, 0.15);
+    --header-gradient-end: rgba(56, 189, 248, 0.1);
+    --header-gradient-hover-start: rgba(125, 211, 252, 0.25);
+    --header-gradient-hover-end: rgba(56, 189, 248, 0.15);
+    --button-gradient-start: rgba(125, 211, 252, 0.3);
+    --button-gradient-end: rgba(56, 189, 248, 0.2);
+
+    --border-subtle: rgba(125, 211, 252, 0.08);
+    --border-default: rgba(125, 211, 252, 0.15);
+    --border-strong: rgba(125, 211, 252, 0.25);
+    --border-gold: rgba(251, 191, 36, 0.5);
+    --border-purple: rgba(167, 139, 250, 0.4);
+    --border-blue: rgba(56, 189, 248, 0.4);
+}
+
+/* ===========================================
+   THEME: Void
+   Cosmic, mystical, starfield
+   =========================================== */
+[data-theme="void"] {
+    --bg-base: #030308;
+    --bg-elevated: #08080f;
+    --bg-surface: #0c0c16;
+    --bg-surface-hover: #12121e;
+    --bg-highlight: #181828;
+    --bg-press: #1e1e32;
+
+    --text-base: #e8e0ff;
+    --text-subdued: #b0a0d0;
+    --text-muted: #706090;
+
+    --accent-primary: #e879f9;
+    --accent-primary-hover: #f0abfc;
+    --accent-primary-glow: rgba(232, 121, 249, 0.4);
+
+    --accent-green: #4ade80;
+    --accent-green-hover: #86efac;
+    --accent-green-glow: rgba(74, 222, 128, 0.3);
+    --accent-green-10: rgba(74, 222, 128, 0.1);
+    --accent-green-15: rgba(74, 222, 128, 0.15);
+    --accent-green-20: rgba(74, 222, 128, 0.2);
+    --accent-green-30: rgba(74, 222, 128, 0.3);
+    --accent-green-35: rgba(74, 222, 128, 0.35);
+    --accent-green-40: rgba(74, 222, 128, 0.4);
+
+    --accent-blue: #818cf8;
+    --accent-blue-glow: rgba(129, 140, 248, 0.4);
+    --accent-blue-08: rgba(129, 140, 248, 0.08);
+    --accent-blue-10: rgba(129, 140, 248, 0.1);
+    --accent-blue-15: rgba(129, 140, 248, 0.15);
+    --accent-blue-20: rgba(129, 140, 248, 0.2);
+    --accent-blue-30: rgba(129, 140, 248, 0.3);
+    --accent-blue-35: rgba(129, 140, 248, 0.35);
+    --accent-blue-40: rgba(129, 140, 248, 0.4);
+
+    --accent-purple: #c084fc;
+    --accent-purple-glow: rgba(192, 132, 252, 0.4);
+    --accent-purple-04: rgba(192, 132, 252, 0.04);
+    --accent-purple-05: rgba(192, 132, 252, 0.05);
+    --accent-purple-08: rgba(192, 132, 252, 0.08);
+    --accent-purple-10: rgba(192, 132, 252, 0.1);
+    --accent-purple-12: rgba(192, 132, 252, 0.12);
+    --accent-purple-15: rgba(192, 132, 252, 0.15);
+    --accent-purple-20: rgba(192, 132, 252, 0.2);
+    --accent-purple-30: rgba(192, 132, 252, 0.3);
+    --accent-purple-35: rgba(192, 132, 252, 0.35);
+    --accent-purple-40: rgba(192, 132, 252, 0.4);
+
+    --accent-red: #fb7185;
+    --accent-red-glow: rgba(251, 113, 133, 0.3);
+    --accent-red-10: rgba(251, 113, 133, 0.1);
+    --accent-red-20: rgba(251, 113, 133, 0.2);
+    --accent-red-35: rgba(251, 113, 133, 0.35);
+    --accent-red-40: rgba(251, 113, 133, 0.4);
+
+    --accent-amber: #fcd34d;
+    --accent-amber-20: rgba(252, 211, 77, 0.2);
+    --accent-amber-35: rgba(252, 211, 77, 0.35);
+    --accent-amber-40: rgba(252, 211, 77, 0.4);
+
+    --accent-cyan: #a5b4fc;
+    --accent-cyan-glow: rgba(165, 180, 252, 0.4);
+
+    --gradient-start: #e879f9;
+    --gradient-end: #818cf8;
+    --gradient-tertiary: #c084fc;
+    --header-gradient-start: rgba(232, 121, 249, 0.15);
+    --header-gradient-end: rgba(129, 140, 248, 0.1);
+    --header-gradient-hover-start: rgba(232, 121, 249, 0.25);
+    --header-gradient-hover-end: rgba(129, 140, 248, 0.15);
+    --button-gradient-start: rgba(232, 121, 249, 0.3);
+    --button-gradient-end: rgba(129, 140, 248, 0.2);
+
+    --border-subtle: rgba(192, 132, 252, 0.08);
+    --border-default: rgba(192, 132, 252, 0.15);
+    --border-strong: rgba(192, 132, 252, 0.25);
+    --border-gold: rgba(252, 211, 77, 0.5);
+    --border-purple: rgba(192, 132, 252, 0.4);
+    --border-blue: rgba(129, 140, 248, 0.4);
+}
+
+/* ===========================================
+   THEME: Pure Darkness
+   Ultimate dark with silver/gold text glow
+   =========================================== */
+[data-theme="pure-darkness"] {
+    --bg-base: #000000;
+    --bg-elevated: #050505;
+    --bg-surface: #080808;
+    --bg-surface-hover: #0c0c0c;
+    --bg-highlight: #101010;
+    --bg-press: #141414;
+
+    --text-base: #d0d0d0;
+    --text-subdued: #909090;
+    --text-muted: #606060;
+
+    --accent-primary: #d4af37;
+    --accent-primary-hover: #e6c558;
+    --accent-primary-glow: rgba(212, 175, 55, 0.5);
+
+    --accent-green: #22c55e;
+    --accent-green-hover: #4ade80;
+    --accent-green-glow: rgba(34, 197, 94, 0.4);
+    --accent-green-10: rgba(34, 197, 94, 0.1);
+    --accent-green-15: rgba(34, 197, 94, 0.15);
+    --accent-green-20: rgba(34, 197, 94, 0.2);
+    --accent-green-30: rgba(34, 197, 94, 0.3);
+    --accent-green-35: rgba(34, 197, 94, 0.35);
+    --accent-green-40: rgba(34, 197, 94, 0.4);
+
+    --accent-blue: #3b82f6;
+    --accent-blue-glow: rgba(59, 130, 246, 0.4);
+    --accent-blue-08: rgba(59, 130, 246, 0.08);
+    --accent-blue-10: rgba(59, 130, 246, 0.1);
+    --accent-blue-15: rgba(59, 130, 246, 0.15);
+    --accent-blue-20: rgba(59, 130, 246, 0.2);
+    --accent-blue-30: rgba(59, 130, 246, 0.3);
+    --accent-blue-35: rgba(59, 130, 246, 0.35);
+    --accent-blue-40: rgba(59, 130, 246, 0.4);
+
+    --accent-purple: #a855f7;
+    --accent-purple-glow: rgba(168, 85, 247, 0.4);
+    --accent-purple-04: rgba(168, 85, 247, 0.04);
+    --accent-purple-05: rgba(168, 85, 247, 0.05);
+    --accent-purple-08: rgba(168, 85, 247, 0.08);
+    --accent-purple-10: rgba(168, 85, 247, 0.1);
+    --accent-purple-12: rgba(168, 85, 247, 0.12);
+    --accent-purple-15: rgba(168, 85, 247, 0.15);
+    --accent-purple-20: rgba(168, 85, 247, 0.2);
+    --accent-purple-30: rgba(168, 85, 247, 0.3);
+    --accent-purple-35: rgba(168, 85, 247, 0.35);
+    --accent-purple-40: rgba(168, 85, 247, 0.4);
+
+    --accent-red: #ef4444;
+    --accent-red-glow: rgba(239, 68, 68, 0.4);
+    --accent-red-10: rgba(239, 68, 68, 0.1);
+    --accent-red-20: rgba(239, 68, 68, 0.2);
+    --accent-red-35: rgba(239, 68, 68, 0.35);
+    --accent-red-40: rgba(239, 68, 68, 0.4);
+
+    --accent-amber: #f59e0b;
+    --accent-amber-20: rgba(245, 158, 11, 0.2);
+    --accent-amber-35: rgba(245, 158, 11, 0.35);
+    --accent-amber-40: rgba(245, 158, 11, 0.4);
+
+    --accent-cyan: #c0c0c0;
+    --accent-cyan-glow: rgba(192, 192, 192, 0.4);
+
+    --gradient-start: #d4af37;
+    --gradient-end: #c0c0c0;
+    --gradient-tertiary: #e6c558;
+    --header-gradient-start: rgba(212, 175, 55, 0.1);
+    --header-gradient-end: rgba(192, 192, 192, 0.05);
+    --header-gradient-hover-start: rgba(212, 175, 55, 0.2);
+    --header-gradient-hover-end: rgba(192, 192, 192, 0.1);
+    --button-gradient-start: rgba(212, 175, 55, 0.2);
+    --button-gradient-end: rgba(192, 192, 192, 0.1);
+
+    --border-subtle: rgba(255, 255, 255, 0.05);
+    --border-default: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(212, 175, 55, 0.2);
+    --border-gold: rgba(212, 175, 55, 0.4);
+    --border-purple: rgba(168, 85, 247, 0.3);
+    --border-blue: rgba(59, 130, 246, 0.3);
+}
+
+/* ===========================================
+   THEME: Blood
+   Vampires, dark magic, menacing
+   =========================================== */
+[data-theme="blood"] {
+    --bg-base: #080404;
+    --bg-elevated: #0e0808;
+    --bg-surface: #140c0c;
+    --bg-surface-hover: #1a1010;
+    --bg-highlight: #221414;
+    --bg-press: #2a1818;
+
+    --text-base: #f0e8e8;
+    --text-subdued: #c0a8a8;
+    --text-muted: #806060;
+
+    --accent-primary: #dc2626;
+    --accent-primary-hover: #ef4444;
+    --accent-primary-glow: rgba(220, 38, 38, 0.5);
+
+    --accent-green: #22c55e;
+    --accent-green-hover: #4ade80;
+    --accent-green-glow: rgba(34, 197, 94, 0.3);
+    --accent-green-10: rgba(34, 197, 94, 0.1);
+    --accent-green-15: rgba(34, 197, 94, 0.15);
+    --accent-green-20: rgba(34, 197, 94, 0.2);
+    --accent-green-30: rgba(34, 197, 94, 0.3);
+    --accent-green-35: rgba(34, 197, 94, 0.35);
+    --accent-green-40: rgba(34, 197, 94, 0.4);
+
+    --accent-blue: #b45309;
+    --accent-blue-glow: rgba(180, 83, 9, 0.4);
+    --accent-blue-08: rgba(180, 83, 9, 0.08);
+    --accent-blue-10: rgba(180, 83, 9, 0.1);
+    --accent-blue-15: rgba(180, 83, 9, 0.15);
+    --accent-blue-20: rgba(180, 83, 9, 0.2);
+    --accent-blue-30: rgba(180, 83, 9, 0.3);
+    --accent-blue-35: rgba(180, 83, 9, 0.35);
+    --accent-blue-40: rgba(180, 83, 9, 0.4);
+
+    --accent-purple: #7c3aed;
+    --accent-purple-glow: rgba(124, 58, 237, 0.4);
+    --accent-purple-04: rgba(124, 58, 237, 0.04);
+    --accent-purple-05: rgba(124, 58, 237, 0.05);
+    --accent-purple-08: rgba(124, 58, 237, 0.08);
+    --accent-purple-10: rgba(124, 58, 237, 0.1);
+    --accent-purple-12: rgba(124, 58, 237, 0.12);
+    --accent-purple-15: rgba(124, 58, 237, 0.15);
+    --accent-purple-20: rgba(124, 58, 237, 0.2);
+    --accent-purple-30: rgba(124, 58, 237, 0.3);
+    --accent-purple-35: rgba(124, 58, 237, 0.35);
+    --accent-purple-40: rgba(124, 58, 237, 0.4);
+
+    --accent-red: #b91c1c;
+    --accent-red-glow: rgba(185, 28, 28, 0.5);
+    --accent-red-10: rgba(185, 28, 28, 0.1);
+    --accent-red-20: rgba(185, 28, 28, 0.2);
+    --accent-red-35: rgba(185, 28, 28, 0.35);
+    --accent-red-40: rgba(185, 28, 28, 0.4);
+
+    --accent-amber: #94a3b8;
+    --accent-amber-20: rgba(148, 163, 184, 0.2);
+    --accent-amber-35: rgba(148, 163, 184, 0.35);
+    --accent-amber-40: rgba(148, 163, 184, 0.4);
+
+    --accent-cyan: #a0a0a0;
+    --accent-cyan-glow: rgba(160, 160, 160, 0.3);
+
+    --gradient-start: #dc2626;
+    --gradient-end: #7c3aed;
+    --gradient-tertiary: #b91c1c;
+    --header-gradient-start: rgba(220, 38, 38, 0.15);
+    --header-gradient-end: rgba(124, 58, 237, 0.1);
+    --header-gradient-hover-start: rgba(220, 38, 38, 0.25);
+    --header-gradient-hover-end: rgba(124, 58, 237, 0.15);
+    --button-gradient-start: rgba(220, 38, 38, 0.3);
+    --button-gradient-end: rgba(124, 58, 237, 0.2);
+
+    --border-subtle: rgba(220, 38, 38, 0.08);
+    --border-default: rgba(220, 38, 38, 0.15);
+    --border-strong: rgba(220, 38, 38, 0.25);
+    --border-gold: rgba(148, 163, 184, 0.4);
+    --border-purple: rgba(124, 58, 237, 0.4);
+    --border-blue: rgba(180, 83, 9, 0.4);
+}
+
+/* ===========================================
+   THEME: Necro
+   Necromancy, undead, toxic
+   =========================================== */
+[data-theme="necro"] {
+    --bg-base: #050805;
+    --bg-elevated: #080c08;
+    --bg-surface: #0c120c;
+    --bg-surface-hover: #101810;
+    --bg-highlight: #141e14;
+    --bg-press: #182418;
+
+    --text-base: #d0e8d0;
+    --text-subdued: #90b890;
+    --text-muted: #507850;
+
+    --accent-primary: #84cc16;
+    --accent-primary-hover: #a3e635;
+    --accent-primary-glow: rgba(132, 204, 22, 0.5);
+
+    --accent-green: #65a30d;
+    --accent-green-hover: #84cc16;
+    --accent-green-glow: rgba(101, 163, 13, 0.4);
+    --accent-green-10: rgba(101, 163, 13, 0.1);
+    --accent-green-15: rgba(101, 163, 13, 0.15);
+    --accent-green-20: rgba(101, 163, 13, 0.2);
+    --accent-green-30: rgba(101, 163, 13, 0.3);
+    --accent-green-35: rgba(101, 163, 13, 0.35);
+    --accent-green-40: rgba(101, 163, 13, 0.4);
+
+    --accent-blue: #d4d4d4;
+    --accent-blue-glow: rgba(212, 212, 212, 0.4);
+    --accent-blue-08: rgba(212, 212, 212, 0.08);
+    --accent-blue-10: rgba(212, 212, 212, 0.1);
+    --accent-blue-15: rgba(212, 212, 212, 0.15);
+    --accent-blue-20: rgba(212, 212, 212, 0.2);
+    --accent-blue-30: rgba(212, 212, 212, 0.3);
+    --accent-blue-35: rgba(212, 212, 212, 0.35);
+    --accent-blue-40: rgba(212, 212, 212, 0.4);
+
+    --accent-purple: #65a30d;
+    --accent-purple-glow: rgba(101, 163, 13, 0.4);
+    --accent-purple-04: rgba(101, 163, 13, 0.04);
+    --accent-purple-05: rgba(101, 163, 13, 0.05);
+    --accent-purple-08: rgba(101, 163, 13, 0.08);
+    --accent-purple-10: rgba(101, 163, 13, 0.1);
+    --accent-purple-12: rgba(101, 163, 13, 0.12);
+    --accent-purple-15: rgba(101, 163, 13, 0.15);
+    --accent-purple-20: rgba(101, 163, 13, 0.2);
+    --accent-purple-30: rgba(101, 163, 13, 0.3);
+    --accent-purple-35: rgba(101, 163, 13, 0.35);
+    --accent-purple-40: rgba(101, 163, 13, 0.4);
+
+    --accent-red: #f87171;
+    --accent-red-glow: rgba(248, 113, 113, 0.4);
+    --accent-red-10: rgba(248, 113, 113, 0.1);
+    --accent-red-20: rgba(248, 113, 113, 0.2);
+    --accent-red-35: rgba(248, 113, 113, 0.35);
+    --accent-red-40: rgba(248, 113, 113, 0.4);
+
+    --accent-amber: #a16207;
+    --accent-amber-20: rgba(161, 98, 7, 0.2);
+    --accent-amber-35: rgba(161, 98, 7, 0.35);
+    --accent-amber-40: rgba(161, 98, 7, 0.4);
+
+    --accent-cyan: #bef264;
+    --accent-cyan-glow: rgba(190, 242, 100, 0.4);
+
+    --gradient-start: #84cc16;
+    --gradient-end: #65a30d;
+    --gradient-tertiary: #bef264;
+    --header-gradient-start: rgba(132, 204, 22, 0.15);
+    --header-gradient-end: rgba(101, 163, 13, 0.1);
+    --header-gradient-hover-start: rgba(132, 204, 22, 0.25);
+    --header-gradient-hover-end: rgba(101, 163, 13, 0.15);
+    --button-gradient-start: rgba(132, 204, 22, 0.3);
+    --button-gradient-end: rgba(101, 163, 13, 0.2);
+
+    --border-subtle: rgba(132, 204, 22, 0.08);
+    --border-default: rgba(132, 204, 22, 0.15);
+    --border-strong: rgba(132, 204, 22, 0.25);
+    --border-gold: rgba(161, 98, 7, 0.5);
+    --border-purple: rgba(101, 163, 13, 0.4);
+    --border-blue: rgba(212, 212, 212, 0.3);
+}
+
+/* ===========================================
+   THEME: Royal
+   Royalty, luxury, deep purple
+   =========================================== */
+[data-theme="royal"] {
+    --bg-base: #0a0610;
+    --bg-elevated: #0f0a18;
+    --bg-surface: #140e20;
+    --bg-surface-hover: #1a1428;
+    --bg-highlight: #201a32;
+    --bg-press: #28203c;
+
+    --text-base: #e8e0f0;
+    --text-subdued: #b8a8d0;
+    --text-muted: #7060a0;
+
+    --accent-primary: #fbbf24;
+    --accent-primary-hover: #fcd34d;
+    --accent-primary-glow: rgba(251, 191, 36, 0.5);
+
+    --accent-green: #22c55e;
+    --accent-green-hover: #4ade80;
+    --accent-green-glow: rgba(34, 197, 94, 0.3);
+    --accent-green-10: rgba(34, 197, 94, 0.1);
+    --accent-green-15: rgba(34, 197, 94, 0.15);
+    --accent-green-20: rgba(34, 197, 94, 0.2);
+    --accent-green-30: rgba(34, 197, 94, 0.3);
+    --accent-green-35: rgba(34, 197, 94, 0.35);
+    --accent-green-40: rgba(34, 197, 94, 0.4);
+
+    --accent-blue: #2563eb;
+    --accent-blue-glow: rgba(37, 99, 235, 0.4);
+    --accent-blue-08: rgba(37, 99, 235, 0.08);
+    --accent-blue-10: rgba(37, 99, 235, 0.1);
+    --accent-blue-15: rgba(37, 99, 235, 0.15);
+    --accent-blue-20: rgba(37, 99, 235, 0.2);
+    --accent-blue-30: rgba(37, 99, 235, 0.3);
+    --accent-blue-35: rgba(37, 99, 235, 0.35);
+    --accent-blue-40: rgba(37, 99, 235, 0.4);
+
+    --accent-purple: #9333ea;
+    --accent-purple-glow: rgba(147, 51, 234, 0.4);
+    --accent-purple-04: rgba(147, 51, 234, 0.04);
+    --accent-purple-05: rgba(147, 51, 234, 0.05);
+    --accent-purple-08: rgba(147, 51, 234, 0.08);
+    --accent-purple-10: rgba(147, 51, 234, 0.1);
+    --accent-purple-12: rgba(147, 51, 234, 0.12);
+    --accent-purple-15: rgba(147, 51, 234, 0.15);
+    --accent-purple-20: rgba(147, 51, 234, 0.2);
+    --accent-purple-30: rgba(147, 51, 234, 0.3);
+    --accent-purple-35: rgba(147, 51, 234, 0.35);
+    --accent-purple-40: rgba(147, 51, 234, 0.4);
+
+    --accent-red: #e11d48;
+    --accent-red-glow: rgba(225, 29, 72, 0.4);
+    --accent-red-10: rgba(225, 29, 72, 0.1);
+    --accent-red-20: rgba(225, 29, 72, 0.2);
+    --accent-red-35: rgba(225, 29, 72, 0.35);
+    --accent-red-40: rgba(225, 29, 72, 0.4);
+
+    --accent-amber: #f59e0b;
+    --accent-amber-20: rgba(245, 158, 11, 0.2);
+    --accent-amber-35: rgba(245, 158, 11, 0.35);
+    --accent-amber-40: rgba(245, 158, 11, 0.4);
+
+    --accent-cyan: #c084fc;
+    --accent-cyan-glow: rgba(192, 132, 252, 0.4);
+
+    --gradient-start: #fbbf24;
+    --gradient-end: #9333ea;
+    --gradient-tertiary: #2563eb;
+    --header-gradient-start: rgba(251, 191, 36, 0.15);
+    --header-gradient-end: rgba(147, 51, 234, 0.1);
+    --header-gradient-hover-start: rgba(251, 191, 36, 0.25);
+    --header-gradient-hover-end: rgba(147, 51, 234, 0.15);
+    --button-gradient-start: rgba(251, 191, 36, 0.3);
+    --button-gradient-end: rgba(147, 51, 234, 0.2);
+
+    --border-subtle: rgba(147, 51, 234, 0.1);
+    --border-default: rgba(147, 51, 234, 0.18);
+    --border-strong: rgba(251, 191, 36, 0.3);
+    --border-gold: rgba(251, 191, 36, 0.5);
+    --border-purple: rgba(147, 51, 234, 0.4);
+    --border-blue: rgba(37, 99, 235, 0.4);
+}
+
+/* ===========================================
+   THEME: Crimson
+   War, battlefield, intense
+   =========================================== */
+[data-theme="crimson"] {
+    --bg-base: #0c0506;
+    --bg-elevated: #120809;
+    --bg-surface: #180b0c;
+    --bg-surface-hover: #1e0e10;
+    --bg-highlight: #261214;
+    --bg-press: #2e1618;
+
+    --text-base: #f5f0f0;
+    --text-subdued: #c8b0b0;
+    --text-muted: #907070;
+
+    --accent-primary: #be123c;
+    --accent-primary-hover: #e11d48;
+    --accent-primary-glow: rgba(190, 18, 60, 0.5);
+
+    --accent-green: #22c55e;
+    --accent-green-hover: #4ade80;
+    --accent-green-glow: rgba(34, 197, 94, 0.3);
+    --accent-green-10: rgba(34, 197, 94, 0.1);
+    --accent-green-15: rgba(34, 197, 94, 0.15);
+    --accent-green-20: rgba(34, 197, 94, 0.2);
+    --accent-green-30: rgba(34, 197, 94, 0.3);
+    --accent-green-35: rgba(34, 197, 94, 0.35);
+    --accent-green-40: rgba(34, 197, 94, 0.4);
+
+    --accent-blue: #6b7280;
+    --accent-blue-glow: rgba(107, 114, 128, 0.4);
+    --accent-blue-08: rgba(107, 114, 128, 0.08);
+    --accent-blue-10: rgba(107, 114, 128, 0.1);
+    --accent-blue-15: rgba(107, 114, 128, 0.15);
+    --accent-blue-20: rgba(107, 114, 128, 0.2);
+    --accent-blue-30: rgba(107, 114, 128, 0.3);
+    --accent-blue-35: rgba(107, 114, 128, 0.35);
+    --accent-blue-40: rgba(107, 114, 128, 0.4);
+
+    --accent-purple: #b45309;
+    --accent-purple-glow: rgba(180, 83, 9, 0.4);
+    --accent-purple-04: rgba(180, 83, 9, 0.04);
+    --accent-purple-05: rgba(180, 83, 9, 0.05);
+    --accent-purple-08: rgba(180, 83, 9, 0.08);
+    --accent-purple-10: rgba(180, 83, 9, 0.1);
+    --accent-purple-12: rgba(180, 83, 9, 0.12);
+    --accent-purple-15: rgba(180, 83, 9, 0.15);
+    --accent-purple-20: rgba(180, 83, 9, 0.2);
+    --accent-purple-30: rgba(180, 83, 9, 0.3);
+    --accent-purple-35: rgba(180, 83, 9, 0.35);
+    --accent-purple-40: rgba(180, 83, 9, 0.4);
+
+    --accent-red: #dc2626;
+    --accent-red-glow: rgba(220, 38, 38, 0.5);
+    --accent-red-10: rgba(220, 38, 38, 0.1);
+    --accent-red-20: rgba(220, 38, 38, 0.2);
+    --accent-red-35: rgba(220, 38, 38, 0.35);
+    --accent-red-40: rgba(220, 38, 38, 0.4);
+
+    --accent-amber: #d97706;
+    --accent-amber-20: rgba(217, 119, 6, 0.2);
+    --accent-amber-35: rgba(217, 119, 6, 0.35);
+    --accent-amber-40: rgba(217, 119, 6, 0.4);
+
+    --accent-cyan: #9ca3af;
+    --accent-cyan-glow: rgba(156, 163, 175, 0.4);
+
+    --gradient-start: #be123c;
+    --gradient-end: #dc2626;
+    --gradient-tertiary: #b45309;
+    --header-gradient-start: rgba(190, 18, 60, 0.15);
+    --header-gradient-end: rgba(220, 38, 38, 0.1);
+    --header-gradient-hover-start: rgba(190, 18, 60, 0.25);
+    --header-gradient-hover-end: rgba(220, 38, 38, 0.15);
+    --button-gradient-start: rgba(190, 18, 60, 0.3);
+    --button-gradient-end: rgba(220, 38, 38, 0.2);
+
+    --border-subtle: rgba(190, 18, 60, 0.1);
+    --border-default: rgba(190, 18, 60, 0.18);
+    --border-strong: rgba(190, 18, 60, 0.3);
+    --border-gold: rgba(217, 119, 6, 0.5);
+    --border-purple: rgba(180, 83, 9, 0.4);
+    --border-blue: rgba(107, 114, 128, 0.4);
+}

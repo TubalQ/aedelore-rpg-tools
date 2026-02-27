@@ -1,0 +1,99 @@
+/* ===========================================
+   Print Styles
+   =========================================== */
+@media print {
+    @page { margin: 1.5cm; size: A4; }
+
+    body {
+        background: white !important;
+        color: black !important;
+        padding: 0;
+        font-size: 11pt;
+    }
+
+    body::before {
+        display: none !important;
+    }
+
+    .header-menus, .tab-container, header,
+    #page-rules, #page-help, #page-dices,
+    .mobile-menu-btn, .mobile-menu-close,
+    .mobile-tab-toggle, .mobile-tab-panel, .mobile-tab-overlay,
+    .cloud-save-indicator, .sync-notice, .privacy-banner,
+    #toast-container, .status-bar, .desktop-sidebar,
+    .sidebar-toggle, .onboarding-sidebar, .onboarding-mobile,
+    .value-btn, .dice-roller-container,
+    .modal-overlay, .confirm-overlay {
+        display: none !important;
+    }
+
+    .container { max-width: 100%; padding: 0; }
+
+    .tab-content {
+        display: block !important;
+        page-break-before: always;
+    }
+
+    .tab-content:first-of-type { page-break-before: auto; }
+
+    .section {
+        page-break-inside: avoid;
+        border: 1px solid #333;
+        background: white !important;
+        padding: 12px;
+        margin-bottom: 12px;
+        box-shadow: none !important;
+    }
+
+    .section-title {
+        border-bottom: 2px solid #333;
+        color: #000 !important;
+        background: none !important;
+        -webkit-text-fill-color: #000 !important;
+    }
+
+    input, textarea, select {
+        border: 1px solid #666 !important;
+        background: white !important;
+        color: black !important;
+        box-shadow: none !important;
+    }
+
+    a { color: #333 !important; text-decoration: underline; }
+
+    table { border-collapse: collapse; }
+    th { background: #f0f0f0 !important; border: 1px solid #333 !important; color: #000 !important; }
+    td { border: 1px solid #666 !important; color: #000 !important; }
+
+    .grid-2 { grid-template-columns: 1fr 1fr; }
+    .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    .attribute-section {
+        background: white !important;
+        border: 1px solid #666;
+    }
+
+    .slider-fill, .slider-track {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    * {
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+}
+
+
+/* ===========================================
+   Reduced Motion Preference
+   =========================================== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
