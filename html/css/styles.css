@@ -2665,8 +2665,8 @@ a.dropdown-item {
 /* Mobile menu button - hidden by default */
 .mobile-menu-btn {
     display: none;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     padding: 0;
     background: transparent;
     border: 1px solid var(--border-subtle);
@@ -2766,9 +2766,12 @@ a.dropdown-item {
         z-index: 10000;
         padding: var(--space-6);
         padding-top: 80px;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
         flex-direction: column;
         gap: var(--space-3);
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
     }
 
     .header-right.mobile-open {
@@ -3236,7 +3239,7 @@ select {
     width: 100%;
     padding: var(--space-3) var(--space-4);
     font-family: var(--font-family);
-    font-size: var(--font-size-sm);
+    font-size: max(var(--font-size-sm), 16px);
     color: var(--text-base);
     background: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
@@ -3477,8 +3480,8 @@ td .value-btn {
 /* Mobile responsive for value buttons - larger touch targets */
 @media (max-width: 768px) {
     .value-btn {
-        width: 36px;
-        height: 36px;
+        width: 44px;
+        height: 44px;
         font-size: 18px;
     }
 
@@ -3495,8 +3498,8 @@ td .value-btn {
     }
 
     td .value-btn {
-        width: 32px;
-        height: 32px;
+        width: 40px;
+        height: 40px;
         font-size: 16px;
     }
 
@@ -3508,8 +3511,8 @@ td .value-btn {
 
 @media (max-width: 480px) {
     .value-btn {
-        width: 32px;
-        height: 32px;
+        width: 40px;
+        height: 40px;
         font-size: 16px;
     }
 
@@ -3950,7 +3953,7 @@ input[type="range"]::-moz-range-thumb {
     border-radius: var(--radius-xl);
     padding: var(--space-8);
     width: 100%;
-    max-width: 400px;
+    max-width: min(400px, 90vw);
     position: relative;
     animation: slideUp 200ms ease;
     box-shadow: 0 0 60px var(--accent-purple-glow), 0 20px 40px rgba(0, 0, 0, 0.5);
@@ -4032,6 +4035,48 @@ input[type="range"]::-moz-range-thumb {
     font-size: var(--font-size-sm);
     min-height: 20px;
     margin-bottom: var(--space-3);
+}
+
+/* Field-level error states */
+input.field-error,
+textarea.field-error,
+select.field-error {
+    border-color: var(--accent-red) !important;
+    box-shadow: 0 0 0 3px rgba(255, 87, 87, 0.15) !important;
+}
+
+input.field-error:focus,
+textarea.field-error:focus,
+select.field-error:focus {
+    border-color: var(--accent-red) !important;
+    box-shadow: 0 0 0 3px rgba(255, 87, 87, 0.25) !important;
+}
+
+.field-error-msg {
+    color: var(--accent-red);
+    font-size: var(--font-size-xs);
+    margin-top: var(--space-1);
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+/* Field success state */
+input.field-success,
+textarea.field-success,
+select.field-success {
+    border-color: var(--accent-green) !important;
+    box-shadow: 0 0 0 3px rgba(34, 217, 127, 0.15) !important;
+}
+
+@keyframes fieldShake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-4px); }
+    40%, 80% { transform: translateX(4px); }
+}
+
+.field-shake {
+    animation: fieldShake 0.4s ease;
 }
 
 .toggle-text {
@@ -4128,6 +4173,8 @@ input[type="range"]::-moz-range-thumb {
     .modal-close {
         top: var(--space-2);
         right: var(--space-2);
+        width: 44px;
+        height: 44px;
     }
 
     .modal-form input {
@@ -4487,7 +4534,7 @@ input[type="range"]::-moz-range-thumb {
    Trash Modal
    =========================================== */
 .modal-content-wide {
-    max-width: 600px;
+    max-width: min(600px, 95vw);
     width: 95%;
 }
 
@@ -4614,14 +4661,25 @@ input[type="range"]::-moz-range-thumb {
     @page { margin: 1.5cm; size: A4; }
 
     body {
-        background: white;
-        color: black;
+        background: white !important;
+        color: black !important;
         padding: 0;
         font-size: 11pt;
     }
 
+    body::before {
+        display: none !important;
+    }
+
     .header-menus, .tab-container, header,
-    #page-rules, #page-help, #page-dices {
+    #page-rules, #page-help, #page-dices,
+    .mobile-menu-btn, .mobile-menu-close,
+    .mobile-tab-toggle, .mobile-tab-panel, .mobile-tab-overlay,
+    .cloud-save-indicator, .sync-notice, .privacy-banner,
+    #toast-container, .status-bar, .desktop-sidebar,
+    .sidebar-toggle, .onboarding-sidebar, .onboarding-mobile,
+    .value-btn, .dice-roller-container,
+    .modal-overlay, .confirm-overlay {
         display: none !important;
     }
 
@@ -4637,32 +4695,48 @@ input[type="range"]::-moz-range-thumb {
     .section {
         page-break-inside: avoid;
         border: 1px solid #333;
-        background: white;
+        background: white !important;
         padding: 12px;
         margin-bottom: 12px;
+        box-shadow: none !important;
     }
 
     .section-title {
         border-bottom: 2px solid #333;
-        color: #000;
+        color: #000 !important;
+        background: none !important;
+        -webkit-text-fill-color: #000 !important;
     }
 
     input, textarea, select {
         border: 1px solid #666 !important;
         background: white !important;
         color: black !important;
+        box-shadow: none !important;
     }
 
+    a { color: #333 !important; text-decoration: underline; }
+
     table { border-collapse: collapse; }
-    th { background: #f0f0f0 !important; border: 1px solid #333 !important; }
-    td { border: 1px solid #666 !important; }
+    th { background: #f0f0f0 !important; border: 1px solid #333 !important; color: #000 !important; }
+    td { border: 1px solid #666 !important; color: #000 !important; }
 
     .grid-2 { grid-template-columns: 1fr 1fr; }
     .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
 
     .attribute-section {
-        background: white;
+        background: white !important;
         border: 1px solid #666;
+    }
+
+    .slider-fill, .slider-track {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    * {
+        box-shadow: none !important;
+        text-shadow: none !important;
     }
 }
 
@@ -9188,7 +9262,7 @@ input[type="range"]::-moz-range-thumb {
 /* Cloud Autosave Indicator */
 .cloud-save-indicator {
     position: fixed;
-    bottom: 20px;
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
     right: 20px;
     display: none;
     align-items: center;
@@ -9226,7 +9300,7 @@ input[type="range"]::-moz-range-thumb {
 
 @media (max-width: 768px) {
     .cloud-save-indicator {
-        bottom: 80px;
+        bottom: calc(80px + env(safe-area-inset-bottom, 0px));
         right: 12px;
         padding: 6px 10px;
         font-size: 0.7rem;
@@ -9236,7 +9310,7 @@ input[type="range"]::-moz-range-thumb {
 /* Sync Notice (for non-logged-in users) */
 .sync-notice {
     position: fixed;
-    bottom: 20px;
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -9301,7 +9375,7 @@ input[type="range"]::-moz-range-thumb {
 
 @media (max-width: 768px) {
     .sync-notice {
-        bottom: 80px;
+        bottom: calc(80px + env(safe-area-inset-bottom, 0px));
         left: 10px;
         right: 10px;
         transform: none;
@@ -9856,6 +9930,7 @@ input.locked:disabled {
     background: var(--bg-elevated);
     border-top: 1px solid var(--border-purple);
     padding: var(--space-4) var(--space-6);
+    padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
     z-index: 10002;
     transform: translateY(100%);
     transition: transform 0.3s ease;
@@ -10665,8 +10740,8 @@ input.locked:disabled {
         left: 0;
         top: 80px;
         z-index: 1000;
-        width: 36px;
-        height: 36px;
+        width: 44px;
+        height: 44px;
         background: var(--bg-elevated);
         border: 1px solid var(--border-default);
         border-left: none;
@@ -11991,7 +12066,7 @@ body.onboarding-active .onboarding-help-btn {
 
 #toast-container {
     position: fixed;
-    bottom: 24px;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
     left: 50%;
     transform: translateX(-50%);
     z-index: 10000;
@@ -12282,5 +12357,18 @@ body.onboarding-active .onboarding-help-btn {
 @media (max-width: 480px) {
     .party-overview-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+/* ===========================================
+   Reduced Motion Preference
+   =========================================== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
     }
 }

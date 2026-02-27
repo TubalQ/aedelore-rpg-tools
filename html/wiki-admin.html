@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Wiki Admin - Aedelore</title>
 
     <!-- Favicon -->
@@ -768,11 +768,11 @@
     </div>
 
     <!-- Book Modal -->
-    <div id="book-modal" class="modal">
+    <div id="book-modal" class="modal" role="dialog" aria-modal="true">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="book-modal-title">New Book</h3>
-                <button class="modal-close" onclick="closeModal('book-modal')">&times;</button>
+                <button class="modal-close" aria-label="Close" onclick="closeModal('book-modal')">&times;</button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="book-id">
@@ -807,11 +807,11 @@
     </div>
 
     <!-- Chapter Modal -->
-    <div id="chapter-modal" class="modal">
+    <div id="chapter-modal" class="modal" role="dialog" aria-modal="true">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="chapter-modal-title">New Chapter</h3>
-                <button class="modal-close" onclick="closeModal('chapter-modal')">&times;</button>
+                <button class="modal-close" aria-label="Close" onclick="closeModal('chapter-modal')">&times;</button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="chapter-id">
@@ -841,11 +841,11 @@
     </div>
 
     <!-- Page Modal -->
-    <div id="page-modal" class="modal">
+    <div id="page-modal" class="modal" role="dialog" aria-modal="true">
         <div class="modal-content" style="max-width: 1000px;">
             <div class="modal-header">
                 <h3 id="page-modal-title">New Page</h3>
-                <button class="modal-close" onclick="closeModal('page-modal')">&times;</button>
+                <button class="modal-close" aria-label="Close" onclick="closeModal('page-modal')">&times;</button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="page-id">

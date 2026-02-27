@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Aedelore - Where Light and Shadow Dance | Fantasy RPG World</title>
 
     <!-- SEO Meta Tags -->
@@ -349,6 +349,21 @@
             100% {
                 opacity: 0;
                 transform: translateY(-100px) scale(1);
+            }
+        }
+
+        /* Reduce particles on mobile for performance */
+        @media (max-width: 768px) {
+            .particle:nth-child(n+16) {
+                display: none;
+            }
+        }
+
+        /* Respect reduced motion preference */
+        @media (prefers-reduced-motion: reduce) {
+            .particle {
+                animation: none !important;
+                display: none;
             }
         }
 
@@ -1426,11 +1441,11 @@
     </div>
 
     <!-- Privacy Details Modal -->
-    <div id="privacy-details-modal" class="modal-overlay" style="display: none;">
+    <div id="privacy-details-modal" class="modal-overlay" role="dialog" aria-modal="true" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Privacy Information</h2>
-                <button class="modal-close" onclick="AedelorePrivacy.hidePrivacyDetails()">&times;</button>
+                <button class="modal-close" aria-label="Close" onclick="AedelorePrivacy.hidePrivacyDetails()">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="privacy-status-row">
