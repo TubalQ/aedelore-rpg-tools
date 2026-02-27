@@ -9,15 +9,14 @@ const SYSTEM_CONFIGS = {
     aedelore: {
         id: 'aedelore',
         name: 'Aedelore',
-        description: 'Fantasy RPG med D10-system',
+        description: 'Fantasy RPG — Modified D20 for Aedelore',
         icon: '🎲',
         color: '#a855f7', // Purple
         rulesUrl: '/wiki#rules-and-reference',
         dice: {
-            primary: 'd10',
-            pool: true,
-            successThreshold: 6,
-            criticalThreshold: 10
+            primary: 'd20',
+            pool: false,
+            criticalThreshold: 20
         },
         // Aedelore uses the existing character-sheet.html without modifications
         useExistingSheet: true

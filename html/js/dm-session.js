@@ -1974,6 +1974,7 @@ function showSessionContent() {
     document.getElementById('session-header').style.display = 'block';
     document.getElementById('tab-container').style.display = 'flex';
     document.getElementById('session-content').style.display = 'block';
+    initDmMode();
 }
 
 function hideSessionContent() {
@@ -1982,6 +1983,8 @@ function hideSessionContent() {
     document.getElementById('session-content').style.display = 'none';
     document.getElementById('session-status-group').style.display = 'none';
     document.getElementById('lock-group').style.display = 'none';
+    const toggle = document.getElementById('dm-mode-toggle');
+    if (toggle) toggle.style.display = 'none';
 }
 
 // ============================================
@@ -2049,6 +2052,47 @@ function switchToTab(tabId) {
         renderPlayLists();
     }
 }
+
+// ============================================
+// DM Prep/Play Mode Toggle
+// ============================================
+
+let currentDmMode = localStorage.getItem('aedelore_dm_mode') || 'prep';
+
+function setDmMode(mode) {
+    currentDmMode = mode;
+    localStorage.setItem('aedelore_dm_mode', mode);
+
+    // Update button states
+    document.querySelectorAll('.dm-mode-btn').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.querySelector(`.dm-mode-${mode}`);
+    if (activeBtn) activeBtn.classList.add('active');
+
+    // Show/hide tabs based on mode
+    document.querySelectorAll('.tab[data-mode]').forEach(tab => {
+        const tabMode = tab.dataset.mode;
+        if (tabMode === 'shared' || tabMode === mode) {
+            tab.classList.remove('dm-tab-hidden');
+        } else {
+            tab.classList.add('dm-tab-hidden');
+        }
+    });
+
+    // If current active tab is now hidden, switch to default
+    const activeTab = document.querySelector('.tab.active');
+    if (activeTab && activeTab.classList.contains('dm-tab-hidden')) {
+        const defaultTabId = mode === 'prep' ? 'page-planning' : 'page-play';
+        switchToTab(defaultTabId);
+    }
+}
+
+function initDmMode() {
+    const toggle = document.getElementById('dm-mode-toggle');
+    if (toggle) toggle.style.display = 'flex';
+    setDmMode(currentDmMode);
+}
+
+window.setDmMode = setDmMode;
 
 // Navigate to specific encounter in Planning tab
 function goToEncounterInPlanning(index) {
@@ -3750,10 +3794,11 @@ function renderPlayersList() {
                             <span style="font-size: 0.7rem; color: ${atLocked ? 'var(--text-muted)' : '#ef4444'};">${atLocked ? '🔒' : '🔓'}Attr</span>
                             <span style="font-size: 0.7rem; color: ${abLocked ? 'var(--text-muted)' : '#ef4444'};">${abLocked ? '🔒' : '🔓'}Abil</span>
                         </div>
-                        <div style="display: flex; gap: 6px;">
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                             <button class="btn-small btn-gold" onclick="showGiveXPModal(${p.characterId}, '${escapeHtml(p.character || p.player).replace(/'/g, "\\'")}')" title="Give XP">✨ XP</button>
                             <button class="btn-small btn-secondary" onclick="unlockCharacter(${p.characterId}, '${escapeHtml(p.character || p.player).replace(/'/g, "\\'")}')" title="Unlock">🔓</button>
                             <button class="btn-small" onclick="showPlayerBuild(${p.characterId}, '${escapeHtml(p.character || p.player).replace(/'/g, "\\'")}')" title="View Build" style="background: var(--accent-cyan);">📊</button>
+                            <button class="btn-small" onclick="resetCharacterXP(${p.characterId}, '${escapeHtml(p.character || p.player).replace(/'/g, "\\'")}')" title="Reset XP" style="background: var(--accent-red);">↺ Reset</button>
                         </div>
                     </div>
                 </div>
@@ -3794,6 +3839,13 @@ function renderPlayersList() {
             ${xpSection}
         </div>
     `}).join('');
+
+    // Show/hide Party Overview button
+    const overviewBtn = document.getElementById('party-overview-btn');
+    if (overviewBtn) {
+        const hasLinked = sessionData.players.some(p => p.characterId);
+        overviewBtn.style.display = hasLinked ? 'inline-flex' : 'none';
+    }
 }
 
 function addPlayer() {
@@ -5535,12 +5587,39 @@ function hideConfirmModal() {
 // View Player Build (DM Function)
 // ============================================
 
+let buildModalCharacterId = null;
+let buildModalEditMode = false;
+let _lastBuildData = null;
+
+// Event delegation for build modal buttons (set up once)
+let _buildDelegationSetup = false;
+function setupBuildDelegation() {
+    if (_buildDelegationSetup) return;
+    const container = document.getElementById('player-build-content');
+    if (!container) return;
+    _buildDelegationSetup = true;
+    container.addEventListener('click', function(e) {
+        const btn = e.target.closest('[data-build-action]');
+        if (!btn) return;
+        const action = btn.dataset.buildAction;
+        if (action === 'edit') rerenderBuild(true);
+        else if (action === 'cancel') rerenderBuild(false);
+        else if (action === 'save') saveBuildEdits();
+    });
+}
+
 async function showPlayerBuild(characterId, characterName) {
     if (!authToken) return;
+
+    buildModalCharacterId = characterId;
+    buildModalEditMode = false;
+    _lastBuildData = null;
 
     const modal = document.getElementById('player-build-modal');
     const title = document.getElementById('player-build-title');
     const content = document.getElementById('player-build-content');
+
+    setupBuildDelegation();
 
     title.textContent = `${characterName}'s Build`;
     content.innerHTML = '<p style="color: var(--text-secondary);">Loading...</p>';
@@ -5548,135 +5627,241 @@ async function showPlayerBuild(characterId, characterName) {
 
     try {
         const res = await apiRequest(`/api/dm/characters/${characterId}/build`);
-
         if (!res.ok) {
-            const data = await res.json();
-            content.innerHTML = `<p style="color: var(--accent-red);">Error: ${escapeHtml(data.error || 'Could not load build')}</p>`;
+            const errData = await res.json();
+            content.innerHTML = `<p style="color: var(--accent-red);">Error: ${escapeHtml(errData.error || 'Could not load build')}</p>`;
             return;
         }
-
-        const { data } = await res.json();
-        content.innerHTML = renderPlayerBuildContent(data);
-
+        const json = await res.json();
+        _lastBuildData = json.data;
+        content.innerHTML = renderPlayerBuildContent(json.data, false);
     } catch (error) {
         console.error('Error fetching player build:', error);
         content.innerHTML = '<p style="color: var(--accent-red);">Error loading character build</p>';
     }
 }
 
-function hidePlayerBuildModal() {
-    document.getElementById('player-build-modal').style.display = 'none';
+async function rerenderBuild(editMode) {
+    try {
+        buildModalEditMode = editMode;
+        // If data was lost, re-fetch
+        if (!_lastBuildData && buildModalCharacterId) {
+            try {
+                const res = await apiRequest(`/api/dm/characters/${buildModalCharacterId}/build`);
+                if (res.ok) {
+                    const json = await res.json();
+                    _lastBuildData = json.data;
+                }
+            } catch (e) { /* ignore */ }
+        }
+        if (_lastBuildData) {
+            document.getElementById('player-build-content').innerHTML = renderPlayerBuildContent(_lastBuildData, editMode);
+        } else {
+            showToast('No build data available — try closing and reopening', 'warning');
+        }
+    } catch (err) {
+        showToast('Edit error: ' + err.message, 'error');
+        console.error('rerenderBuild error:', err);
+    }
 }
 
-function renderPlayerBuildContent(data) {
+function hidePlayerBuildModal() {
+    document.getElementById('player-build-modal').style.display = 'none';
+    buildModalEditMode = false;
+}
+
+async function saveBuildEdits() {
+    if (!buildModalCharacterId || !authToken) return;
+
+    const inputs = document.querySelectorAll('#player-build-content input[data-stat-key]');
+    const stats = {};
+    inputs.forEach(input => {
+        const key = input.dataset.statKey;
+        const val = parseInt(input.value, 10);
+        if (!isNaN(val)) {
+            stats[key] = val;
+        }
+    });
+
+    if (Object.keys(stats).length === 0) {
+        showToast('No changes to save', 'warning');
+        return;
+    }
+
+    try {
+        const res = await apiRequest(`/api/dm/characters/${buildModalCharacterId}/update-stats`, {
+            method: 'POST',
+            body: JSON.stringify({ stats })
+        });
+
+        if (!res.ok) {
+            const data = await res.json();
+            showToast(data.error || 'Could not save stats', 'error');
+            return;
+        }
+
+        const json = await res.json();
+        _lastBuildData = json.data;
+        buildModalEditMode = false;
+        document.getElementById('player-build-content').innerHTML = renderPlayerBuildContent(json.data, false);
+        showToast('Stats saved!', 'success');
+
+        // Refresh player list
+        await syncCampaignPlayers();
+    } catch (error) {
+        showToast('Connection error. Try again.', 'error');
+    }
+}
+
+window.showPlayerBuild = showPlayerBuild;
+window.rerenderBuild = rerenderBuild;
+window.saveBuildEdits = saveBuildEdits;
+
+// Attribute group definitions (shared)
+const BUILD_ATTRIBUTE_GROUPS = [
+    {
+        name: 'STRENGTH', key: 'strength_value', color: '#ef4444',
+        skills: [
+            { key: 'strength_athletics', label: 'Athletics' },
+            { key: 'strength_raw_power', label: 'Raw Power' },
+            { key: 'strength_unarmed', label: 'Unarmed' }
+        ]
+    },
+    {
+        name: 'DEXTERITY', key: 'dexterity_value', color: '#f97316',
+        skills: [
+            { key: 'dexterity_endurance', label: 'Endurance' },
+            { key: 'dexterity_acrobatics', label: 'Acrobatics' },
+            { key: 'dexterity_sleight_of_hand', label: 'Sleight of Hand' },
+            { key: 'dexterity_stealth', label: 'Stealth' }
+        ]
+    },
+    {
+        name: 'TOUGHNESS', key: 'toughness_value', color: '#eab308',
+        skills: [
+            { key: 'toughness_bonus_while_injured', label: 'Bonus Injured' },
+            { key: 'toughness_resistance', label: 'Resistance' }
+        ]
+    },
+    {
+        name: 'INTELLIGENCE', key: 'intelligence_value', color: '#3b82f6',
+        skills: [
+            { key: 'intelligence_arcana', label: 'Arcana' },
+            { key: 'intelligence_history', label: 'History' },
+            { key: 'intelligence_investigation', label: 'Investigation' },
+            { key: 'intelligence_nature', label: 'Nature' },
+            { key: 'intelligence_religion', label: 'Religion' }
+        ]
+    },
+    {
+        name: 'WISDOM', key: 'wisdom_value', color: '#22d97f',
+        skills: [
+            { key: 'wisdom_luck', label: 'Luck' },
+            { key: 'wisdom_animal_handling', label: 'Animal Handling' },
+            { key: 'wisdom_insight', label: 'Insight' },
+            { key: 'wisdom_medicine', label: 'Medicine' },
+            { key: 'wisdom_perception', label: 'Perception' },
+            { key: 'wisdom_survival', label: 'Survival' }
+        ]
+    },
+    {
+        name: 'FORCE OF WILL', key: 'force_of_will_value', color: '#a855f7',
+        skills: [
+            { key: 'force_of_will_deception', label: 'Deception' },
+            { key: 'force_of_will_intimidation', label: 'Intimidation' },
+            { key: 'force_of_will_performance', label: 'Performance' },
+            { key: 'force_of_will_persuasion', label: 'Persuasion' }
+        ]
+    },
+    {
+        name: 'THIRD EYE', key: 'third_eye_value', color: '#22d3ee',
+        skills: []
+    }
+];
+
+function renderPlayerBuildContent(data, editMode) {
     if (!data) {
         return '<p style="color: var(--text-secondary);">No character data available</p>';
     }
 
-    let html = '';
-
-    // Helper function to get value
     const getVal = (key) => {
         const raw = data[key];
         return (raw !== undefined && raw !== '' && !isNaN(parseInt(raw))) ? parseInt(raw) : 0;
     };
 
-    // Attributes with their skills
-    const attributeGroups = [
-        {
-            name: 'STRENGTH',
-            key: 'strength_value',
-            skills: [
-                { key: 'strength_athletics', label: 'Athletics' },
-                { key: 'strength_raw_power', label: 'Raw Power' },
-                { key: 'strength_unarmed', label: 'Unarmed' }
-            ]
-        },
-        {
-            name: 'DEXTERITY',
-            key: 'dexterity_value',
-            skills: [
-                { key: 'dexterity_endurance', label: 'Endurance' },
-                { key: 'dexterity_acrobatics', label: 'Acrobatics' },
-                { key: 'dexterity_sleight_of_hand', label: 'Sleight of Hand' },
-                { key: 'dexterity_stealth', label: 'Stealth' }
-            ]
-        },
-        {
-            name: 'TOUGHNESS',
-            key: 'toughness_value',
-            skills: [
-                { key: 'toughness_bonus_while_injured', label: 'Bonus Injured' },
-                { key: 'toughness_resistance', label: 'Resistance' }
-            ]
-        },
-        {
-            name: 'INTELLIGENCE',
-            key: 'intelligence_value',
-            skills: [
-                { key: 'intelligence_arcana', label: 'Arcana' },
-                { key: 'intelligence_history', label: 'History' },
-                { key: 'intelligence_investigation', label: 'Investigation' },
-                { key: 'intelligence_nature', label: 'Nature' },
-                { key: 'intelligence_religion', label: 'Religion' }
-            ]
-        },
-        {
-            name: 'WISDOM',
-            key: 'wisdom_value',
-            skills: [
-                { key: 'wisdom_luck', label: 'Luck' },
-                { key: 'wisdom_animal_handling', label: 'Animal Handling' },
-                { key: 'wisdom_insight', label: 'Insight' },
-                { key: 'wisdom_medicine', label: 'Medicine' },
-                { key: 'wisdom_perception', label: 'Perception' },
-                { key: 'wisdom_survival', label: 'Survival' }
-            ]
-        },
-        {
-            name: 'FORCE OF WILL',
-            key: 'force_of_will_value',
-            skills: [
-                { key: 'force_of_will_deception', label: 'Deception' },
-                { key: 'force_of_will_intimidation', label: 'Intimidation' },
-                { key: 'force_of_will_performance', label: 'Performance' },
-                { key: 'force_of_will_persuasion', label: 'Persuasion' }
-            ]
-        },
-        {
-            name: 'THIRD EYE',
-            key: 'third_eye_value',
-            skills: []
-        }
-    ];
+    let html = '';
 
-    // Render attributes section
+    // Summary bar
+    let totalAttrPoints = 0;
+    let totalSkillPoints = 0;
+    BUILD_ATTRIBUTE_GROUPS.forEach(group => {
+        totalAttrPoints += getVal(group.key);
+        group.skills.forEach(s => { totalSkillPoints += getVal(s.key); });
+    });
+
+    html += `<div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; padding: 10px; background: var(--bg-elevated); border-radius: 6px; border: 1px solid var(--border-subtle);">
+        <span style="font-size: 0.8rem; color: var(--text-muted);">Attributes: <strong style="color: var(--accent-purple);">${totalAttrPoints}</strong></span>
+        <span style="font-size: 0.8rem; color: var(--text-muted);">Skills: <strong style="color: var(--accent-green);">${totalSkillPoints}</strong></span>
+        <span style="font-size: 0.8rem; color: var(--text-muted);">Total: <strong style="color: var(--accent-primary);">${totalAttrPoints + totalSkillPoints}</strong></span>
+        <span style="flex: 1;"></span>
+        ${editMode
+            ? `<button class="btn-small btn-gold" data-build-action="save" style="font-size: 0.75rem;">Save</button>
+               <button class="btn-small btn-secondary" data-build-action="cancel" style="font-size: 0.75rem;">Cancel</button>`
+            : `<button class="btn-small btn-secondary" data-build-action="edit" style="font-size: 0.75rem;">Edit</button>`
+        }
+    </div>`;
+
+    // Attributes section
     html += `<div style="margin-bottom: var(--space-4);">
         <div style="font-size: 0.75rem; color: var(--accent-purple); font-weight: 600; margin-bottom: 8px; text-transform: uppercase; border-bottom: 1px solid var(--border-subtle); padding-bottom: 4px;">Attributes & Skills</div>`;
 
-    attributeGroups.forEach(group => {
+    BUILD_ATTRIBUTE_GROUPS.forEach(group => {
         const mainVal = getVal(group.key);
-        if (mainVal === 0 && group.skills.every(s => getVal(s.key) === 0)) {
-            return; // Skip empty attributes
-        }
+        const hasAnyValue = mainVal > 0 || group.skills.some(s => getVal(s.key) > 0);
+
+        // In view mode, skip empty groups; in edit mode, show all
+        if (!editMode && !hasAnyValue) return;
 
         html += `<div style="background: var(--bg-surface); padding: 10px; border-radius: 6px; border: 1px solid var(--border-subtle); margin-bottom: 8px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: ${group.skills.length > 0 ? '6px' : '0'};">
-                <span style="font-weight: 600; color: var(--text-base); font-size: 0.85rem;">${group.name}</span>
-                <span style="background: var(--accent-purple-20); color: var(--accent-purple); padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 0.85rem;">${mainVal}</span>
-            </div>`;
+                <span style="font-weight: 600; color: var(--text-base); font-size: 0.85rem;">${group.name}</span>`;
 
-        // Render skills for this attribute
-        const nonZeroSkills = group.skills.filter(s => getVal(s.key) > 0);
-        if (nonZeroSkills.length > 0) {
-            html += '<div style="display: flex; flex-wrap: wrap; gap: 4px;">';
-            nonZeroSkills.forEach(skill => {
-                const val = getVal(skill.key);
-                html += `<span style="font-size: 0.75rem; color: var(--text-secondary); background: var(--bg-elevated); padding: 2px 6px; border-radius: 3px;">
-                    ${skill.label}: <strong style="color: var(--accent-green);">${val}</strong>
-                </span>`;
-            });
-            html += '</div>';
+        if (editMode) {
+            html += `<input type="number" data-stat-key="${group.key}" value="${mainVal}" min="0" max="999"
+                style="width: 56px; text-align: center; background: var(--bg-elevated); border: 1px solid var(--accent-purple); border-radius: 4px; color: var(--accent-purple); font-weight: 600; font-size: 0.85rem; padding: 2px 4px;">`;
+        } else {
+            html += `<span style="background: var(--accent-purple-20); color: var(--accent-purple); padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 0.85rem;">${mainVal}</span>`;
+        }
+
+        html += '</div>';
+
+        // Skills
+        if (editMode) {
+            // Show all skills in edit mode
+            if (group.skills.length > 0) {
+                html += '<div style="display: flex; flex-wrap: wrap; gap: 6px;">';
+                group.skills.forEach(skill => {
+                    const val = getVal(skill.key);
+                    html += `<div style="display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--text-secondary); background: var(--bg-elevated); padding: 3px 6px; border-radius: 3px;">
+                        ${skill.label}:
+                        <input type="number" data-stat-key="${skill.key}" value="${val}" min="0" max="999"
+                            style="width: 44px; text-align: center; background: var(--bg-base); border: 1px solid var(--border-subtle); border-radius: 3px; color: var(--accent-green); font-weight: 600; font-size: 0.75rem; padding: 1px 2px;">
+                    </div>`;
+                });
+                html += '</div>';
+            }
+        } else {
+            const nonZeroSkills = group.skills.filter(s => getVal(s.key) > 0);
+            if (nonZeroSkills.length > 0) {
+                html += '<div style="display: flex; flex-wrap: wrap; gap: 4px;">';
+                nonZeroSkills.forEach(skill => {
+                    const val = getVal(skill.key);
+                    html += `<span style="font-size: 0.75rem; color: var(--text-secondary); background: var(--bg-elevated); padding: 2px 6px; border-radius: 3px;">
+                        ${skill.label}: <strong style="color: var(--accent-green);">${val}</strong>
+                    </span>`;
+                });
+                html += '</div>';
+            }
         }
 
         html += '</div>';
@@ -5712,6 +5897,170 @@ function renderPlayerBuildContent(data) {
 
     return html;
 }
+
+// ============================================
+// Party Overview (all players' stats)
+// ============================================
+
+async function showPartyOverview() {
+    if (!authToken) return;
+
+    const modal = document.getElementById('party-overview-modal');
+    const content = document.getElementById('party-overview-content');
+
+    content.innerHTML = '<p style="color: var(--text-secondary);">Loading party stats...</p>';
+    modal.style.display = 'flex';
+
+    // Get all players with linked characters
+    const linkedPlayers = (sessionData.players || []).filter(p => p.characterId);
+
+    if (linkedPlayers.length === 0) {
+        content.innerHTML = '<p style="color: var(--text-secondary); font-style: italic;">No linked characters in this session. Campaign members need to create and link their characters first.</p>';
+        return;
+    }
+
+    // Fetch all builds in parallel
+    const results = await Promise.allSettled(
+        linkedPlayers.map(async (p) => {
+            const res = await apiRequest(`/api/dm/characters/${p.characterId}/build`);
+            if (!res.ok) throw new Error('Failed');
+            const json = await res.json();
+            return { player: p, data: json.data };
+        })
+    );
+
+    let html = '<div class="party-overview-grid">';
+
+    results.forEach((result, i) => {
+        const p = linkedPlayers[i];
+        const name = p.character || p.player || 'Unknown';
+
+        if (result.status !== 'fulfilled') {
+            html += `<div class="party-card party-card-error">
+                <div class="party-card-header">${escapeHtml(name)}</div>
+                <p style="color: var(--accent-red); font-size: 0.85rem;">Could not load</p>
+            </div>`;
+            return;
+        }
+
+        const data = result.value.data;
+        if (!data) {
+            html += `<div class="party-card party-card-error">
+                <div class="party-card-header">${escapeHtml(name)}</div>
+                <p style="color: var(--text-secondary); font-size: 0.85rem;">No data</p>
+            </div>`;
+            return;
+        }
+
+        const getVal = (key) => {
+            const raw = data[key];
+            return (raw !== undefined && raw !== '' && !isNaN(parseInt(raw))) ? parseInt(raw) : 0;
+        };
+
+        // Basic info
+        const race = p.race || '—';
+        const cls = p.class || '—';
+        const xp = p.xp || 0;
+        const xpSpent = p.xp_spent || 0;
+
+        // Attributes
+        const attrs = [
+            { abbr: 'STR', key: 'strength_value', color: '#ef4444' },
+            { abbr: 'DEX', key: 'dexterity_value', color: '#f97316' },
+            { abbr: 'TGH', key: 'toughness_value', color: '#eab308' },
+            { abbr: 'INT', key: 'intelligence_value', color: '#3b82f6' },
+            { abbr: 'WIS', key: 'wisdom_value', color: '#22d97f' },
+            { abbr: 'FOW', key: 'force_of_will_value', color: '#a855f7' },
+            { abbr: '3RD', key: 'third_eye_value', color: '#22d3ee' }
+        ];
+
+        // Top skills (non-zero, sorted by value)
+        const allSkills = [
+            { key: 'strength_athletics', label: 'Athletics' },
+            { key: 'strength_raw_power', label: 'Raw Power' },
+            { key: 'strength_unarmed', label: 'Unarmed' },
+            { key: 'dexterity_endurance', label: 'Endurance' },
+            { key: 'dexterity_acrobatics', label: 'Acrobatics' },
+            { key: 'dexterity_sleight_of_hand', label: 'Sleight of Hand' },
+            { key: 'dexterity_stealth', label: 'Stealth' },
+            { key: 'toughness_bonus_while_injured', label: 'Bonus Injured' },
+            { key: 'toughness_resistance', label: 'Resistance' },
+            { key: 'intelligence_arcana', label: 'Arcana' },
+            { key: 'intelligence_history', label: 'History' },
+            { key: 'intelligence_investigation', label: 'Investigation' },
+            { key: 'intelligence_nature', label: 'Nature' },
+            { key: 'intelligence_religion', label: 'Religion' },
+            { key: 'wisdom_luck', label: 'Luck' },
+            { key: 'wisdom_animal_handling', label: 'Animal Handling' },
+            { key: 'wisdom_insight', label: 'Insight' },
+            { key: 'wisdom_medicine', label: 'Medicine' },
+            { key: 'wisdom_perception', label: 'Perception' },
+            { key: 'wisdom_survival', label: 'Survival' },
+            { key: 'force_of_will_deception', label: 'Deception' },
+            { key: 'force_of_will_intimidation', label: 'Intimidation' },
+            { key: 'force_of_will_performance', label: 'Performance' },
+            { key: 'force_of_will_persuasion', label: 'Persuasion' }
+        ];
+
+        const topSkills = allSkills
+            .map(s => ({ ...s, val: getVal(s.key) }))
+            .filter(s => s.val > 0)
+            .sort((a, b) => b.val - a.val);
+
+        // Abilities
+        const abilities = [];
+        for (let j = 1; j <= 10; j++) {
+            const ability = data[`spell_${j}_type`];
+            if (ability && ability.trim()) abilities.push(ability);
+        }
+
+        html += `<div class="party-card">
+            <div class="party-card-header">
+                <span class="party-card-name">${escapeHtml(name)}</span>
+                <span class="party-card-info">${escapeHtml(race)} · ${escapeHtml(cls)}</span>
+            </div>
+            <div class="party-card-xp">XP: <strong>${xp - xpSpent}</strong> <span style="color: var(--text-muted);">(${xp} total, ${xpSpent} spent)</span></div>
+            <div class="party-card-attrs">
+                ${attrs.map(a => {
+                    const v = getVal(a.key);
+                    return `<div class="party-attr" style="--attr-color: ${a.color};">
+                        <span class="party-attr-val">${v}</span>
+                        <span class="party-attr-label">${a.abbr}</span>
+                    </div>`;
+                }).join('')}
+            </div>`;
+
+        if (topSkills.length > 0) {
+            html += `<div class="party-card-section">
+                <div class="party-card-section-title" style="color: var(--accent-green);">Skills</div>
+                <div class="party-card-tags">
+                    ${topSkills.map(s => `<span class="party-tag">${s.label} <strong>${s.val}</strong></span>`).join('')}
+                </div>
+            </div>`;
+        }
+
+        if (abilities.length > 0) {
+            html += `<div class="party-card-section">
+                <div class="party-card-section-title" style="color: var(--accent-cyan);">Abilities (${abilities.length})</div>
+                <div class="party-card-tags">
+                    ${abilities.map(a => `<span class="party-tag party-tag-ability">${escapeHtml(a)}</span>`).join('')}
+                </div>
+            </div>`;
+        }
+
+        html += '</div>';
+    });
+
+    html += '</div>';
+    content.innerHTML = html;
+}
+
+function hidePartyOverview() {
+    document.getElementById('party-overview-modal').style.display = 'none';
+}
+
+window.showPartyOverview = showPartyOverview;
+window.hidePartyOverview = hidePartyOverview;
 
 // ============================================
 // Give XP & Unlock Character (DM Functions)
@@ -5762,6 +6111,34 @@ async function confirmGiveXP() {
         showToast('Connection error. Try again.', 'error');
     }
 }
+
+// Reset XP for a character
+async function resetCharacterXP(characterId, characterName) {
+    if (!authToken) return;
+
+    if (!await showConfirm(`Reset ALL XP for "${characterName}"? This sets both earned and spent XP to 0 and cannot be undone.`, { confirmText: 'Reset XP', danger: true })) {
+        return;
+    }
+
+    try {
+        const res = await apiRequest(`/api/dm/characters/${characterId}/reset-xp`, {
+            method: 'POST'
+        });
+
+        if (!res.ok) {
+            const data = await res.json();
+            showToast(data.error || 'Could not reset XP', 'error');
+            return;
+        }
+
+        showToast(`XP reset for ${characterName}`, 'success');
+        await syncCampaignPlayers();
+    } catch (error) {
+        showToast('Connection error. Try again.', 'error');
+    }
+}
+
+window.resetCharacterXP = resetCharacterXP;
 
 // Give a quest item to a player's character inventory
 // oldPlayerName is optional - if provided, item will be removed from old player first

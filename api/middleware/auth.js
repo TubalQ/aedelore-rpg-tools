@@ -3,6 +3,7 @@ const { RedisStore } = require('rate-limit-redis');
 const Redis = require('ioredis');
 const db = require('../db');
 const { loggers } = require('../logger');
+const oidc = require('./oidc');
 
 const log = loggers.auth;
 
@@ -90,10 +91,11 @@ const errorLogLimiter = createLimiter({
 const AUTH_COOKIE_NAME = 'auth_token';
 
 // Authentication middleware
-// Reads token from: 1) Authorization header, 2) Cookie, 3) Query param
+// Reads token from: 1) Authorization header, 2) Cookie, 3) Body (sendBeacon), 4) Query param
 async function authenticate(req, res, next) {
     const token = req.headers.authorization?.replace('Bearer ', '')
                 || req.cookies?.[AUTH_COOKIE_NAME]
+                || req.body?.token
                 || req.query.token;
 
     if (!token) {
@@ -101,20 +103,60 @@ async function authenticate(req, res, next) {
     }
 
     try {
+        // 1. Try local session token (opaque token in DB)
         const session = await db.get(
             "SELECT user_id, created_at FROM auth_tokens WHERE token = $1 AND created_at > NOW() - INTERVAL '24 hours'",
             [token]
         );
 
-        if (!session) {
-            await db.query('DELETE FROM auth_tokens WHERE token = $1', [token]);
-            // Clear stale auth cookie to prevent repeated 401 errors
-            res.clearCookie(AUTH_COOKIE_NAME, { path: '/' });
-            return res.status(401).json({ error: 'Unauthorized' });
+        if (session) {
+            // Sliding session: refresh token expiry on activity
+            // Only update every 5 minutes to avoid excessive DB writes
+            const tokenAge = Date.now() - new Date(session.created_at).getTime();
+            if (tokenAge > 5 * 60 * 1000) {
+                db.query('UPDATE auth_tokens SET created_at = NOW() WHERE token = $1', [token])
+                    .catch(() => {}); // Fire and forget
+            }
+
+            req.userId = session.user_id;
+            return next();
         }
 
-        req.userId = session.user_id;
-        next();
+        // 2. If OIDC is enabled, try validating as a Keycloak JWT
+        if (oidc.isOidcEnabled() && token.includes('.')) {
+            try {
+                const providers = oidc.loadProviders();
+                for (const provider of providers) {
+                    try {
+                        const claims = await oidc.validateIdToken(token, provider);
+                        if (claims.sub) {
+                            const user = await db.get('SELECT id FROM users WHERE oidc_sub = $1', [claims.sub]);
+                            if (user) {
+                                req.userId = user.id;
+                                return next();
+                            }
+                            // JIT provision if user not found
+                            const newUser = await oidc.findOrCreateUser(
+                                claims.sub,
+                                claims.preferred_username || claims.name,
+                                claims.email
+                            );
+                            req.userId = newUser.id;
+                            return next();
+                        }
+                    } catch {
+                        // This provider didn't match, try next
+                    }
+                }
+            } catch {
+                // JWT validation failed for all providers
+            }
+        }
+
+        // 3. No valid session — clean up stale token
+        await db.query('DELETE FROM auth_tokens WHERE token = $1', [token]);
+        res.clearCookie(AUTH_COOKIE_NAME, { path: '/' });
+        return res.status(401).json({ error: 'Unauthorized' });
     } catch (error) {
         log.error({ err: error }, 'Auth error');
         return res.status(500).json({ error: 'Server error' });
@@ -189,6 +231,7 @@ async function clearLoginAttempts(username) {
 }
 
 module.exports = {
+    createLimiter,
     generalLimiter,
     authLimiter,
     passwordResetLimiter,

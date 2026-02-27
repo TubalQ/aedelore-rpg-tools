@@ -487,6 +487,44 @@
             color: var(--accent-cyan);
         }
 
+        /* Wiki Content Boxes */
+        .wiki-box-lore,
+        .wiki-box-rules,
+        .wiki-box-info,
+        .wiki-box-warning,
+        .wiki-box-readaloud {
+            padding: 16px 20px;
+            margin: 24px 0;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+
+        .wiki-box-lore {
+            border-color: #a855f7;
+            background: rgba(168, 85, 247, 0.08);
+        }
+
+        .wiki-box-rules {
+            border-color: #f0c040;
+            background: rgba(240, 192, 64, 0.08);
+        }
+
+        .wiki-box-info {
+            border-color: #22d3ee;
+            background: rgba(34, 211, 238, 0.08);
+        }
+
+        .wiki-box-warning {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        .wiki-box-readaloud {
+            border-color: #22d97f;
+            background: rgba(34, 217, 127, 0.08);
+            font-style: italic;
+        }
+
         /* Responsive Images */
         .wiki-page-content img,
         .wiki-page-body img {
@@ -810,6 +848,101 @@
             font-size: 0.8em;
         }
 
+        /* Page Navigation (Prev/Next) */
+        .wiki-page-nav {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin-top: 40px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .wiki-page-nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-subdued);
+            transition: all 0.2s ease;
+            max-width: 48%;
+        }
+
+        .wiki-page-nav-btn:hover {
+            border-color: var(--accent-purple);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(168, 85, 247, 0.1);
+        }
+
+        .wiki-page-nav-next {
+            margin-left: auto;
+        }
+
+        .wiki-page-nav-arrow {
+            font-size: 1.25rem;
+            color: var(--accent-purple);
+            flex-shrink: 0;
+        }
+
+        .wiki-page-nav-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .wiki-page-nav-chapter {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .wiki-page-nav-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-base);
+        }
+
+        /* Mobile TOC Toggle */
+        .wiki-toc-fab {
+            display: none;
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 900;
+            padding: 10px 18px;
+            background: var(--accent-purple);
+            color: #fff;
+            border: none;
+            border-radius: 24px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-family: inherit;
+        }
+
+        .wiki-toc-fab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(168, 85, 247, 0.5);
+        }
+
+        .wiki-toc-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 950;
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
             .wiki-container {
@@ -818,7 +951,28 @@
             }
 
             .wiki-sidebar {
-                width: 100%;
+                display: none !important;
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 300px;
+                height: 100%;
+                z-index: 1000;
+                background: var(--bg-base);
+                padding: 20px;
+                overflow-y: auto;
+            }
+
+            body.wiki-toc-open .wiki-sidebar {
+                display: block !important;
+            }
+
+            body.wiki-toc-open .wiki-toc-overlay {
+                display: block;
+            }
+
+            .wiki-toc-fab {
+                display: block;
             }
 
             .wiki-toc {
@@ -835,6 +989,14 @@
 
             .wiki-breadcrumb {
                 padding: 12px 24px;
+            }
+
+            .wiki-page-nav {
+                flex-direction: column;
+            }
+
+            .wiki-page-nav-btn {
+                max-width: 100%;
             }
         }
 
@@ -926,6 +1088,10 @@
             </div>
         </div>
 
+        <!-- Mobile TOC Toggle + Overlay -->
+        <button class="wiki-toc-fab" id="wiki-toc-fab" style="display:none;" onclick="toggleMobileToc()">Contents</button>
+        <div class="wiki-toc-overlay" id="wiki-toc-overlay" onclick="toggleMobileToc()"></div>
+
         <!-- Content Container -->
         <div class="wiki-container">
             <!-- Sidebar (shown on page view) -->
@@ -970,9 +1136,9 @@
         <img id="lightbox-img" src="" alt="Full size image">
     </div>
 
-    <script src="js/modules/toast.js?v=1"></script>
+    <script src="js/modules/toast.js"></script>
     <script src="js/purify.min.js"></script>
-    <script src="js/wiki.js?v=2"></script>
+    <script src="js/wiki.js"></script>
     <script>
         // Lightbox functionality
         function openLightbox(src) {

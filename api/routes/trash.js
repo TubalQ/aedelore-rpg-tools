@@ -151,20 +151,26 @@ router.delete('/characters/:id', authenticate, async (req, res) => {
 // DELETE /api/trash/campaigns/:id (permanent delete)
 router.delete('/campaigns/:id', authenticate, async (req, res) => {
     try {
-        // First delete all sessions
+        // Verify ownership FIRST before deleting sessions
+        const campaign = await db.get(
+            'SELECT id FROM campaigns WHERE id = $1 AND user_id = $2 AND deleted_at IS NOT NULL',
+            [req.params.id, req.userId]
+        );
+
+        if (!campaign) {
+            return res.status(404).json({ error: 'Deleted campaign not found' });
+        }
+
+        // Now safe to delete sessions (ownership verified)
         await db.query(
             'DELETE FROM sessions WHERE campaign_id = $1',
             [req.params.id]
         );
 
-        const result = await db.query(
-            'DELETE FROM campaigns WHERE id = $1 AND user_id = $2 AND deleted_at IS NOT NULL',
-            [req.params.id, req.userId]
+        await db.query(
+            'DELETE FROM campaigns WHERE id = $1',
+            [req.params.id]
         );
-
-        if (result.rowCount === 0) {
-            return res.status(404).json({ error: 'Deleted campaign not found' });
-        }
 
         res.json({ success: true, message: 'Campaign permanently deleted' });
     } catch (error) {

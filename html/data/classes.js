@@ -2,14 +2,12 @@ const CLASSES = {
     "Warrior": {
         name: "Warrior",
         bonuses: [
-            "+1 Strength",
-            "+1 Toughness",
-            "+1 Athletics",
-            "+1 Endurance",
-            "+1 Unarmed",
-            "+1 Intimidation",
-            "+1 Raw Power",
-            "+1 Resistance",
+            "+1 Dexterity",
+            "+1 Wisdom",
+            "+2 Athletics",
+            "+2 Unarmed",
+            "+1 Survival",
+            "+1 Acrobatics",
             "Starting Armor: Chainmail (chest), Leather (shoulders, legs)",
             "Starting Shield: Shield (Metal)",
             "Starting Weapon: Battleaxe",
@@ -39,10 +37,9 @@ const CLASSES = {
         bonuses: [
             "+2 Dexterity",
             "+1 Sleight of Hand",
-            "+1 Stealth",
+            "+2 Stealth",
             "+1 Investigation",
             "+1 Acrobatics",
-            "+1 Perception",
             "+1 Deception",
             "Starting Armor: Leather (chest, legs), Cloth (head, shoulders)",
             "Starting Weapon: Dagger",
@@ -70,12 +67,13 @@ const CLASSES = {
     "Outcast": {
         name: "Outcast",
         bonuses: [
-            "+1 Strength",
-            "+2 Toughness",
+            "+1 Intelligence",
+            "+1 Wisdom",
             "+2 Stealth",
-            "+1 Resistance",
+            "+1 Survival",
             "+1 Investigation",
             "+1 Nature",
+            "+1 Deception",
             "Starting Armor: Leather (chest), Cloth (legs)",
             "Starting Weapon: Mace",
             "Starting Gold: 2",
@@ -111,7 +109,7 @@ const CLASSES = {
             "Starting Weapon: Quarterstaff",
             "Starting Gold: 10",
             "Starting Worthiness: 6",
-            "Spell Capacity: 10 (mage spells)",
+            "Spell Capacity: 12 (mage spells)",
             "Full Arcana (1D10)",
             "Arcana regeneration: 1/round or 2/rest",
             "HP Bonus: +2"
@@ -126,7 +124,7 @@ const CLASSES = {
             gold: 10,
             worthiness: 6,
             arcana: "1D10",
-            spells: 10,
+            spells: 12,
             hpBonus: 2
         },
         abilityType: "arcana"
@@ -136,12 +134,12 @@ const CLASSES = {
         bonuses: [
             "+1 Dexterity",
             "+1 Wisdom",
-            "+1 Perception",
             "+1 Animal Handling",
             "+1 Survival",
-            "+1 Insight",
             "+1 Nature",
             "+1 Stealth",
+            "+1 Medicine",
+            "+1 Unarmed",
             "Starting Armor: Leather (chest, shoulders, legs)",
             "Starting Weapon: Longbow",
             "Starting Arrows: 1D10",
@@ -180,7 +178,7 @@ const CLASSES = {
             "Starting Weapon: Spear",
             "Starting Gold: 2",
             "Starting Worthiness: 3",
-            "Spell/Ability Capacity: 5",
+            "Spell/Ability Capacity: 10",
             "Access to nature-based spells and melee abilities",
             "Arcana regeneration: 1/round or 2/rest",
             "HP Bonus: +3"
@@ -194,8 +192,72 @@ const CLASSES = {
             weapon: "Spear",
             gold: 2,
             worthiness: 3,
-            spells: 5,
+            spells: 10,
             hpBonus: 3
+        },
+        abilityType: "arcana"
+    },
+    "Warden": {
+        name: "Warden",
+        bonuses: [
+            "+1 Dexterity",
+            "+2 Wisdom",
+            "+2 Survival",
+            "+2 Athletics",
+            "+1 Nature",
+            "Starting Armor: Chainmail (chest), Leather (shoulders, legs)",
+            "Starting Shield: Shield (Wooden)",
+            "Starting Weapon: Spear",
+            "Starting Gold: 2",
+            "Starting Food: 1D10",
+            "Starting Worthiness: 4",
+            "Ability Capacity: 3 (melee abilities)",
+            "Border guard of the Void frontier",
+            "HP Bonus: +5"
+        ],
+        startingEquipment: {
+            armor: {
+                chest: "Chainmail",
+                shoulders: "Leather Pauldrons",
+                legs: "Leather Greaves"
+            },
+            shield: "Shield (Wooden)",
+            weapon: "Spear",
+            gold: 2,
+            food: "1D10",
+            worthiness: 4,
+            abilities: 3,
+            hpBonus: 5
+        },
+        abilityType: "weakened"
+    },
+    "Ascendant": {
+        name: "Ascendant",
+        bonuses: [
+            "+3 Wisdom",
+            "+2 Force of Will",
+            "+1 Intelligence",
+            "Starting Armor: Cloth (chest, shoulders, legs)",
+            "Starting Weapon: Quarterstaff",
+            "Starting Gold: 1",
+            "Starting Worthiness: 6",
+            "Spell/Ability Capacity: 6",
+            "Initiate of the Doctrine of Emanations",
+            "Arcana regeneration: 1/round or 2/rest",
+            "HP Bonus: +0"
+        ],
+        startingEquipment: {
+            armor: {
+                chest: "Cloth",
+                shoulders: "Cloth Mantle",
+                legs: "Cloth Pants"
+            },
+            weapon: "Quarterstaff",
+            gold: 1,
+            worthiness: 6,
+            arcana: "1D10",
+            spells: 6,
+            hpBonus: 0
         },
         abilityType: "arcana"
     }

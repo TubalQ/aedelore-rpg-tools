@@ -35,4 +35,9 @@ function switchTab(tabId) {
     if ((tabId === 'page-gear' || tabId === 'page-dashboard') && typeof refreshCharacterData === 'function') {
         refreshCharacterData();
     }
+
+    // Initialize AI chat when switching to AI tab
+    if (tabId === 'page-ai' && typeof initAIChat === 'function') {
+        initAIChat();
+    }
 }

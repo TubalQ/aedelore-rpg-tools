@@ -17,7 +17,8 @@ const CSRF_EXEMPT_PATHS = [
     '/api/register',
     '/api/forgot-password',
     '/api/reset-password',
-    '/api/errors'  // Error logging from frontend
+    '/api/errors',  // Error logging from frontend
+    '/api/ai/webhook'  // Stripe webhook (uses signature verification)
 ];
 
 function generateCsrfToken() {
@@ -54,13 +55,19 @@ function csrfProtection(req, res, next) {
     }
 
     // Skip for exempt paths (login, register, etc.)
-    if (CSRF_EXEMPT_PATHS.some(path => req.path === path || req.path.startsWith(path + '/'))) {
+    if (CSRF_EXEMPT_PATHS.includes(req.path)) {
+        return next();
+    }
+
+    // Skip for Bearer token auth (API/MCP calls) — CSRF only protects cookie-based browser auth
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
         return next();
     }
 
     const cookieToken = req.cookies[CSRF_COOKIE_NAME];
-    // Accept CSRF token from header OR query param (for sendBeacon which can't set headers)
-    const headerToken = req.headers[CSRF_HEADER_NAME] || req.query.csrf_token;
+    // Accept CSRF token from header, body (sendBeacon JSON), or query param
+    const headerToken = req.headers[CSRF_HEADER_NAME] || req.body?.csrf_token || req.query.csrf_token;
 
     if (!cookieToken || !headerToken) {
         return res.status(403).json({ error: 'CSRF token missing' });

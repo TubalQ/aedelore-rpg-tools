@@ -20,6 +20,7 @@ const sessionRoutes = require('./routes/sessions');
 const trashRoutes = require('./routes/trash');
 const errorRoutes = require('./routes/errors');
 const wikiRoutes = require('./routes/wiki');
+const aiRoutes = require('./routes/ai');
 
 // Import middleware
 const { generalLimiter, authenticate } = require('./middleware/auth');
@@ -42,7 +43,11 @@ app.use(cors({
     credentials: true
 }));
 
-app.use(express.json({ limit: '1mb' }));
+// JSON parser — skip for Stripe webhook (needs raw body)
+app.use((req, res, next) => {
+    if (req.path === '/api/ai/webhook') return next();
+    express.json({ limit: '1mb' })(req, res, next);
+});
 app.use(cookieParser());
 
 // CSRF protection (skips safe methods and test environment)
@@ -215,6 +220,7 @@ campaignRoutes.setMetrics(metrics, writeMetricsFile);
 sessionRoutes.setMetrics(metrics, writeMetricsFile);
 errorRoutes.setMetrics(metrics);
 wikiRoutes.setMetrics(metrics, writeMetricsFile);
+aiRoutes.setMetrics(metrics, writeMetricsFile);
 
 // ============================================
 // Mount Routes
@@ -263,6 +269,9 @@ app.use('/api/errors', errorRoutes);
 // Wiki routes
 app.use('/api/wiki', wikiRoutes);
 
+// AI routes
+app.use('/api/ai', aiRoutes);
+
 // Health check
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', database: 'postgresql' });
@@ -288,11 +297,11 @@ async function start() {
             log.info({ port: PORT }, 'Aedelore API running');
         });
 
-        // Security: Set server timeouts to prevent slowloris/slow POST attacks
+        // Security: Set server timeouts (higher for AI streaming)
         server.headersTimeout = 60000;    // 60 seconds for headers
-        server.requestTimeout = 30000;    // 30 seconds for full request
+        server.requestTimeout = 300000;   // 5 minutes for full request (AI streaming)
         server.keepAliveTimeout = 65000;  // 65 seconds keep-alive
-        server.timeout = 120000;          // 2 minutes overall timeout
+        server.timeout = 300000;          // 5 minutes overall timeout (AI streaming)
 
         return server;
     } catch (error) {

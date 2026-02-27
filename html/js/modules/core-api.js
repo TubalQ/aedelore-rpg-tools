@@ -81,11 +81,22 @@ async function apiRequest(url, options = {}) {
         headers['X-CSRF-Token'] = csrfToken;
     }
 
-    return fetch(url, {
+    const response = await fetch(url, {
         ...options,
         headers,
         credentials: 'include'  // Include cookies in request
     });
+
+    // Global 401 interceptor: clear auth state on expired/invalid token
+    if (response.status === 401) {
+        localStorage.removeItem('aedelore_auth_token');
+        window.authToken = null;
+        if (typeof window.updateAuthUI === 'function') {
+            window.updateAuthUI();
+        }
+    }
+
+    return response;
 }
 
 // Export to global scope for other modules

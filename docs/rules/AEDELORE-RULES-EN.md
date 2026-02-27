@@ -1,7 +1,7 @@
 # Aedelore - Complete Rules
 
-> Version 1.0 | 2026-01-21
-> A D10 pool-based roleplaying system for World of Aedelore
+> Version 2.0 | 2026-02-23
+> A D20-based roleplaying system for World of Aedelore
 
 ---
 
@@ -9,7 +9,7 @@
 
 ## 1.1 Philosophy
 
-Aedelore uses a flexible D10-based system inspired by the Storyteller System.
+Aedelore uses a D20-based system.
 **The Dungeon Master (DM) always has the final say** - rules are guidelines, not laws.
 
 Focus on:
@@ -22,52 +22,43 @@ Focus on:
 
 ## 1.2 The Dice System
 
-### Basic Rule
-Points in abilities and skills convert to D10 dice:
+### Points to Modifiers
+Ability/skill points convert to modifiers: `modifier = ceil(points / 2)`
 
-| Points | Dice |
-|--------|------|
-| 1-2 | 1D10 |
-| 3-4 | 2D10 |
-| 5-6 | 3D10 |
-| 7-8 | 4D10 |
-| 9-10 | 5D10 |
-| 11+ | 6D10 |
+| Points | Modifier |
+|--------|----------|
+| 1 | +1 |
+| 2 | +1 |
+| 3 | +2 |
+| 4 | +2 |
+| 5 | +3 |
+| 6 | +3 |
+| 7 | +4 |
+| 8 | +4 |
+| 9 | +5 |
+| 10 | +5 |
 
-**Maximum:** No action may exceed **8 dice** total, unless a class ability specifically allows it.
+### Checks
+Roll **1D20 + modifier** vs a **Difficulty Class (DC)** set by the DM.
+Meet or beat the DC = success. Below DC = failure.
 
-### Result Levels
+### Critical Hits & Misses
+- **Natural 20:** Automatic success + critical hit (double damage dice in combat)
+- **Natural 1:** Automatic failure + possible negative consequence
 
-Each die is evaluated individually:
+### Difficulty Classes
 
-| Roll | Result | Description |
-|------|--------|-------------|
-| 1-4 | **Failure** | Complete failure |
-| 5-6 | **Barely** | Minimal success, may have consequences |
-| 7-9 | **Success** | Full success |
-| 10 | **Critical** | Exceptional success + reroll the die |
+| Difficulty | DC |
+|------------|-----|
+| Trivial | 5 |
+| Easy | 10 |
+| Normal | 13 |
+| Hard | 16 |
+| Very Hard | 19 |
+| Nearly Impossible | 22 |
 
-### Critical Rolls (10)
-When you roll 10:
-1. Count it as a **success**
-2. Reroll the die
-3. Add the result of the reroll
-4. If the reroll is also 10, reroll again (can chain)
-
-**Example:** You roll 10 → 8. That's 2 successes + possible critical effect (DM decides).
-
-### Difficulty
-
-DM sets the number of successes required:
-
-| Difficulty | Successes |
-|------------|-----------|
-| Trivial | 1 |
-| Easy | 2 |
-| Normal | 3 |
-| Hard | 4 |
-| Very Hard | 5 |
-| Nearly Impossible | 6+ |
+### Attributes vs Skills
+The DM chooses either an attribute OR a skill for each check — **never stacked**.
 
 ---
 
@@ -75,20 +66,22 @@ DM sets the number of successes required:
 
 ### Simple Check
 ```
-Pool = Core Ability (points → dice)
+1D20 + Attribute modifier vs DC
 ```
 
-### Combined Check
+### Skill Check
 ```
-Pool = Core Ability + Skill
-(Convert each part to dice, max 8 total)
+1D20 + Skill modifier vs DC
 ```
 
-**Example:** Strength 4 (2D10) + Athletics 3 (2D10) = 4D10
+**Example:** Stealth check DC 13: Roll 1D20 + Stealth modifier (+3) = need 10+ on die.
 
 ### Contested Check
-Both parties roll their pools. Most successes wins.
+Both parties roll 1D20 + modifier. Higher total wins.
 On tie: DM decides (usually advantage to defender).
+
+### Damage Dice
+Damage still uses D6 and D10 dice (not D20). Weapons specify their damage dice.
 
 ---
 
@@ -239,11 +232,11 @@ On tie: DM decides or reroll.
 
 ## 4.2 Attack
 
-### Step 1: Attack Check
-
-Build your attack pool:
+### Opposed Roll
+Combat uses opposed rolls:
 ```
-Attack Pool = Core Ability + Weapon Attack Bonus
+Attacker: 1D20 + Weapon Attack Bonus (from core ability modifier)
+Defender: 1D20 + Defense modifier (varies by defense type)
 ```
 
 The weapon determines which Core Ability is used (see weapon list):
@@ -251,27 +244,25 @@ The weapon determines which Core Ability is used (see weapon list):
 - **Dexterity:** Dagger, Rapier, Scimitar, Shortsword, Whip, all bows, light crossbows, throwing knives
 - **Strength/Dexterity:** Katana (player's choice)
 
-**Convert** each part to dice according to the table (1.2), max 8D10 total.
-
 **Example - Longsword (Strength, +2 attack):**
-- Strength 4 = 2D10
-- Longsword +2 = 1D10
-- **Total:** 3D10
+- Strength 4 → modifier +2
+- Longsword Attack Bonus +2
+- **Roll:** 1D20 + 4
 
 ### Attack Results
 
-| Successes | Result |
-|-----------|--------|
-| 0 | **Miss** - no damage |
-| 1 | **Glancing blow** - 50% damage |
-| 2+ | **Full hit** - full damage |
-| Critical (10) | Extra effect (DM decides) |
+| Result | Effect |
+|--------|--------|
+| Attacker wins | **Hit** - roll full damage |
+| Tie or Defender wins | **Miss** - no damage |
+| Natural 20 | **Critical Hit** - double damage dice |
+| Natural 1 | **Auto-miss** |
 
 ---
 
-### Step 2: Damage Roll
+### Damage Roll
 
-On hit (at least 1 success), roll the weapon's damage dice:
+On hit, roll the weapon's damage dice:
 
 ```
 Damage = Weapon's Damage Dice
@@ -281,7 +272,7 @@ Damage = Weapon's Damage Dice
 - Longsword = 1D10
 - Greatsword = 2D6
 
-**On Glancing Blow:** Halve the damage (round down).
+**On Critical Hit:** Double the damage dice (e.g., 1D10 → 2D10).
 
 ---
 
@@ -291,37 +282,36 @@ When attacked you may choose **one** of the following reactions:
 
 ### Dodge
 ```
-Pool = Dexterity + Acrobatics
+1D20 + Acrobatics modifier
 ```
-- **Success:** Avoid the attack completely
-- **Barely:** Take half damage
-- **Fail:** Take full damage
+- **Win:** Avoid the attack completely
+- **Lose:** Take full damage
 
 ### Parry
 ```
-Pool = Strength + Weapon Attack Bonus
+1D20 + Weapon Attack Bonus
 ```
-- **Success:** Parry the attack, no damage
-- **Barely:** Reduce damage by weapon's attack bonus
-- **Fail:** Take full damage
+- **Win:** Parry the attack, no damage
+- **Lose:** Take full damage
 
 ### Block
-Requires shield or armor.
+Requires shield.
 ```
-Pool = Strength
+1D20 + Shield Defence value
 ```
-- **Success (at least 1):** Block up to the shield's/armor's Block value in damage. Remaining damage goes through to you. The shield takes the blocked damage to its HP.
-- **Fail:** Take full damage
+Shield Defence values: Small +1, Wooden +2, Metal +3, Spiked +2, Tower +5.
+- **Win:** Block the attack, shield takes the damage to its HP
+- **Lose:** Take full damage
 
-**Example:** Enemy deals 8 damage. You block with Shield (Metal, Block 5).
-- You roll Strength and get 1 success → Block 5 damage
-- You take 3 damage (8-5), shield takes 5 damage to its HP
+**Example:** Enemy rolls 15. You block with Metal Shield (+3), roll 1D20+3 = 16.
+- You win → shield absorbs the damage
 
 ### Take Hit
 ```
-Pool = Toughness + Armor Bonus
+1D20 + Toughness modifier
 ```
-Count successes. Each success reduces damage by 1.
+You always take the hit, but Toughness modifier reduces damage taken.
+Each point of modifier reduces damage by 1.
 
 ---
 
@@ -351,7 +341,7 @@ When armor takes damage, reduce its HP. At 0 HP the armor is **Broken** and prov
 
 Weapons have the following properties:
 - **Ability:** Which ability is used (Strength/Dexterity)
-- **Attack Bonus:** Added to attack pool
+- **Attack Bonus:** Added to attack roll modifier
 - **Damage:** Damage dice on hit
 - **Range:** Range in meters
 
@@ -366,14 +356,14 @@ Players can combine actions (DM approves):
 **Example - Jumping Arrow Shot:**
 1. Roll **Athletics/Acrobatics** for the jump
 2. On successful jump, roll **attack** with bow
-3. More successes may give bonus to the attack
+3. Beating the DC by 5+ may give +2 bonus to the attack
 
 ---
 
 ## 4.7 Assistance in Combat
 
 A character can **give up their action** to assist another:
-- Assisted player gets **+1D10** on their next roll
+- Assisted player gets **+2** on their next roll
 - Must be narratively justified
 - Max 1 assistance per round
 
@@ -397,30 +387,31 @@ A character can **give up their action** to assist another:
 
 ### Spell Check
 ```
-Pool = 1D10 per point in relevant ability (Arcana for Mage, Nature for Druid)
-Requires at least 1 success to succeed
+1D20 + INT modifier vs spell DC (each spell has its own DC)
 ```
 
+| DC | Power Level |
+|----|-------------|
+| 8 | Basic spells (cantrips, simple utility) |
+| 10 | Standard spells (moderate combat/utility) |
+| 13 | Powerful spells (strong AoE, summoning, transformation) |
+| 16 | Very powerful spells (game-changing effects, high-tier magic) |
+
 ### Spell Cost
-Each spell costs Arcana. See the spell's description.
+Each spell costs Arcana. Arcana is consumed whether the spell succeeds or fails.
 
 ### Damage Calculation
-See the spell's description for damage formula.
+See the spell's description for damage formula (uses D6/D10 damage dice).
 
-**Example - Ray of Frost:**
-- Arcana check to cast
-- On success: 1D6 damage × spell's multiplier
-
-### Critical Success on Magic
+### Critical Success on Magic (Natural 20)
 DM decides effect - can be:
-- Increased damage
+- Increased damage (double damage dice)
 - Extended duration
 - Enhanced secondary effects
 
-### Failed Magic (Fumble)
-On 0 successes on spell check, DM may decide:
-- Spell fizzles (no effect, Arcana consumed)
-- Magical backlash (DM decides consequence)
+### Failed Magic
+- **Fail (below DC):** Spell fizzles, Arcana still consumed
+- **Natural 1:** Backlash — spell fails with negative side effect (DM decides)
 
 ---
 
@@ -443,10 +434,11 @@ Mages and Druids can learn more spells than they can have active.
 Melee classes (Warrior, Thief, Hunter, Outcast) have access to special abilities that cost **Weakened** to use.
 
 ### Usage
-1. Check the ability's **Check** (e.g., "Stealth, min 2 success")
-2. Roll 1D10 per point in the relevant skill
-3. On successful check, pay the **Weakened** cost
-4. Gain the ability's **Gain** (bonus dice) for the action
+1. Check the ability's **Check** (e.g., "1D20 + Stealth, DC 13")
+2. Roll 1D20 + relevant stat modifier vs DC
+3. On success, pay the **Weakened** cost
+4. Gain the ability's **Gain** (modifier bonus) for the action
+5. Natural 20 = automatic success, Natural 1 = automatic failure
 
 ---
 
@@ -478,13 +470,13 @@ Each character has **6 Weakened Points**.
 
 ### When Weakened = 0
 
-Roll **1D10 + Toughness**:
+Roll **1D20 + Toughness modifier vs DC 10**:
 
 | Result | Effect |
 |--------|--------|
-| 1-2 | **Death** - Total collapse |
-| 3-5 | **Unconscious** - Fainted |
-| 6-10 | **Exhausted** - Can move but not fight |
+| Nat 1 | **Death** - Total collapse |
+| Fail | **Unconscious** - Fainted |
+| Meet DC | **Exhausted** - Can move but not fight |
 
 ### Recovery
 - **Short rest:** +1 Weakened
@@ -512,19 +504,19 @@ Characters can have **Bleed [X]** where X indicates severity:
 - **Bleed 3+:** Life-threatening (roll 3D6, take highest)
 
 ### Stopping Bleeding
-- **Medicine check:** At least 1 success stops Bleed 1, 2 successes for Bleed 2, etc.
+- **Medicine check:** 1D20 + Medicine vs DC 10 per Bleed level
 - **Bandage:** Stops Bleed 1 automatically
 - **Healing magic:** Stops all bleeding
 
 ### When HP = 0 from Bleeding
-Roll **1D10 + Toughness**:
+Roll **1D20 + Toughness modifier vs DC 10**:
 
 | Result | Effect |
 |--------|--------|
-| 1-2 | **Death** - Total blood loss |
-| 3-4 | **Barely alive** - Unconscious, needs immediate care |
-| 5-6 | **Fainted** - Unconscious but stable |
-| 7+ | **Conscious** - Can act but severely weakened |
+| Nat 1 | **Death** - Total blood loss |
+| Fail by 5+ | **Barely alive** - Unconscious, needs immediate care |
+| Fail | **Fainted** - Unconscious but stable |
+| Meet DC | **Conscious** - Can act but severely weakened |
 
 ---
 
@@ -532,12 +524,12 @@ Roll **1D10 + Toughness**:
 
 | Status | Effect |
 |--------|--------|
-| **Poisoned** | -1D10 on all rolls, take 1 damage/round (DM varies) |
+| **Poisoned** | -2 on all rolls, take 1 damage/round (DM varies) |
 | **Stunned** | Cannot act this round |
-| **Blinded** | -2D10 on attacks and perception |
-| **Deafened** | Cannot hear, -1D10 on perception |
-| **Frightened** | Cannot approach fear source, -1D10 on attacks |
-| **Prone** | -1D10 on attacks, +1D10 for enemies in melee |
+| **Blinded** | -4 on attacks and perception |
+| **Deafened** | Cannot hear, -2 on perception |
+| **Frightened** | Cannot approach fear source, -2 on attacks |
+| **Prone** | -2 on attacks, enemies get +2 in melee |
 
 ---
 
@@ -559,8 +551,8 @@ Resources are tracked with dice.
 
 ### Without Food/Water
 - **1 day without:** No effects
-- **2 days without:** -1D10 on all rolls
-- **3+ days without:** Take 1 damage per day, -2D10 on all rolls
+- **2 days without:** -2 on all rolls
+- **3+ days without:** Take 1 damage per day, -4 on all rolls
 
 ### Restocking
 - **Towns:** Buy food and water
@@ -599,7 +591,7 @@ Amount depends on class/race.
 ### Potion Effects
 | Potion | Effect |
 |--------|--------|
-| **Adrenaline** | +2D10 on next action |
+| **Adrenaline** | +3 on next action |
 | **Antidote** | Cures Poisoned status |
 | **Poison** | Can be applied to weapons (DM decides effect) |
 | **Arcane Elixir** | +10 Arcana (Mage/Druid only) |
@@ -660,10 +652,10 @@ DM may require Worthiness-based checks to:
 According to the spell's description.
 
 ### Medicine
-Roll **Medicine check**:
-- **1 success:** +1D6 HP to patient
-- **2+ successes:** +2D6 HP to patient
-- **Critical:** +3D6 HP to patient
+Roll **1D20 + Medicine modifier vs DC 10**:
+- **Meet DC:** +1D6 HP to patient
+- **Beat DC by 5+:** +2D6 HP to patient
+- **Natural 20:** +3D6 HP to patient
 
 ---
 
@@ -671,12 +663,12 @@ Roll **Medicine check**:
 
 ### When HP = 0
 The character is **Dying**. Each round:
-1. Roll **1D10 + Toughness**
+1. Roll **1D20 + Toughness modifier vs DC 10**
 2. Result determines outcome (see 7.2)
 
 ### Stabilization
 Another character can attempt to stabilize:
-- **Medicine check (1 success):** Character is stabilized, unconscious but not dying
+- **Medicine check (1D20 + Medicine vs DC 10):** Character is stabilized, unconscious but not dying
 - **Healing magic:** Revives the character
 
 ### Permanent Death
@@ -710,13 +702,13 @@ DM decides how characters develop. Suggestions:
 
 If a situation isn't covered by the rules:
 1. Determine relevant Ability + Skill
-2. Set difficulty (number of successes)
+2. Set a DC
 3. Let the player roll
 4. Interpret the result narratively
 
 ## A.3 Balancing Combat
 
-- **Weak enemies:** 1-2 successes to defeat
+- **Weak enemies:** Low modifiers, easy to hit
 - **Normal enemies:** Even fight
 - **Strong enemies:** Requires tactics and cooperation
 - **Bosses:** Special mechanics, multiple phases
@@ -725,42 +717,43 @@ If a situation isn't covered by the rules:
 
 # APPENDIX B: QUICK REFERENCE
 
-## Dice Conversion
-| Points | Dice |
-|--------|------|
-| 1-2 | 1D10 |
-| 3-4 | 2D10 |
-| 5-6 | 3D10 |
-| 7-8 | 4D10 |
-| 9-10 | 5D10 |
-| 11+ | 6D10 |
+## Points to Modifier
+| Points | Modifier |
+|--------|----------|
+| 1-2 | +1 |
+| 3-4 | +2 |
+| 5-6 | +3 |
+| 7-8 | +4 |
+| 9-10 | +5 |
 
-## Result Levels
-| Roll | Result |
-|------|--------|
-| 1-4 | Failure |
-| 5-6 | Barely |
-| 7-9 | Success |
-| 10 | Critical |
+## Core Roll
+1D20 + modifier vs DC. Meet or beat = success.
+- Natural 20 = Critical hit (double damage dice)
+- Natural 1 = Auto-miss / fumble
 
-## Attack Results
-| Successes | Effect |
-|-----------|--------|
-| 0 | Miss |
-| 1 | 50% damage |
-| 2+ | Full damage |
+## Attack (Opposed Roll)
+| Result | Effect |
+|--------|--------|
+| Attacker wins | Full damage |
+| Tie / Defender wins | Miss |
+| Natural 20 | Critical — double damage dice |
+| Natural 1 | Auto-miss |
 
-## Difficulty Levels
-| Difficulty | Successes |
-|------------|-----------|
-| Trivial | 1 |
-| Easy | 2 |
-| Normal | 3 |
-| Hard | 4 |
-| Very Hard | 5 |
-| Nearly Impossible | 6+ |
+## Difficulty Classes (DC)
+| Difficulty | DC |
+|------------|-----|
+| Trivial | 5 |
+| Easy | 10 |
+| Normal | 13 |
+| Hard | 16 |
+| Very Hard | 19 |
+| Nearly Impossible | 22 |
+
+## Spell DC
+Each spell has its own DC: 8 (basic), 10 (standard), 13 (powerful), 16 (very powerful).
+Roll 1D20 + INT modifier to cast.
 
 ---
 
-*Aedelore Rules v1.0 - World of Aedelore*
+*Aedelore Rules v2.0 - World of Aedelore*
 *The DM always has the final say.*

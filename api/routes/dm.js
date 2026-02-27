@@ -55,6 +55,47 @@ router.post('/characters/:id/give-xp', authenticate, async (req, res) => {
     }
 });
 
+// POST /api/dm/characters/:id/reset-xp
+router.post('/characters/:id/reset-xp', authenticate, async (req, res) => {
+    try {
+        const character = await db.get(`
+            SELECT c.id, c.xp, c.xp_spent, c.name, c.campaign_id, camp.user_id as dm_id
+            FROM characters c
+            LEFT JOIN campaigns camp ON c.campaign_id = camp.id
+            WHERE c.id = $1 AND c.deleted_at IS NULL
+        `, [req.params.id]);
+
+        if (!character) {
+            return res.status(404).json({ error: 'Character not found' });
+        }
+
+        if (!character.campaign_id) {
+            return res.status(400).json({ error: 'Character is not linked to a campaign' });
+        }
+
+        if (character.dm_id !== req.userId) {
+            return res.status(403).json({ error: 'Only the campaign DM can reset XP' });
+        }
+
+        await db.query(
+            'UPDATE characters SET xp = 0, xp_spent = 0, updated_at = CURRENT_TIMESTAMP WHERE id = $1',
+            [req.params.id]
+        );
+
+        log.info({ characterId: character.id, characterName: character.name, oldXp: character.xp, oldXpSpent: character.xp_spent }, 'XP reset by DM');
+
+        res.json({
+            success: true,
+            xp: 0,
+            xp_spent: 0,
+            message: `XP reset for ${character.name}`
+        });
+    } catch (error) {
+        log.error({ err: error }, 'Reset XP error');
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // GET /api/dm/characters/:id/build
 router.get('/characters/:id/build', authenticate, async (req, res) => {
     try {
@@ -94,6 +135,104 @@ router.get('/characters/:id/build', authenticate, async (req, res) => {
     } catch (error) {
         log.error({ err: error }, 'Get character build error');
         res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// POST /api/dm/characters/:id/update-stats
+router.post('/characters/:id/update-stats', authenticate, async (req, res) => {
+    const { stats } = req.body;
+
+    if (!stats || typeof stats !== 'object' || Array.isArray(stats)) {
+        return res.status(400).json({ error: 'stats must be an object of key-value pairs' });
+    }
+
+    // Whitelist of allowed stat keys
+    const ALLOWED_KEYS = new Set([
+        'strength_value', 'strength_athletics', 'strength_raw_power', 'strength_unarmed',
+        'dexterity_value', 'dexterity_endurance', 'dexterity_acrobatics', 'dexterity_sleight_of_hand', 'dexterity_stealth',
+        'toughness_value', 'toughness_bonus_while_injured', 'toughness_resistance',
+        'intelligence_value', 'intelligence_arcana', 'intelligence_history', 'intelligence_investigation', 'intelligence_nature', 'intelligence_religion',
+        'wisdom_value', 'wisdom_luck', 'wisdom_animal_handling', 'wisdom_insight', 'wisdom_medicine', 'wisdom_perception', 'wisdom_survival',
+        'force_of_will_value', 'force_of_will_deception', 'force_of_will_intimidation', 'force_of_will_performance', 'force_of_will_persuasion',
+        'third_eye_value'
+    ]);
+
+    // Validate all keys are allowed and values are reasonable integers
+    const updates = {};
+    for (const [key, value] of Object.entries(stats)) {
+        if (!ALLOWED_KEYS.has(key)) {
+            return res.status(400).json({ error: `Key "${key}" is not an allowed stat` });
+        }
+        const parsed = parseInt(value, 10);
+        if (!Number.isInteger(parsed) || parsed < 0 || parsed > 999) {
+            return res.status(400).json({ error: `Value for "${key}" must be 0-999` });
+        }
+        updates[key] = parsed;
+    }
+
+    if (Object.keys(updates).length === 0) {
+        return res.status(400).json({ error: 'No stats to update' });
+    }
+
+    const client = await db.pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        const characterResult = await client.query(`
+            SELECT c.id, c.name, c.data, c.campaign_id, camp.user_id as dm_id
+            FROM characters c
+            LEFT JOIN campaigns camp ON c.campaign_id = camp.id
+            WHERE c.id = $1 AND c.deleted_at IS NULL
+            FOR UPDATE OF c
+        `, [req.params.id]);
+        const character = characterResult.rows[0];
+
+        if (!character) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ error: 'Character not found' });
+        }
+
+        if (!character.campaign_id) {
+            await client.query('ROLLBACK');
+            return res.status(400).json({ error: 'Character is not linked to a campaign' });
+        }
+
+        if (character.dm_id !== req.userId) {
+            await client.query('ROLLBACK');
+            return res.status(403).json({ error: 'Only the campaign DM can update stats' });
+        }
+
+        let charData;
+        try {
+            charData = typeof character.data === 'string' ? JSON.parse(character.data) : (character.data || {});
+        } catch (parseErr) {
+            await client.query('ROLLBACK');
+            return res.status(500).json({ error: 'Character data is corrupted' });
+        }
+
+        // Merge updates
+        Object.assign(charData, updates);
+
+        await client.query(
+            'UPDATE characters SET data = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+            [JSON.stringify(charData), req.params.id]
+        );
+
+        await client.query('COMMIT');
+
+        log.info({ characterId: character.id, characterName: character.name, updatedKeys: Object.keys(updates) }, 'Stats updated by DM');
+
+        res.json({
+            success: true,
+            message: `Updated ${Object.keys(updates).length} stat(s) for ${character.name}`,
+            data: charData
+        });
+    } catch (error) {
+        await client.query('ROLLBACK');
+        log.error({ err: error }, 'Update stats error');
+        res.status(500).json({ error: 'Server error' });
+    } finally {
+        client.release();
     }
 });
 

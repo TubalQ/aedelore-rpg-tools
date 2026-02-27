@@ -18,26 +18,26 @@
 - Max 5 poäng i en enskild talang vid start
 
 ### Tärningssystem
-Varje poäng i ability/skill/spell = 1D10
+Alla checks slås med **1D20 + modifierare** mot **DC**.
 
-| Poäng | Tärningar |
-|-------|-----------|
-| 1-2 | 1D10 |
-| 3-4 | 2D10 |
-| 5-6 | 3D10 |
-| 6-7 | 4D10 |
-| 8-9 | 5D10 |
-| 10+ | 6D10 |
+Poäng konverteras till modifierare: `Math.ceil(poäng / 2)`
 
-**Max 8 tärningar** per handling (om inte klassförmåga tillåter mer).
+| Poäng | Modifierare |
+|-------|-------------|
+| 1-2 | +1 |
+| 3-4 | +2 |
+| 5-6 | +3 |
+| 7-8 | +4 |
+| 9-10 | +5 |
+| 11+ | +6 |
 
-### Resultatnivåer
+### Resultat
 | Slag | Resultat |
 |------|----------|
-| 1-4 | Failure (misslyckat) |
-| 5-6 | Barely a success (minimal effekt) |
-| 7-9 | Success (lyckas med målet) |
-| 10 | Critical success (extra bra + slå om för bonus) |
+| Nat 1 | Fumble (automatiskt misslyckande) |
+| < DC | Misslyckat |
+| ≥ DC | Lyckat |
+| Nat 20 | Kritisk framgång |
 
 ---
 
@@ -47,28 +47,29 @@ Varje poäng i ability/skill/spell = 1D10
 - **≤6 spelare:** Slå D6, 1=lägst, 6=högst
 - **>6 spelare:** Slå D10 istället
 
-### Steg 1: Attack Check
+### Steg 1: Attack Check (Opposed Roll)
 ```
-Attack-pool = Core Ability + Relevant Skill + Weapon Attack Bonus
-(Max 8 tärningar)
+Attackerare: 1D20 + Weapon Attack Bonus
+Försvarare: 1D20 + Defense modifierare
+Attack ≥ Defense = Träff
 ```
 
-| Framgångar | Resultat |
-|------------|----------|
-| 0 | Miss |
-| 1 | Glancing blow (50% skada) |
-| 2+ | Full skada |
-| 10:or | Critical - slå om, kan förstärka effekt |
+| Resultat | Effekt |
+|----------|--------|
+| Attack < Defense | Miss |
+| Attack ≥ Defense | Träff → full skada |
+| Nat 20 | Critical hit |
+| Nat 1 | Fumble |
 
 ### Steg 2: Skadekast
 ```
-Skada = 1D10 + vapnets skadebonus
+Skada = Vapnets Damage Dice (t.ex. 1D10, 2D6)
 ```
 
 **Exempel - Svärdattack:**
-- Strength: 3 (3 tärningar)
-- Sword atk bonus: +1 (1 tärning)
-- Slå 4D10, får 2 successes → Full träff
+- Attackerare: 1D20 + 2 (sword atk bonus) = 15
+- Försvarare: 1D20 + 3 (dex+acrobatics) = 12
+- 15 ≥ 12 → Träff
 - Slå 1D10 för skada, får 7
 - Svärd har +2 damage → Total: 9 skada
 
@@ -76,24 +77,20 @@ Skada = 1D10 + vapnets skadebonus
 
 ## Försvar
 
-### Försvarsalternativ (vid träff eller nära träff)
+### Försvarsalternativ (Opposed Roll)
+
+Försvararen slår 1D20 + modifierare mot attackerarens kast:
 
 | Försvar | Formel |
 |---------|--------|
-| **Dodge** | 1D10 + Dexterity + skill |
-| **Parry** | 1D10 + Strength + weapon attack bonus |
-| **Block** | 1D10 + Strength + shield/armor |
-| **Take Hit** | 1D10 + Strength + armor (reducerar skada) |
+| **Dodge** | 1D20 + Dexterity mod + Acrobatics mod |
+| **Parry** | 1D20 + Strength mod + Weapon Attack Bonus |
+| **Block** | 1D20 + Strength mod (+ shield/armor bonus) |
+| **Take Hit** | 1D20 + Toughness mod + Armor Bonus |
 
-### ⚠️ OKLART - Försvarsmekanik
-Reglerna säger "1D10 + X" men resten av systemet använder dice pools.
-
-**Fråga:** Är det:
-- A) En pool (Dexterity poäng → tärningar) + skill som extra tärningar?
-- B) Bokstavligen 1D10 + ett numeriskt värde som modifier?
-- C) Något annat?
-
-**Behöver förtydligande från DM.**
+### ✅ LÖST — Försvarsmekanik
+D20-systemet löser den gamla oklarheten. Alla försvarsslag är nu:
+**1D20 + modifierare** som opposed roll mot attackerarens **1D20 + attack bonus**.
 
 ---
 
@@ -101,8 +98,7 @@ Reglerna säger "1D10 + X" men resten av systemet använder dice pools.
 
 ### Kasta besvärjelser
 ```
-Spell-check = 1D10 per poäng i relevant ability (Arcana/Nature)
-Kräver minst 1 success för att lyckas
+Spell-check = 1D20 + INT modifierare vs spell DC (anges på varje spell)
 ```
 
 ### Skadeberäkning
@@ -128,10 +124,10 @@ Effekter kan förstärkas (mer skada, bättre sekundära effekter). DM bestämme
 Thief, Warrior, Hunter, Outcast har klassspecifika actions.
 
 **Exempel - Thief's Vanish:**
-1. Kolla ability-beskrivning → använder Stealth
-2. Slå 1D10 per poäng i Stealth
-3. Minst 1 success → Aktiverar förmågan
-4. Får extra 4D10 för handlingen
+1. Kolla ability-beskrivning → använder Stealth, DC 10
+2. Slå 1D20 + Stealth modifierare vs DC 10
+3. Lyckas (≥ DC) → Aktiverar förmågan
+4. Får gain-bonus till handlingen
 5. Betala kostnaden i "weakened"
 
 ---
@@ -144,13 +140,13 @@ Thief, Warrior, Hunter, Outcast har klassspecifika actions.
 - När alla är förbrukade → risk för svimning/död
 
 ### När weakened = 0
-Slå **1D10 + Toughness**:
+Slå **1D20 + Toughness modifierare vs DC 10**:
 
 | Resultat | Effekt |
 |----------|--------|
-| 1-2 | **Död** (total utmattning) |
-| 3-5 | **Svimning** |
-| 6-10 | **Kan röra sig** men inte strida |
+| Nat 1 | **Död** (total utmattning) |
+| Misslyckat (< DC 10) | **Svimning** |
+| Lyckat (≥ DC 10) | **Kan röra sig** men inte strida |
 
 ---
 
@@ -167,19 +163,15 @@ När karaktär får kritiskt sår → börjar blöda.
 | 3-4 | 2 poäng |
 | 5-6 | 1 poäng |
 
-### När blodpoäng = 0
-Slå **1D10 + Toughness**:
+### När HP = 0 från blödning
+Slå **1D20 + Toughness modifierare vs DC 10**:
 
 | Resultat | Effekt |
 |----------|--------|
-| 1-2 | **Död** (total blodförlust) |
-| 3-4 | **Knappt vid liv** |
-| 5-6 | **Svimmad** (kan inte röra sig eller strida) |
-
-### ⚠️ OKLART - Blodpoäng
-- Hur många blodpoäng har man?
-- Är det samma som HP?
-- Eller en separat resurs?
+| Nat 1 | **Död** (total blodförlust) |
+| Misslyckat (< DC 10) | **Knappt vid liv** |
+| Lyckat (≥ DC 10) | **Stabil** (medvetslös men inte döende) |
+| Nat 20 | **Vid medvetande** (försvagad) |
 
 ---
 
@@ -206,7 +198,7 @@ Slå **1D10 + Toughness**:
 
 ### Hjälpa annan spelare
 - Ge upp din handling för att assistera
-- Assisterad spelare får **+1D10** på nästa relevanta slag
+- Assisterad spelare får **+2** på nästa relevanta slag
 - Måste vara narrativt motiverat
 - Max 1 assistans per runda
 - Ingen annan handling den rundan
@@ -269,65 +261,47 @@ Se "Religions and Creeds" på wiki.
 
 # FRÅGOR & OKLARHETER
 
-## Prioritet 1 - Kräver förtydligande
+## ✅ Lösta av D20-systemet
 
-### 1. Försvarsmekanik
-**Citat:** "Dodging: Roll 1D10 + Dexterity + skill"
+### 1. Försvarsmekanik — LÖST
+**Gammalt problem:** "1D10 + X" var oklart (pool eller modifier?).
+**Lösning:** D20 opposed rolls. Alla kast är 1D20 + modifierare.
 
-**Fråga:** Är detta:
-- A) 1D10 + numeriskt värde (t.ex. 1D10 + 4 + 2 = resultat jämförs mot något)?
-- B) En pool där Dexterity ger tärningar + skill ger extra tärningar?
-- C) Contested roll mot attackerarens successes?
+### 2. Blodpoäng — FÖRTYDLIGAT
+Blödning drar HP direkt. Ingen separat "blodpoängs"-resurs.
+Vid HP = 0 från blödning → survival roll (1D20 + Toughness mod vs DC 10).
 
-### 2. Blodpoäng
-**Fråga:** Hur många "blood points" har en karaktär?
-- Samma som HP?
-- Separat resurs (t.ex. 10 för alla)?
-- Baserat på Toughness?
+### 3. Rustningens roll — LÖST
+Rustning ger bonus till "Take Hit" och "Block" defense-kast.
+Rustning har egen HP som tar skada vid block.
 
-### 3. Rustningens roll
-**Fråga:** Vad gör rustning exakt?
-- Ger den bonus till "Take Hit" eller "Block"?
-- Har den egen HP som tar skada?
-- Hur interagerar olika skadetyper (stick/hugg/kross)?
-
-### 4. Skadereduktion vid Block/Take Hit
-**Fråga:** Om jag lyckas med Block eller Take Hit, vad händer?
-- Tar jag ingen skada alls?
-- Reduceras skadan med ett värde?
-- Fördelas skadan mellan mig och rustning/sköld?
+### 4. Skadereduktion vid Block/Take Hit — LÖST
+Block: Sköld/rustning absorberar upp till sitt Block-värde, resten går igenom.
+Take Hit: Skillnaden mellan defense- och attack-kast reducerar skada.
 
 ---
 
-## Prioritet 2 - Balansförslag
+## Balansnoteringar
 
-### 1. D6 vs D10 inkonsistens
-**Problem:** Blödning använder D6, resten av systemet D10.
+### D6/D10 för skada
+Blödning (D6), skada (D6/D10), initiative (D6/D10) behåller sina tärningstyper.
+D20 används **enbart** för checks ("lyckas jag?"-slag).
 
-**Förslag:** Konvertera till D10:
-| D10 Slag | HP-förlust |
-|----------|------------|
-| 1-3 | 3 poäng |
-| 4-6 | 2 poäng |
-| 7-10 | 1 poäng |
-
-### 2. Initiative D6
-**Problem:** Initiative använder D6 (eller D10 vid >6 spelare).
-
-**Förslag:** Alltid D10 + Dexterity för konsistens?
+### Initiative
+Behåller D6 (≤6 deltagare) / D10 (>6 deltagare). Ej D20.
 
 ---
 
-## Prioritet 3 - Nya förslag
+## Förslag (ej implementerade)
 
 ### Weakened-effekt under 6
 **Nuvarande:** Ingen effekt förrän 0.
 
 **Förslag:** Gradvis försämring?
 - 4-5 weakened: Inga effekter
-- 2-3 weakened: -1 tärning på alla slag
-- 1 weakened: -2 tärningar
-- 0 weakened: Survival roll
+- 2-3 weakened: -1 på alla slag
+- 1 weakened: -2 på alla slag
+- 0 weakened: Survival roll (1D20 + Toughness mod vs DC 10)
 
 ---
 
@@ -338,6 +312,7 @@ Se "Religions and Creeds" på wiki.
 | 2026-01-21 | Dokument skapat |
 | 2026-01-21 | Officiella regler från wiki tillagda |
 | 2026-01-21 | Oklarheter och frågor dokumenterade |
+| 2026-02-23 | Migrerat från D10 pool-system till D20 + modifierare |
 
 ---
 

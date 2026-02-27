@@ -19,9 +19,11 @@ function setMetrics(m, writeFn) {
     writeMetricsFile = writeFn;
 }
 
-// Admin check middleware - only user ID 6 (Patrik) can admin
+// Admin check middleware
+const ADMIN_USER_ID = parseInt(process.env.ADMIN_USER_ID || '6', 10);
+
 function requireAdmin(req, res, next) {
-    if (req.userId !== 6) {
+    if (req.userId !== ADMIN_USER_ID) {
         return res.status(403).json({ error: 'Admin access required' });
     }
     next();
@@ -208,6 +210,8 @@ router.get('/search', async (req, res) => {
 
     try {
         const searchTerm = q.trim();
+        // Escape ILIKE special characters to prevent wildcard injection
+        const escapedTerm = searchTerm.replace(/[%_\\]/g, '\\$&');
 
         // Search in pages using ILIKE for simple search
         const pages = await db.all(`
@@ -228,7 +232,7 @@ router.get('/search', async (req, res) => {
                 CASE WHEN p.title ILIKE $1 THEN 0 ELSE 1 END,
                 p.title
             LIMIT 50
-        `, [`%${searchTerm}%`, searchTerm.toLowerCase()]);
+        `, [`%${escapedTerm}%`, searchTerm.toLowerCase()]);
 
         res.json({ query: searchTerm, results: pages });
     } catch (error) {

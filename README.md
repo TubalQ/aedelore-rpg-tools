@@ -75,11 +75,20 @@ Built for the Aedelore RPG system, but supports other systems like D&D 5e, Pathf
 - Give loot items to specific players
 - Event log and turning points
 
-**AI Assistant**
-- Works with Claude and ChatGPT
-- Generate NPCs, encounters, locations
-- Import AI-generated content directly
-- Session recap generation
+**AI Chat (Built-in)**
+- In-app AI chat for players and DMs
+- Lore-aware responses grounded in Aedelore game data and rules
+- Multiple model support (Anthropic Claude, OpenAI)
+- Credit-based billing via Stripe
+
+**AI Assistant (MCP)**
+- Model Context Protocol server for direct AI integration
+- 39 tools (24 DM + 15 player) and 12 prompt templates
+- OAuth 2.0 with PKCE authentication
+- DM tools: plan sessions, create NPCs/encounters, import content, manage campaigns
+- Player tools: build characters, equip gear, track HP/inventory, run solo adventures
+- AI updates the character sheet in real-time during play
+- Works with Claude Desktop, Cursor, and other MCP-compatible clients
 
 **Player View**
 - Share session summaries with players
@@ -94,6 +103,11 @@ Built for the Aedelore RPG system, but supports other systems like D&D 5e, Pathf
 | Backend API | Node.js + Express |
 | Database | PostgreSQL 16 |
 | Web Server | nginx |
+| MCP Server | Node.js + @modelcontextprotocol/sdk |
+| AI Providers | Anthropic Claude, OpenAI |
+| Payments | Stripe |
+| Auth | OAuth 2.0 with PKCE, OIDC/Keycloak |
+| Cache | Redis 7 |
 | Email | Nodemailer (SMTP) |
 | Container | Docker Compose |
 
@@ -152,10 +166,15 @@ docker compose up -d
 | `html/sitemap.xml` | Update all URLs to your domain |
 | `nginx.conf` | Set `set_real_ip_from` to your reverse proxy IP |
 
+## Android App
+
+The native Android app is currently under development. The `android/` directory contains a Kotlin/Jetpack Compose application that will provide a native mobile experience for Aedelore character sheets and campaign tools. It is not yet ready for use.
+
 ## Project Structure
 
 ```
 aedelore-rpg-tools/
+├── android/                # Native Android app (under development)
 ├── html/                   # Frontend PWA
 │   ├── css/               # Stylesheets
 │   ├── js/                # JavaScript modules
@@ -219,15 +238,11 @@ For detailed technical documentation including architecture, API endpoints, data
 
 Want to see what we're currently working on? Check out the [development repository](https://github.com/TubalQ/aedelore-rpg-tool-development-suite) for upcoming features, testing, and experimental changes.
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit issues and pull requests.
-
 ## License
 
-This project is licensed under the MIT License with Attribution - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE).
 
-**You are free to use, modify, and distribute this software, but you must give appropriate credit to Aedelore and TubalQ as the original creators.**
+You are free to view, clone, study, and modify the source code for **personal, non-commercial use**. Commercial use is not permitted without explicit permission from the author.
 
 ## Credits
 

@@ -125,6 +125,15 @@ const RELIGIONS = {
             "+1 Religion"
         ]
     },
+    "The Doctrine of Emanations": {
+        name: "The Doctrine of Emanations",
+        deity: "The Black Sun, through the Dragon Aspects",
+        description: "Contemplative order studying the sacred emanations that flow from the source of all creation, seeking to pierce the veils of illusion.",
+        bonuses: [
+            "+1 Religion",
+            "+1 Insight"
+        ]
+    },
     "None": {
         name: "None",
         deity: "No deity",

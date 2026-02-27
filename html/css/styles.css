@@ -12102,3 +12102,185 @@ body.onboarding-active .onboarding-help-btn {
     color: #fff !important;
 }
 .confirm-danger:hover { opacity: 0.9; }
+
+/* =============================================
+   DM Prep/Play Mode Toggle
+   ============================================= */
+
+.dm-mode-toggle-container {
+    display: flex;
+    width: fit-content;
+    margin: 16px auto 0;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.dm-mode-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.dm-mode-btn:hover {
+    color: var(--text-subdued);
+    background: var(--bg-surface-hover);
+}
+
+.dm-mode-prep.active {
+    background: var(--accent-primary-10);
+    color: var(--accent-primary);
+}
+
+.dm-mode-play.active {
+    background: var(--accent-green-10);
+    color: var(--accent-green);
+}
+
+.tab.dm-tab-hidden {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .dm-mode-toggle-container {
+        width: 100%;
+        justify-content: center;
+        margin: 12px 0 0;
+    }
+    .dm-mode-btn {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+/* =============================================
+   Party Overview
+   ============================================= */
+
+.party-overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.party-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 16px;
+}
+
+.party-card-error {
+    opacity: 0.6;
+}
+
+.party-card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.party-card-name {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-base);
+}
+
+.party-card-info {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.party-card-xp {
+    font-size: 0.8rem;
+    color: var(--text-subdued);
+    margin-bottom: 10px;
+}
+
+.party-card-xp strong {
+    color: var(--accent-primary);
+}
+
+.party-card-attrs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.party-attr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 34px;
+    padding: 4px 6px;
+    background: var(--bg-surface);
+    border-radius: 6px;
+    border: 1px solid var(--border-subtle);
+}
+
+.party-attr-val {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--attr-color);
+}
+
+.party-attr-label {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.party-card-section {
+    margin-top: 8px;
+}
+
+.party-card-section-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 4px;
+}
+
+.party-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.party-tag {
+    font-size: 0.75rem;
+    color: var(--text-subdued);
+    background: var(--bg-surface);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.party-tag strong {
+    color: var(--accent-green);
+}
+
+.party-tag-ability {
+    border-left: 2px solid var(--accent-cyan);
+}
+
+@media (max-width: 480px) {
+    .party-overview-grid {
+        grid-template-columns: 1fr;
+    }
+}

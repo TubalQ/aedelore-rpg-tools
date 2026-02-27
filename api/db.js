@@ -49,6 +49,18 @@ async function initializeDatabase() {
                 END IF;
             END $$;
 
+            -- Create campaigns table early (needed before campaign_id FK on characters)
+            CREATE TABLE IF NOT EXISTS campaigns (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                name TEXT NOT NULL,
+                description TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_campaigns_user_id ON campaigns(user_id);
+
             -- Add campaign_id column if it doesn't exist (migration for linking characters to campaigns)
             DO $$
             BEGIN
@@ -98,17 +110,6 @@ async function initializeDatabase() {
                     ALTER TABLE characters ADD COLUMN abilities_locked BOOLEAN DEFAULT FALSE;
                 END IF;
             END $$;
-
-            CREATE TABLE IF NOT EXISTS campaigns (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                name TEXT NOT NULL,
-                description TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-
-            CREATE INDEX IF NOT EXISTS idx_campaigns_user_id ON campaigns(user_id);
 
             -- Campaign players table for tracking which users are in which campaigns
             CREATE TABLE IF NOT EXISTS campaign_players (

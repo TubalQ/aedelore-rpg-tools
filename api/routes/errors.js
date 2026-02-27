@@ -70,8 +70,15 @@ router.post('/', errorLogLimiter, async (req, res) => {
     }
 });
 
-// GET /api/errors - Get recent frontend errors (requires auth)
+// Admin check
+const ADMIN_USER_ID = parseInt(process.env.ADMIN_USER_ID || '6', 10);
+
+// GET /api/errors - Get recent frontend errors (admin only)
 router.get('/', authenticate, async (req, res) => {
+    if (req.userId !== ADMIN_USER_ID) {
+        return res.status(403).json({ error: 'Admin access required' });
+    }
+
     const limit = Math.min(parseInt(req.query.limit, 10) || 100, 500);
 
     try {

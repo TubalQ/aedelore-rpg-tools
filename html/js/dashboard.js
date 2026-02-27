@@ -114,7 +114,7 @@ function updateStatusBar() {
 
     // Hide arcana for non-magic classes
     const selectedClass = document.getElementById('class')?.value;
-    const isMagicClass = selectedClass === 'Mage' || selectedClass === 'Druid';
+    const isMagicClass = selectedClass === 'Mage' || selectedClass === 'Druid' || selectedClass === 'Ascendant';
     if (arcanaContainer) {
         arcanaContainer.classList.toggle('status-arcana-hidden', !isMagicClass);
     }
@@ -273,7 +273,7 @@ function updateDesktopSidebar() {
 
     // Hide arcana for non-magic classes
     const selectedClass = document.getElementById('class')?.value;
-    const isMagicClass = selectedClass === 'Mage' || selectedClass === 'Druid';
+    const isMagicClass = selectedClass === 'Mage' || selectedClass === 'Druid' || selectedClass === 'Ascendant';
     if (sidebarArcanaRow) {
         sidebarArcanaRow.style.display = isMagicClass ? 'flex' : 'none';
     }
@@ -698,7 +698,7 @@ function updateDashboard() {
     // Update magic card description based on class
     const magicDesc = document.getElementById('nav-magic-desc');
     if (magicDesc) {
-        if (charClass === 'Mage' || charClass === 'Druid') {
+        if (charClass === 'Mage' || charClass === 'Druid' || charClass === 'Ascendant') {
             magicDesc.textContent = `${charClass} spells & abilities`;
         } else if (charClass) {
             magicDesc.textContent = `${charClass} abilities`;
@@ -840,7 +840,7 @@ function toggleStatCard(card, attrName) {
 // ===========================================
 
 function quickRest() {
-    // Rest: +2 HP and +2 Arcana
+    // Rest: +2 HP, +2 Arcana, restore Willpower to max
     let messages = [];
 
     // Restore HP
@@ -869,6 +869,18 @@ function quickRest() {
         }
     }
 
+    // Restore Willpower to max (3)
+    const willSlider = document.getElementById('willpower_slider');
+    if (willSlider) {
+        const willMax = parseInt(willSlider.max) || 3;
+        const willCurrent = parseInt(willSlider.value) || 0;
+        if (willCurrent < willMax) {
+            willSlider.value = willMax;
+            willSlider.dispatchEvent(new Event('input'));
+            messages.push('Willpower restored');
+        }
+    }
+
     updateStatusBar();
 
     if (messages.length > 0) {
@@ -876,7 +888,7 @@ function quickRest() {
         // Trigger immediate save
         if (typeof triggerImmediateSave === 'function') triggerImmediateSave();
     } else {
-        showQuickMessage('Already at full HP and Arcana!');
+        showQuickMessage('Already at full HP, Arcana and Willpower!');
     }
 }
 
@@ -1393,22 +1405,11 @@ function updateQuickWeapons() {
 
         const type = typeEl?.value;
         if (type) {
-            // Look up weapon check from WEAPONS_DATA
-            const weaponData = typeof WEAPONS_DATA !== 'undefined' ? WEAPONS_DATA[type] : null;
-            let check = '';
-            if (weaponData) {
-                const abilityShort = weaponData.ability
-                    .replace('Strength', 'STR')
-                    .replace('Dexterity', 'DEX');
-                check = `${abilityShort}${weaponData.bonus}`;
-            }
-
             weapons.push({
                 name: type,
                 atk: atkEl?.value || '',
                 dmg: dmgEl?.value || '',
-                range: rangeEl?.value || '',
-                check: check
+                range: rangeEl?.value || ''
             });
         }
     }
@@ -1424,10 +1425,9 @@ function updateQuickWeapons() {
             <div class="quick-weapon-card">
                 <div class="weapon-name">⚔️ ${w.name}</div>
                 <div class="weapon-stats">
-                    ${w.atk ? `<span class="weapon-stat"><span class="stat-label">ATK</span> ${w.atk}</span>` : ''}
+                    ${w.atk ? `<span class="weapon-stat"><span class="stat-label">ATK</span> 1D20${w.atk} vs DC 10</span>` : ''}
                     ${w.dmg ? `<span class="weapon-stat"><span class="stat-label">DMG</span> ${w.dmg}</span>` : ''}
                     ${w.range ? `<span class="weapon-stat"><span class="stat-label">RNG</span> ${w.range}</span>` : ''}
-                    ${w.check ? `<span class="weapon-stat"><span class="stat-label">CHK</span> ${w.check}</span>` : ''}
                 </div>
             </div>
         `;
@@ -1435,6 +1435,9 @@ function updateQuickWeapons() {
     html += '</div>';
     container.innerHTML = html;
 }
+
+// Store abilities for modal lookup
+window._dashboardAbilities = [];
 
 function updateQuickAbilities() {
     const container = document.getElementById('quick-abilities-list');
@@ -1447,145 +1450,149 @@ function updateQuickAbilities() {
     const abilities = [];
 
     // Collect selected abilities
+    const classSpells = (typeof SPELLS_BY_CLASS !== 'undefined' && selectedClass) ? SPELLS_BY_CLASS[selectedClass] : null;
+
     for (let i = 1; i <= maxSpells; i++) {
         const typeEl = document.getElementById(`spell_${i}_type`);
-        const arcanaEl = document.getElementById(`spell_${i}_arcana`);
-        const gainEl = document.getElementById(`spell_${i}_gain`);
-        const weakenedEl = document.getElementById(`spell_${i}_weakened`);
-
         const name = typeEl?.value;
-        if (name) {
-            abilities.push({
-                name: name,
-                cost: isConjurer ? (arcanaEl?.value || '') : '',
-                effect: isConjurer ? '' : (arcanaEl?.value || ''),
-                gain: gainEl?.value || '',
-                weakened: weakenedEl?.value || '',
-                isConjurer: isConjurer
-            });
-        }
+        if (!name) continue;
+
+        const spellData = classSpells?.find(s => s.name === name);
+        const desc = spellData?.desc || '';
+        // Extract type from desc (first word before comma)
+        const type = desc.includes(',') ? desc.split(',')[0].trim() : '';
+        const detail = desc.includes(',') ? desc.substring(desc.indexOf(',') + 1).trim() : desc;
+
+        abilities.push({
+            name,
+            type,
+            detail,
+            check: spellData?.check || (isConjurer && spellData?.dc ? `1D20 + INT vs DC ${spellData.dc}` : (isConjurer ? '1D20 + INT vs spell DC' : '')),
+            cost: isConjurer ? (spellData?.arcana || '') : '',
+            damage: isConjurer ? (spellData?.damage || '') : '',
+            gain: spellData?.gain || '',
+            weakened: spellData?.weakened || '',
+            isConjurer
+        });
     }
+
+    window._dashboardAbilities = abilities;
 
     if (abilities.length === 0) {
         container.innerHTML = '<p class="empty-state">No abilities selected</p>';
         return;
     }
 
-    let html = '<div class="quick-abilities-grid">';
-    abilities.forEach(a => {
-        if (a.isConjurer) {
-            // Conjurer: show arcana cost and spelldamage
-            html += `
-                <div class="quick-ability-card conjurer">
-                    <div class="ability-name">✨ ${a.name}</div>
-                    <div class="ability-details">
-                        ${a.cost ? `<span class="ability-cost">Cost: ${a.cost}</span>` : ''}
-                        ${a.weakened ? `<span class="ability-dmg">Dmg: ${a.weakened}</span>` : ''}
-                    </div>
-                    <div class="ability-check">Check: Arkana + 1D10</div>
-                </div>
-            `;
-        } else {
-            // Melee: show effect, gain, and weakened cost
-            html += `
-                <div class="quick-ability-card melee">
-                    <div class="ability-name">💪 ${a.name}</div>
-                    <div class="ability-details">
-                        ${a.effect ? `<div class="ability-effect">${a.effect}</div>` : ''}
-                        ${a.gain ? `<span class="ability-gain">Gain: ${a.gain}</span>` : ''}
-                        ${a.weakened ? `<span class="ability-weak">Weak: ${a.weakened}</span>` : ''}
-                    </div>
-                </div>
-            `;
-        }
+    // Group by type
+    const groups = {};
+    abilities.forEach((a, i) => {
+        const key = a.type || 'Other';
+        if (!groups[key]) groups[key] = [];
+        groups[key].push({ ...a, index: i });
     });
-    html += '</div>';
+
+    // Type colors
+    const typeColors = {
+        'Offensive': 'var(--accent-red, #ef4444)',
+        'Black Magic': 'var(--accent-purple, #a855f7)',
+        'Conjuration': 'var(--accent-blue, #3b82f6)',
+        'Protection': 'var(--accent-green, #22c55e)',
+        'Transmutation': 'var(--accent-cyan, #06b6d4)',
+        'Transformation': 'var(--accent-cyan, #06b6d4)',
+        'Enchantment': 'var(--accent-pink, #ec4899)',
+        'Divination': 'var(--accent-gold, #f0c040)',
+        'Abjuration': 'var(--accent-green, #22c55e)',
+        'Illusion': 'var(--accent-purple, #a855f7)',
+        'Necromancy': 'var(--accent-red, #ef4444)',
+        'Manipulation': 'var(--accent-amber, #f59e0b)',
+        'Nature': 'var(--accent-green, #22c55e)',
+        'Arcana': 'var(--accent-purple, #a855f7)',
+        'Fire': 'var(--accent-red, #ef4444)',
+        'Utility': 'var(--text-muted)',
+    };
+    const defaultColor = isConjurer ? 'var(--accent-purple, #a855f7)' : 'var(--accent-amber, #f59e0b)';
+
+    let html = '';
+    for (const [type, items] of Object.entries(groups)) {
+        const color = typeColors[type] || defaultColor;
+        html += `<div style="margin-bottom: 10px;">`;
+        html += `<div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: ${color}; opacity: 0.7; margin-bottom: 4px; font-weight: 600;">${type}</div>`;
+        html += `<div style="display: flex; flex-wrap: wrap; gap: 6px;">`;
+        items.forEach(a => {
+            html += `<div onclick="showAbilityDetail(${a.index})" style="padding: 6px 12px; background: linear-gradient(135deg, color-mix(in srgb, ${color} 15%, transparent) 0%, color-mix(in srgb, ${color} 5%, transparent) 100%); border: 1px solid color-mix(in srgb, ${color} 30%, transparent); border-radius: 8px; cursor: pointer; transition: transform 0.1s, box-shadow 0.1s;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.2)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+                <span style="font-weight: 600; font-size: 0.85rem; color: ${color};">${a.name}</span>
+            </div>`;
+        });
+        html += `</div></div>`;
+    }
     container.innerHTML = html;
 }
+
+function showAbilityDetail(index) {
+    const a = window._dashboardAbilities?.[index];
+    if (!a) return;
+
+    const color = a.isConjurer ? 'var(--accent-purple)' : 'var(--accent-amber)';
+    document.getElementById('ability-detail-name').textContent = a.name;
+    document.getElementById('ability-detail-name').style.color = color;
+    document.getElementById('ability-detail-type').textContent = a.type;
+    document.getElementById('ability-detail-type').style.color = color;
+
+    let body = '';
+    if (a.detail) {
+        body += `<p style="color: var(--text-secondary); margin-bottom: 12px; line-height: 1.5;">${a.detail}</p>`;
+    }
+    body += `<div style="display: flex; flex-direction: column; gap: 8px;">`;
+    if (a.check) {
+        body += `<div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-subtle);"><span style="color: var(--text-muted); font-size: 0.85rem;">Check</span><span style="color: var(--text-base); font-size: 0.85rem;">${a.check}</span></div>`;
+    }
+    if (a.cost && a.cost !== '-') {
+        body += `<div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-subtle);"><span style="color: var(--text-muted); font-size: 0.85rem;">Arcana Cost</span><span style="color: var(--accent-purple); font-weight: 600; font-size: 0.85rem;">${a.cost}</span></div>`;
+    }
+    if (a.damage && a.damage !== '-' && a.damage !== '0') {
+        body += `<div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-subtle);"><span style="color: var(--text-muted); font-size: 0.85rem;">Damage</span><span style="color: var(--accent-red); font-weight: 600; font-size: 0.85rem;">${a.damage}</span></div>`;
+    }
+    if (a.weakened && a.weakened !== '-') {
+        body += `<div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-subtle);"><span style="color: var(--text-muted); font-size: 0.85rem;">Weakened Cost</span><span style="color: var(--accent-amber); font-weight: 600; font-size: 0.85rem;">${a.weakened}</span></div>`;
+    }
+    if (a.gain && a.gain !== 0 && a.gain !== '0') {
+        body += `<div style="display: flex; justify-content: space-between; padding: 6px 0;"><span style="color: var(--text-muted); font-size: 0.85rem;">Gain</span><span style="color: var(--accent-green); font-weight: 600; font-size: 0.85rem;">+${a.gain}</span></div>`;
+    }
+    body += `</div>`;
+
+    document.getElementById('ability-detail-body').innerHTML = body;
+    document.getElementById('ability-detail-modal').style.display = 'flex';
+}
+
+function hideAbilityDetailModal() {
+    document.getElementById('ability-detail-modal').style.display = 'none';
+}
+
+window.showAbilityDetail = showAbilityDetail;
+window.hideAbilityDetailModal = hideAbilityDetailModal;
 
 // ===========================================
 // TOOLS TAB SWITCHING
 // ===========================================
 
-function switchToolsTab(tabId) {
+function switchToolsTab(tabId, btn) {
     // Remove active from all tabs and content
     document.querySelectorAll('.tools-tab').forEach(tab => tab.classList.remove('active'));
     document.querySelectorAll('.tools-content').forEach(content => content.classList.remove('active'));
 
     // Add active to clicked tab
-    event.target.classList.add('active');
+    if (btn) btn.classList.add('active');
 
     // Show corresponding content
     const content = document.getElementById(tabId);
     if (content) content.classList.add('active');
 }
 
-// Tools dice roller (simplified version)
+// Tools dice roller — delegates to the main diceroller.js (rollAllDice)
+// The old D10 pool roller has been replaced by the D20 system in character-sheet.html
 function toolsRollDice() {
-    const d10Count = parseInt(document.getElementById('tools-d10-slider')?.value || 0);
-    const d12Count = parseInt(document.getElementById('tools-d12-slider')?.value || 0);
-    const d20Count = parseInt(document.getElementById('tools-d20-slider')?.value || 0);
-
-    if (d10Count + d12Count + d20Count === 0) {
-        showQuickMessage('Select some dice to roll!');
-        return;
-    }
-
-    let results = [];
-    let successes = 0;
-    let barelys = 0;
-
-    // Roll d10s
-    for (let i = 0; i < d10Count; i++) {
-        const roll = Math.floor(Math.random() * 10) + 1;
-        if (roll >= 8) successes++;
-        else if (roll >= 6) barelys++;
-        results.push({ die: 'd10', value: roll });
-    }
-
-    // Roll d12s
-    for (let i = 0; i < d12Count; i++) {
-        const roll = Math.floor(Math.random() * 12) + 1;
-        results.push({ die: 'd12', value: roll });
-    }
-
-    // Roll d20s
-    for (let i = 0; i < d20Count; i++) {
-        const roll = Math.floor(Math.random() * 20) + 1;
-        results.push({ die: 'd20', value: roll });
-    }
-
-    // Show results
-    const resultsDiv = document.getElementById('tools-dice-results');
-    const contentDiv = document.getElementById('tools-results-content');
-
-    if (resultsDiv && contentDiv) {
-        resultsDiv.style.display = 'block';
-
-        let html = `<p style="font-size: 1.2rem; color: var(--accent-gold); margin-bottom: 10px;">
-            <strong>Successes: ${successes}</strong> | Barely: ${barelys}
-        </p>`;
-        html += '<div style="display: flex; flex-wrap: wrap; gap: 8px;">';
-
-        results.forEach(r => {
-            let color = '#ef4444'; // fail
-            if (r.die === 'd10') {
-                if (r.value >= 8) color = 'var(--accent-green)';
-                else if (r.value >= 6) color = 'var(--accent-blue)';
-            }
-            html += `<span style="
-                display: inline-block;
-                padding: 8px 12px;
-                background: var(--bg-highlight);
-                border: 2px solid ${color};
-                border-radius: 6px;
-                color: ${color};
-                font-weight: bold;
-            ">${r.die}: ${r.value}</span>`;
-        });
-
-        html += '</div>';
-        contentDiv.innerHTML = html;
+    if (typeof rollAllDice === 'function') {
+        rollAllDice();
     }
 }
 
@@ -1689,17 +1696,7 @@ function initDashboard() {
         }
     });
 
-    // Tools dice sliders
-    ['tools-d10-slider', 'tools-d12-slider', 'tools-d20-slider'].forEach(sliderId => {
-        const slider = document.getElementById(sliderId);
-        if (slider) {
-            slider.addEventListener('input', () => {
-                const countId = sliderId.replace('-slider', '-count');
-                const countEl = document.getElementById(countId);
-                if (countEl) countEl.textContent = slider.value;
-            });
-        }
-    });
+    // Tools dice roller — D20 system uses diceroller.js directly
 
     // Add listeners for sidebar sync
     const sidebarWatchFields = [

@@ -185,9 +185,8 @@ function updateBreadcrumb(items) {
 // Load all books (home view)
 async function loadBooks() {
     const content = document.getElementById('wiki-content');
-    const sidebar = document.getElementById('sidebar');
 
-    sidebar.style.display = 'none';
+    hideSidebar();
     content.innerHTML = '<div class="wiki-loading"><div class="wiki-loading-spinner"></div><p>Loading books...</p></div>';
 
     updateBreadcrumb([]);
@@ -254,9 +253,8 @@ async function loadBook(bookSlug) {
     }
 
     const content = document.getElementById('wiki-content');
-    const sidebar = document.getElementById('sidebar');
 
-    sidebar.style.display = 'none';
+    hideSidebar();
     content.innerHTML = '<div class="wiki-loading"><div class="wiki-loading-spinner"></div><p>Loading...</p></div>';
 
     currentView = 'book';
@@ -268,6 +266,9 @@ async function loadBook(bookSlug) {
         if (!response.ok) throw new Error('Book not found');
 
         const book = await response.json();
+
+        // Cache book data for page navigation
+        bookCache[bookSlug] = { data: book, ts: Date.now() };
 
         updateBreadcrumb([{ title: book.title, slug: book.slug }]);
 
@@ -385,7 +386,6 @@ async function loadPage(bookSlug, pageSlug) {
     }
 
     const content = document.getElementById('wiki-content');
-    const sidebar = document.getElementById('sidebar');
 
     // Adventure gate: non-free pages require login
     if (isAdventureBook(bookSlug) && !isFreePage(pageSlug) && !isLoggedIn()) {
@@ -398,7 +398,7 @@ async function loadPage(bookSlug, pageSlug) {
             </a>
             ${loginGateMessage()}
         `;
-        sidebar.style.display = 'none';
+        hideSidebar();
         currentView = 'page';
         currentBook = bookSlug;
         currentPage = pageSlug;
@@ -480,7 +480,10 @@ async function loadPage(bookSlug, pageSlug) {
 
         // Build table of contents from headings
         buildTableOfContents();
-        sidebar.style.display = 'block';
+        showSidebar();
+
+        // Page navigation (prev/next)
+        renderPageNavigation(bookSlug, pageSlug);
 
         // Scroll to top
         window.scrollTo(0, 0);
@@ -492,7 +495,7 @@ async function loadPage(bookSlug, pageSlug) {
                 <a href="#${bookSlug}" class="wiki-back-btn" onclick="navigateTo('book', '${bookSlug}'); return false;">Back to book</a>
             </div>
         `;
-        sidebar.style.display = 'none';
+        hideSidebar();
     }
 }
 
@@ -546,10 +549,9 @@ function handleSearch(e) {
 // Show search results
 async function showSearchResults(query) {
     const content = document.getElementById('wiki-content');
-    const sidebar = document.getElementById('sidebar');
     const searchInput = document.getElementById('search-input');
 
-    sidebar.style.display = 'none';
+    hideSidebar();
     currentView = 'search';
 
     // Update search input
@@ -598,6 +600,142 @@ async function showSearchResults(query) {
         `;
     }
 }
+
+// ============================================
+// Book Data Cache + Page Navigation
+// ============================================
+
+const bookCache = {};
+const BOOK_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+async function getBookData(bookSlug) {
+    const cached = bookCache[bookSlug];
+    if (cached && (Date.now() - cached.ts < BOOK_CACHE_TTL)) {
+        return cached.data;
+    }
+    const response = await fetch(`${API_BASE}/books/${bookSlug}`);
+    if (!response.ok) return null;
+    const data = await response.json();
+    bookCache[bookSlug] = { data, ts: Date.now() };
+    return data;
+}
+
+function buildOrderedPages(book) {
+    const pages = book.pages || [];
+    const chapters = book.chapters || [];
+
+    // Group pages by chapter
+    const chapterPages = {};
+    const standalonePages = [];
+    pages.forEach(page => {
+        if (page.chapter_id) {
+            if (!chapterPages[page.chapter_id]) chapterPages[page.chapter_id] = [];
+            chapterPages[page.chapter_id].push(page);
+        } else {
+            standalonePages.push(page);
+        }
+    });
+
+    // Sort pages within each chapter by sort_order
+    Object.values(chapterPages).forEach(arr => arr.sort((a, b) => a.sort_order - b.sort_order));
+    standalonePages.sort((a, b) => a.sort_order - b.sort_order);
+
+    // Flatten: chapters in sort_order, pages within each chapter, standalone last
+    const ordered = [];
+    const sortedChapters = [...chapters].sort((a, b) => a.sort_order - b.sort_order);
+    sortedChapters.forEach(chapter => {
+        const cPages = chapterPages[chapter.id] || [];
+        cPages.forEach(p => ordered.push({ ...p, _chapterTitle: chapter.title }));
+    });
+    standalonePages.forEach(p => ordered.push({ ...p, _chapterTitle: null }));
+
+    return ordered;
+}
+
+async function renderPageNavigation(bookSlug, pageSlug) {
+    const book = await getBookData(bookSlug);
+    if (!book) return;
+
+    const ordered = buildOrderedPages(book);
+    const currentIdx = ordered.findIndex(p => p.slug === pageSlug);
+    if (currentIdx === -1) return;
+
+    const prev = currentIdx > 0 ? ordered[currentIdx - 1] : null;
+    const next = currentIdx < ordered.length - 1 ? ordered[currentIdx + 1] : null;
+
+    if (!prev && !next) return;
+
+    const currentChapter = ordered[currentIdx]._chapterTitle;
+
+    function navBtn(page, direction) {
+        if (!page) return '<div></div>';
+        const arrow = direction === 'prev' ? '&larr;' : '&rarr;';
+        const align = direction === 'prev' ? 'left' : 'right';
+        const chapterLabel = page._chapterTitle && page._chapterTitle !== currentChapter
+            ? `<span class="wiki-page-nav-chapter">${escapeHtml(page._chapterTitle)}</span>` : '';
+        return `
+            <a href="#${bookSlug}/${page.slug}" class="wiki-page-nav-btn wiki-page-nav-${direction}"
+               onclick="navigateTo('page', '${bookSlug}', '${page.slug}'); return false;"
+               style="text-align: ${align};">
+                ${direction === 'prev' ? `<span class="wiki-page-nav-arrow">${arrow}</span>` : ''}
+                <span class="wiki-page-nav-text">
+                    ${chapterLabel}
+                    <span class="wiki-page-nav-title">${escapeHtml(page.title)}</span>
+                </span>
+                ${direction === 'next' ? `<span class="wiki-page-nav-arrow">${arrow}</span>` : ''}
+            </a>
+        `;
+    }
+
+    const navHtml = `
+        <nav class="wiki-page-nav">
+            ${navBtn(prev, 'prev')}
+            ${navBtn(next, 'next')}
+        </nav>
+    `;
+
+    const pageContent = document.querySelector('.wiki-page-content');
+    if (pageContent) {
+        pageContent.insertAdjacentHTML('beforeend', navHtml);
+    }
+}
+
+// ============================================
+// Sidebar Helpers + Mobile TOC
+// ============================================
+
+function showSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) sidebar.style.display = 'block';
+    const tocBtn = document.getElementById('wiki-toc-fab');
+    if (tocBtn) tocBtn.style.display = '';
+}
+
+function hideSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) sidebar.style.display = 'none';
+    const tocBtn = document.getElementById('wiki-toc-fab');
+    if (tocBtn) tocBtn.style.display = 'none';
+    closeMobileToc();
+}
+
+function toggleMobileToc() {
+    const body = document.body;
+    const isOpen = body.classList.contains('wiki-toc-open');
+    if (isOpen) {
+        closeMobileToc();
+    } else {
+        body.classList.add('wiki-toc-open');
+        body.style.overflow = 'hidden';
+    }
+}
+
+function closeMobileToc() {
+    document.body.classList.remove('wiki-toc-open');
+    document.body.style.overflow = '';
+}
+
+window.toggleMobileToc = toggleMobileToc;
 
 // Search by tag
 function searchByTag(tag) {

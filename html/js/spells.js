@@ -45,8 +45,11 @@ function updateSpellsList() {
         }
     }
 
-    // Determine max number of spells: Mage gets 10, others get 5
-    const maxSpells = selectedClass === 'Mage' ? 10 : 5;
+    // Determine max number of spells from class data
+    const classData = selectedClass && CLASSES && CLASSES[selectedClass];
+    const maxSpells = classData && classData.startingEquipment
+        ? (classData.startingEquipment.spells || classData.startingEquipment.abilities || 5)
+        : 5;
 
     // Collect all currently selected spells
     const selectedSpells = [];
@@ -79,22 +82,41 @@ function updateSpellsList() {
         // Add spells for selected class
         if (selectedClass && SPELLS_BY_CLASS && SPELLS_BY_CLASS[selectedClass]) {
             const spells = SPELLS_BY_CLASS[selectedClass];
+
+            // Group spells by category (first word of desc before comma)
+            const groups = {};
             spells.forEach(spell => {
-                const option = document.createElement('option');
-                option.value = spell.name;
+                const category = spell.desc && spell.desc.includes(',')
+                    ? spell.desc.split(',')[0].trim()
+                    : 'Other';
+                if (!groups[category]) groups[category] = [];
+                groups[category].push(spell);
+            });
 
-                // Check if spell is already selected in another slot
-                const isSelected = selectedSpells.includes(spell.name) && spell.name !== currentValue;
+            // Build optgroups for each category
+            Object.keys(groups).forEach(category => {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = category;
 
-                if (isSelected) {
-                    option.textContent = spell.name + ' (Already Selected)';
-                    option.disabled = true;
-                    option.style.color = '#94a3b8';
-                } else {
-                    option.textContent = spell.name;
-                }
+                groups[category].forEach(spell => {
+                    const option = document.createElement('option');
+                    option.value = spell.name;
 
-                spellSelect.appendChild(option);
+                    // Check if spell is already selected in another slot
+                    const isSelected = selectedSpells.includes(spell.name) && spell.name !== currentValue;
+
+                    if (isSelected) {
+                        option.textContent = spell.name + ' (Already Selected)';
+                        option.disabled = true;
+                        option.style.color = '#94a3b8';
+                    } else {
+                        option.textContent = spell.name;
+                    }
+
+                    optgroup.appendChild(option);
+                });
+
+                spellSelect.appendChild(optgroup);
             });
 
             // Restore previous value if it still exists in the new list
@@ -137,7 +159,7 @@ function autoFillSpellData(spellIndex) {
         // Auto-fill gain (only for melee abilities)
         const gainInput = document.getElementById(`spell_${spellIndex}_gain`);
         if (gainInput && !isConjurer) {
-            gainInput.value = spell.gain !== undefined ? `${spell.gain}D10` : '';
+            gainInput.value = spell.gain !== undefined ? `+${spell.gain}` : '';
         }
 
         // Auto-fill last column (Spelldamage for conjurers, Weakened Cost for melee)

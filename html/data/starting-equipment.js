@@ -54,5 +54,23 @@ const STARTING_EQUIPMENT = {
     "High Elf_Druid": { weapon: "Quarterstaff", armor: { chest: "Leather", shoulders: "Cloth Mantle", legs: "Cloth Pants" }, shield: null },
     "Moon Elf_Druid": { weapon: "Quarterstaff", armor: { chest: "Leather", shoulders: "Cloth Mantle", legs: "Cloth Pants" }, shield: null },
     "Orc_Druid": { weapon: "Glaive", armor: { chest: "Hide", shoulders: "Leather Pauldrons", legs: "Leather Greaves" }, shield: null },
-    "Troll_Druid": { weapon: "Quarterstaff", armor: { chest: "Hide", shoulders: "Leather Pauldrons", legs: "Leather Greaves" }, shield: null }
+    "Troll_Druid": { weapon: "Quarterstaff", armor: { chest: "Hide", shoulders: "Leather Pauldrons", legs: "Leather Greaves" }, shield: null },
+
+    // WARDEN
+    "Human_Warden": { weapon: "Spear", armor: { chest: "Chainmail", shoulders: "Leather Pauldrons", legs: "Leather Greaves" }, shield: "Shield (Wooden)" },
+    "Dwarf_Warden": { weapon: "Warhammer", armor: { chest: "Chainmail", shoulders: "Chain Pauldrons", legs: "Chain Greaves" }, shield: "Shield (Metal)" },
+    "Halfling_Warden": { weapon: "Shortsword", armor: { chest: "Chain Shirt", shoulders: "Leather Pauldrons", legs: "Leather Greaves" }, shield: "Shield (Wooden)" },
+    "High Elf_Warden": { weapon: "Halberd", armor: { chest: "Scale Mail", shoulders: "Leather Pauldrons", legs: "Leather Greaves" }, shield: null },
+    "Moon Elf_Warden": { weapon: "Spear", armor: { chest: "Chain Shirt", shoulders: "Leather Pauldrons", legs: "Leather Greaves" }, shield: "Shield (Wooden)" },
+    "Orc_Warden": { weapon: "Greataxe", armor: { chest: "Chainmail", shoulders: "Chain Pauldrons", legs: "Chain Greaves" }, shield: null },
+    "Troll_Warden": { weapon: "Quarterstaff", armor: { chest: "Scale Mail", shoulders: "Leather Pauldrons", legs: "Leather Greaves" }, shield: null },
+
+    // ASCENDANT
+    "Human_Ascendant": { weapon: "Quarterstaff", armor: { chest: "Cloth", shoulders: "Cloth Mantle", legs: "Cloth Pants" }, shield: null },
+    "Dwarf_Ascendant": { weapon: "Mace", armor: { chest: "Leather", shoulders: "Cloth Mantle", legs: "Cloth Pants" }, shield: null },
+    "Halfling_Ascendant": { weapon: "Quarterstaff", armor: { chest: "Cloth", shoulders: "Cloth Mantle", legs: "Cloth Pants" }, shield: null },
+    "High Elf_Ascendant": { weapon: "Quarterstaff", armor: { chest: "Cloth", shoulders: "Cloth Mantle", legs: "Cloth Pants" }, shield: null },
+    "Moon Elf_Ascendant": { weapon: "Quarterstaff", armor: { chest: "Cloth", shoulders: "Cloth Mantle", legs: "Cloth Pants" }, shield: null },
+    "Orc_Ascendant": { weapon: "Quarterstaff", armor: { chest: "Hide", shoulders: "Cloth Mantle", legs: "Cloth Pants" }, shield: null },
+    "Troll_Ascendant": { weapon: "Quarterstaff", armor: { chest: "Cloth", shoulders: "Cloth Mantle", legs: "Cloth Pants" }, shield: null }
 };

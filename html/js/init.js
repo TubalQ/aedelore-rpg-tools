@@ -78,6 +78,8 @@ function updateArcaneElixirForClass(selectedClass) {
         startingPots = 2;
     } else if (selectedClass === 'Druid') {
         startingPots = 1;
+    } else if (selectedClass === 'Ascendant') {
+        startingPots = 1;
     }
 
     arcaneSlider.value = startingPots;

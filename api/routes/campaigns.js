@@ -2,7 +2,7 @@ const express = require('express');
 const crypto = require('crypto');
 const router = express.Router();
 const db = require('../db');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, createLimiter } = require('../middleware/auth');
 const { loggers } = require('../logger');
 
 const log = loggers.campaigns;
@@ -15,6 +15,12 @@ function setMetrics(m, writeFn) {
     metrics = m;
     writeMetricsFile = writeFn;
 }
+
+const joinLimiter = createLimiter({
+    windowMs: 60 * 1000,
+    max: 5,
+    message: { error: 'Too many join attempts, please try again later' }
+});
 
 // Helper function to generate summary from session data
 function generateSessionSummary(data, playerCharacterName = null) {
@@ -88,10 +94,16 @@ function generateSessionSummary(data, playerCharacterName = null) {
         }))
     };
 
-    // Only include DM-only fields if not player view
+    // Turning points and events - filter by visibleTo for players
+    summary.turning_points = turningPoints
+        .filter(tp => tp.description && isVisibleToPlayer(tp.visibleTo))
+        .map(tp => ({ description: tp.description, consequence: tp.consequence, linkedTo: tp.linkedTo || '' }));
+    summary.event_log = eventLog
+        .filter(e => e.text && isVisibleToPlayer(e.visibleTo))
+        .map(e => ({ text: e.text, timestamp: e.timestamp, linkedTo: e.linkedTo || '' }));
+
+    // Session notes - full for DM, only follow-up for players
     if (!playerCharacterName) {
-        summary.turning_points = turningPoints.map(tp => ({ description: tp.description, consequence: tp.consequence }));
-        summary.event_log = eventLog.map(e => ({ text: e.text, timestamp: e.timestamp }));
         summary.session_notes = data.sessionNotes || null;
     } else {
         if (data.sessionNotes && data.sessionNotes.followUp) {
@@ -106,7 +118,7 @@ function generateSessionSummary(data, playerCharacterName = null) {
 router.get('/', authenticate, async (req, res) => {
     try {
         const campaigns = await db.all(`
-            SELECT c.*,
+            SELECT c.id, c.name, c.description, c.user_id, c.created_at, c.updated_at,
                    (SELECT COUNT(*) FROM sessions WHERE campaign_id = c.id AND deleted_at IS NULL) as session_count
             FROM campaigns c
             WHERE c.user_id = $1 AND c.deleted_at IS NULL
@@ -292,7 +304,7 @@ router.delete('/:id/share', authenticate, async (req, res) => {
 });
 
 // POST /api/campaigns/join
-router.post('/join', authenticate, async (req, res) => {
+router.post('/join', joinLimiter, authenticate, async (req, res) => {
     const { share_code } = req.body;
 
     if (!share_code) {
@@ -410,6 +422,7 @@ router.get('/:id/players', authenticate, async (req, res) => {
                     class: data.class || '',
                     religion: data.religion || '',
                     background: data.background || '',
+                    relationships: data.relationships || '',
                     xp: p.character_xp || 0,
                     xp_spent: p.character_xp_spent || 0,
                     race_class_locked: p.character_race_class_locked || false,

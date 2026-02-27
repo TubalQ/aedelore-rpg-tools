@@ -186,7 +186,14 @@ function initEditor(initialContent = '') {
         height: 400,
         menubar: false,
         plugins: 'lists link code table image',
-        toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | link image | code',
+        toolbar: 'undo redo | formatselect styleselect | bold italic | alignleft aligncenter alignright | bullist numlist | link image | code',
+        style_formats: [
+            { title: 'Lore Box', block: 'div', wrapper: true, classes: 'wiki-box-lore' },
+            { title: 'Rules Box', block: 'div', wrapper: true, classes: 'wiki-box-rules' },
+            { title: 'Info Box', block: 'div', wrapper: true, classes: 'wiki-box-info' },
+            { title: 'Warning Box', block: 'div', wrapper: true, classes: 'wiki-box-warning' },
+            { title: 'Read Aloud', block: 'div', wrapper: true, classes: 'wiki-box-readaloud' }
+        ],
         content_css: false,
         skin: 'oxide-dark',
         // Image upload configuration
@@ -226,6 +233,14 @@ function initEditor(initialContent = '') {
             h3 { color: #22d3ee; margin: 16px 0 8px; }
             blockquote { border-left: 3px solid #a855f7; padding-left: 16px; color: #888; }
             img { max-width: 100%; height: auto; border-radius: 8px; }
+            .wiki-box-lore, .wiki-box-rules, .wiki-box-info, .wiki-box-warning, .wiki-box-readaloud {
+                padding: 16px 20px; margin: 24px 0; border-radius: 8px; border-left: 4px solid;
+            }
+            .wiki-box-lore { border-color: #a855f7; background: rgba(168, 85, 247, 0.08); }
+            .wiki-box-rules { border-color: #f0c040; background: rgba(240, 192, 64, 0.08); }
+            .wiki-box-info { border-color: #22d3ee; background: rgba(34, 211, 238, 0.08); }
+            .wiki-box-warning { border-color: #ef4444; background: rgba(239, 68, 68, 0.08); }
+            .wiki-box-readaloud { border-color: #22d97f; background: rgba(34, 217, 127, 0.08); font-style: italic; }
         `,
         setup: (editor) => {
             tinyEditor = editor;

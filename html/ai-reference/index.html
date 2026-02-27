@@ -36,7 +36,7 @@
 
 <h1>Aedelore RPG - AI Reference Guide</h1>
 
-<p><strong>Version:</strong> 1.0 | <strong>System:</strong> D10 Pool-Based | <strong>Setting:</strong> Fantasy World of Aedelore</p>
+<p><strong>Version:</strong> 2.0 | <strong>System:</strong> D20-Based | <strong>Setting:</strong> Fantasy World of Aedelore</p>
 
 <div class="note">
 <strong>For AI Assistants:</strong> This page contains game rules and character creation data. For world lore, see the specialized pages below.
@@ -57,42 +57,48 @@
 <hr>
 
 <div class="section">
-<h2>1. Core Dice System</h2>
+<h2>1. Core Dice System (D20)</h2>
 
-<h3>Points to Dice Conversion</h3>
+<p><strong>All checks:</strong> Roll 1D20 + modifier vs DC (Difficulty Class). Meet or beat the DC = success.</p>
+
+<h3>Points to Modifier Conversion</h3>
 <table>
-<tr><th>Points</th><th>Dice</th></tr>
-<tr><td>1-2</td><td>1D10</td></tr>
-<tr><td>3-4</td><td>2D10</td></tr>
-<tr><td>5-6</td><td>3D10</td></tr>
-<tr><td>7-8</td><td>4D10</td></tr>
-<tr><td>9-10</td><td>5D10</td></tr>
-<tr><td>11+</td><td>6D10</td></tr>
+<tr><th>Points</th><th>Modifier</th></tr>
+<tr><td>1-2</td><td>+1</td></tr>
+<tr><td>3-4</td><td>+2</td></tr>
+<tr><td>5-6</td><td>+3</td></tr>
+<tr><td>7-8</td><td>+4</td></tr>
+<tr><td>9-10</td><td>+5</td></tr>
+<tr><td>11+</td><td>+6</td></tr>
 </table>
-<p><strong>Maximum:</strong> No action may exceed 8 dice total, unless a class ability specifically allows it.</p>
+<p><strong>Formula:</strong> Modifier = Math.ceil(points / 2). Points on character sheet stay as-is; conversion happens at roll time.</p>
 
-<h3>Result Levels (per die)</h3>
+<h3>Attributes vs Skills</h3>
+<p>DM picks <strong>ONE</strong> — attribute OR skill. They are <strong>never stacked together</strong>.</p>
+<ul>
+<li><strong>General check:</strong> 1D20 + attribute (Strength, Dexterity, Intelligence, Wisdom, Toughness)</li>
+<li><strong>Specific check:</strong> 1D20 + skill (Stealth, Acrobatics, Perception, Athletics, etc.)</li>
+</ul>
+
+<h3>Critical Hits & Misses</h3>
+<ul>
+<li><strong>Natural 20:</strong> Critical hit — always succeeds, double damage dice</li>
+<li><strong>Natural 1:</strong> Auto-miss — always fails, possible backlash (DM decides)</li>
+</ul>
+
+<h3>Difficulty Classes (DC)</h3>
 <table>
-<tr><th>Roll</th><th>Result</th><th>Description</th></tr>
-<tr><td>1-4</td><td>Failure</td><td>Complete failure</td></tr>
-<tr><td>5-6</td><td>Barely</td><td>Minimal success, may have consequences</td></tr>
-<tr><td>7-9</td><td>Success</td><td>Full success</td></tr>
-<tr><td>10</td><td>Critical</td><td>Exceptional success + reroll the die</td></tr>
+<tr><th>Difficulty</th><th>DC</th></tr>
+<tr><td>Trivial</td><td>5</td></tr>
+<tr><td>Easy</td><td>10</td></tr>
+<tr><td>Normal</td><td>13</td></tr>
+<tr><td>Hard</td><td>16</td></tr>
+<tr><td>Very Hard</td><td>19</td></tr>
+<tr><td>Nearly Impossible</td><td>22</td></tr>
 </table>
 
-<h3>Critical Rolls (10)</h3>
-<p>When you roll 10: Count it as success, reroll the die, add the result. If reroll is also 10, chain continues.</p>
-
-<h3>Difficulty Levels</h3>
-<table>
-<tr><th>Difficulty</th><th>Successes Required</th></tr>
-<tr><td>Trivial</td><td>1</td></tr>
-<tr><td>Easy</td><td>2</td></tr>
-<tr><td>Normal</td><td>3</td></tr>
-<tr><td>Hard</td><td>4</td></tr>
-<tr><td>Very Hard</td><td>5</td></tr>
-<tr><td>Nearly Impossible</td><td>6+</td></tr>
-</table>
+<h3>Damage Dice</h3>
+<p>Damage uses D6/D10/2D6 etc (NOT D20). Weapon and spell damage dice are unchanged. D20 is only for "do I succeed?" checks.</p>
 </div>
 
 <div class="section">
@@ -104,46 +110,56 @@
 <li>More than 6 participants: Roll 1D10 instead</li>
 </ul>
 
-<h3>Attack</h3>
-<pre>Attack Pool = Core Ability + Weapon Attack Bonus
-(Convert each part to dice, max 8D10 total)</pre>
+<h3>Attack vs Defense (Opposed Rolls)</h3>
+<pre>Attacker:  1D20 + Weapon ATK Bonus + Attribute Modifier (STR or DEX based on weapon)
+Defender:  1D20 + Defense bonus
+Highest total wins → attacker wins = hit → roll weapon damage dice → apply to armor HP
+Tie = defender wins</pre>
 
-<table>
-<tr><th>Successes</th><th>Result</th></tr>
-<tr><td>0</td><td>Miss - no damage</td></tr>
-<tr><td>1</td><td>Glancing blow - 50% damage</td></tr>
-<tr><td>2+</td><td>Full hit - full damage</td></tr>
-<tr><td>Critical (10)</td><td>Extra effect (DM decides)</td></tr>
-</table>
+<ul>
+<li><strong>Natural 20 attack:</strong> Critical hit — auto-hit, double damage dice</li>
+<li><strong>Natural 1 attack:</strong> Auto-miss regardless of total</li>
+</ul>
 
-<h3>Defense Options</h3>
+<h3>Defense Options (choose one when attacked)</h3>
 
 <h4>Dodge</h4>
-<pre>Pool = Dexterity + Acrobatics</pre>
+<pre>1D20 + Acrobatics modifier</pre>
 <ul>
-<li>Success: Avoid attack completely</li>
-<li>Barely: Take half damage</li>
-<li>Fail: Take full damage</li>
+<li>Win: No damage</li>
+<li>Lose: Full damage to Armor HP</li>
 </ul>
 
-<h4>Parry</h4>
-<pre>Pool = Strength + Weapon Attack Bonus</pre>
+<h4>Parry (requires weapon)</h4>
+<pre>1D20 + Weapon ATK Bonus + Attribute Modifier (STR or DEX)</pre>
 <ul>
-<li>Success: Parry attack, no damage</li>
-<li>Barely: Reduce damage by weapon's attack bonus</li>
-<li>Fail: Take full damage</li>
+<li>Win: No damage</li>
+<li>Lose: Full damage to Armor HP</li>
 </ul>
 
-<h4>Block (requires shield or armor)</h4>
-<pre>Pool = Strength</pre>
+<h4>Block (requires shield)</h4>
+<pre>1D20 + Shield Defence value (Small +1, Wooden +2, Metal +3, Spiked +2, Tower +5)</pre>
 <ul>
-<li>Success (at least 1): Block up to shield's/armor's Block value. Remaining damage goes through. Shield takes blocked damage to its HP.</li>
-<li>Fail: Take full damage</li>
+<li>Win: Shield HP absorbs damage</li>
+<li>Lose: Full damage to Armor HP</li>
 </ul>
 
 <h4>Take Hit</h4>
-<pre>Pool = Toughness + Armor Bonus</pre>
-<p>Each success reduces damage by 1.</p>
+<pre>1D20 + Toughness modifier (or Armor Bonus)</pre>
+<ul>
+<li>Win: Armor absorbs, minimal damage</li>
+<li>Lose: Full damage to Armor HP + Stun/Knockback</li>
+</ul>
+
+<h3>Combat Round Sequence</h3>
+<pre>1. Attacker rolls: 1D20 + Weapon ATK Bonus + Attribute Modifier (STR or DEX)
+2. Defender chooses defense and rolls: 1D20 + defense bonus
+3. Compare totals — attacker wins? → Roll weapon damage dice
+4. Apply damage to Shield HP → Armor HP → Character HP
+5. DM chooses body part for armor damage: Hand, Leg, Chest, Shoulders, Head</pre>
+
+<h3>Assistance</h3>
+<p>Give up your action to grant ally +2 on their next roll. Max 1 assist per round.</p>
 </div>
 
 <div class="section">
@@ -575,78 +591,79 @@
 <h2>10. Abilities & Spells</h2>
 
 <h3>Warrior Abilities (Weakened-based)</h3>
+<p>Activation: 1D20 + stat modifier vs DC. Gain = bonus to next relevant roll.</p>
 <table>
-<tr><th>Ability</th><th>Check</th><th>Weakened Cost</th><th>Gain (dice)</th><th>Effect</th></tr>
-<tr><td>Last Stand</td><td>Armor, min 1 success</td><td>2</td><td>+2</td><td>Take focus from enemy</td></tr>
-<tr><td>Hero</td><td>Passive</td><td>Worthiness</td><td>0</td><td>Hero of the people</td></tr>
-<tr><td>Me First</td><td>Athletics, min 2 success</td><td>3</td><td>+3</td><td>Ignore initiative, +1 Init, 1 round</td></tr>
-<tr><td>Ultimate Sacrifice</td><td>Strength, min 1 success</td><td>2</td><td>+3</td><td>Adrenaline, take 2 dmg</td></tr>
-<tr><td>Paladin's Sacrifice</td><td>Strength, min 1 success</td><td>4</td><td>+3</td><td>Ignore pain, faint after</td></tr>
-<tr><td>Crusader</td><td>Armor, min 1 success</td><td>2</td><td>+3</td><td>Use armor, 1 round</td></tr>
-<tr><td>Give In</td><td>Strength, min 2 success</td><td>4</td><td>+4</td><td>Massive adrenaline, lose control</td></tr>
-<tr><td>Shield Wall</td><td>Toughness, min 2 success</td><td>3</td><td>+3</td><td>Protect allies behind you, req. shield, 2 rounds</td></tr>
-<tr><td>Battle Cry</td><td>Intimidation, min 1 success</td><td>2</td><td>+2</td><td>Inspire nearby allies, 1 round</td></tr>
-<tr><td>Second Wind</td><td>Endurance, min 1 success</td><td>3</td><td>+3</td><td>Push through exhaustion</td></tr>
-<tr><td>Disarm</td><td>Athletics, min 2 success</td><td>3</td><td>+2</td><td>Remove enemy weapon</td></tr>
-<tr><td>Whirlwind</td><td>Strength, min 2 success</td><td>4</td><td>+4</td><td>Strike multiple nearby foes, 1 round</td></tr>
-<tr><td>Intercept</td><td>Toughness, min 1 success</td><td>2</td><td>+3</td><td>Take hit meant for ally</td></tr>
-<tr><td>Unbreakable</td><td>Toughness, min 1 success</td><td>3</td><td>+3</td><td>Resist being knocked down, 2 rounds</td></tr>
+<tr><th>Ability</th><th>Check</th><th>DC</th><th>Weakened</th><th>Gain</th><th>Effect</th></tr>
+<tr><td>Last Stand</td><td>1D20 + Armor bonus</td><td>10</td><td>2</td><td>+2</td><td>Take focus from enemy</td></tr>
+<tr><td>Hero</td><td>Passive</td><td>-</td><td>Worthiness</td><td>-</td><td>Hero of the people</td></tr>
+<tr><td>Me First</td><td>1D20 + Athletics</td><td>15</td><td>3</td><td>+3</td><td>Ignore initiative, 1 round</td></tr>
+<tr><td>Ultimate Sacrifice</td><td>1D20 + Strength</td><td>10</td><td>2</td><td>+3</td><td>Adrenaline, take 2 dmg</td></tr>
+<tr><td>Paladin's Sacrifice</td><td>1D20 + Strength</td><td>10</td><td>4</td><td>+3</td><td>Ignore pain, faint after</td></tr>
+<tr><td>Crusader</td><td>1D20 + Armor bonus</td><td>10</td><td>2</td><td>+3</td><td>Use armor, 1 round</td></tr>
+<tr><td>Give In</td><td>1D20 + Strength</td><td>15</td><td>4</td><td>+4</td><td>Massive adrenaline, lose control</td></tr>
+<tr><td>Shield Wall</td><td>1D20 + Toughness</td><td>15</td><td>3</td><td>+3</td><td>Protect allies, req. shield, 2 rounds</td></tr>
+<tr><td>Battle Cry</td><td>1D20 + Intimidation</td><td>10</td><td>2</td><td>+2</td><td>Inspire nearby allies, 1 round</td></tr>
+<tr><td>Second Wind</td><td>1D20 + Endurance</td><td>10</td><td>3</td><td>+3</td><td>Push through exhaustion</td></tr>
+<tr><td>Disarm</td><td>1D20 + Athletics</td><td>15</td><td>3</td><td>+2</td><td>Remove enemy weapon</td></tr>
+<tr><td>Whirlwind</td><td>1D20 + Strength</td><td>15</td><td>4</td><td>+4</td><td>Strike multiple foes, 1 round</td></tr>
+<tr><td>Intercept</td><td>1D20 + Toughness</td><td>10</td><td>2</td><td>+3</td><td>Take hit meant for ally</td></tr>
+<tr><td>Unbreakable</td><td>1D20 + Toughness</td><td>10</td><td>3</td><td>+3</td><td>Resist knockdown, 2 rounds</td></tr>
 </table>
 
 <h3>Thief/Rogue Abilities (Weakened-based)</h3>
 <table>
-<tr><th>Ability</th><th>Check</th><th>Weakened Cost</th><th>Gain</th><th>Effect</th></tr>
-<tr><td>Lockpicking</td><td>Sleight of Hand, min 1</td><td>4</td><td>+1</td><td>Open normal locks, not in battle</td></tr>
-<tr><td>Sneaking</td><td>Stealth, min 1</td><td>3</td><td>+2</td><td>Extra quiet when sneaking</td></tr>
-<tr><td>Awareness</td><td>Perception, min 2</td><td>4</td><td>+4</td><td>Granted third eye, not in battle</td></tr>
-<tr><td>Vanish</td><td>Stealth, min 2</td><td>4</td><td>+4</td><td>Vanish into thin air</td></tr>
-<tr><td>Footloose</td><td>Dexterity, min 2</td><td>3</td><td>+5</td><td>Move fast as lightning</td></tr>
-<tr><td>Fixed Mind</td><td>Deception, min 1</td><td>4</td><td>+2</td><td>Deceive someone</td></tr>
-<tr><td>Backstab</td><td>Dexterity, min 2</td><td>3</td><td>+3</td><td>Strike from behind for extra damage</td></tr>
-<tr><td>Pickpocket</td><td>Sleight of Hand, min 1</td><td>4</td><td>+2</td><td>Steal unnoticed, not in battle</td></tr>
-<tr><td>Evasion</td><td>Acrobatics, min 2</td><td>3</td><td>+4</td><td>Dodge incoming attack, 1 round</td></tr>
-<tr><td>Shadow Cloak</td><td>Stealth, min 1</td><td>3</td><td>+3</td><td>Blend into shadows, 2 rounds</td></tr>
-<tr><td>Disengage</td><td>Acrobatics, min 1</td><td>2</td><td>+2</td><td>Escape without provoking</td></tr>
-<tr><td>Poison Blade</td><td>Sleight of Hand, min 1</td><td>3</td><td>+3</td><td>Coat weapon with poison, not in battle</td></tr>
-<tr><td>Silent Step</td><td>Stealth, min 1</td><td>2</td><td>+2</td><td>Move without sound, not in battle</td></tr>
+<tr><th>Ability</th><th>Check</th><th>DC</th><th>Weakened</th><th>Gain</th><th>Effect</th></tr>
+<tr><td>Lockpicking</td><td>1D20 + Sleight of Hand</td><td>10</td><td>4</td><td>+1</td><td>Open locks, not in battle</td></tr>
+<tr><td>Sneaking</td><td>1D20 + Stealth</td><td>10</td><td>3</td><td>+2</td><td>Extra quiet when sneaking</td></tr>
+<tr><td>Awareness</td><td>1D20 + Perception</td><td>15</td><td>4</td><td>+4</td><td>Third eye, not in battle</td></tr>
+<tr><td>Vanish</td><td>1D20 + Stealth</td><td>15</td><td>4</td><td>+4</td><td>Vanish into thin air</td></tr>
+<tr><td>Footloose</td><td>1D20 + Dexterity</td><td>15</td><td>3</td><td>+5</td><td>Move fast as lightning</td></tr>
+<tr><td>Fixed Mind</td><td>1D20 + Deception</td><td>10</td><td>4</td><td>+2</td><td>Deceive someone</td></tr>
+<tr><td>Backstab</td><td>1D20 + Dexterity</td><td>15</td><td>3</td><td>+3</td><td>Strike from behind, extra dmg</td></tr>
+<tr><td>Pickpocket</td><td>1D20 + Sleight of Hand</td><td>10</td><td>4</td><td>+2</td><td>Steal unnoticed, not in battle</td></tr>
+<tr><td>Evasion</td><td>1D20 + Acrobatics</td><td>15</td><td>3</td><td>+4</td><td>Dodge attack, 1 round</td></tr>
+<tr><td>Shadow Cloak</td><td>1D20 + Stealth</td><td>10</td><td>3</td><td>+3</td><td>Blend into shadows, 2 rounds</td></tr>
+<tr><td>Disengage</td><td>1D20 + Acrobatics</td><td>10</td><td>2</td><td>+2</td><td>Escape without provoking</td></tr>
+<tr><td>Poison Blade</td><td>1D20 + Sleight of Hand</td><td>10</td><td>3</td><td>+3</td><td>Poison weapon, not in battle</td></tr>
+<tr><td>Silent Step</td><td>1D20 + Stealth</td><td>10</td><td>2</td><td>+2</td><td>Move silently, not in battle</td></tr>
 </table>
 
 <h3>Hunter Abilities (Weakened-based)</h3>
 <table>
-<tr><th>Ability</th><th>Check</th><th>Weakened Cost</th><th>Gain</th><th>Effect</th></tr>
-<tr><td>Steady Shot</td><td>Dexterity, min 1</td><td>3</td><td>+2</td><td>Arrow hits exactly where you aim</td></tr>
-<tr><td>Tame a Beast</td><td>Animal Handling, min 2</td><td>5</td><td>+5</td><td>Tame normal non-magical beast, not in battle</td></tr>
-<tr><td>Unveil Path</td><td>Survival, min 1</td><td>2</td><td>+2</td><td>Notice tracks no one else notices, not in battle</td></tr>
-<tr><td>Set Trap</td><td>Nature, min 1</td><td>3</td><td>+3</td><td>Build natural traps, not in battle</td></tr>
-<tr><td>Shadow Meld</td><td>Stealth, min 2</td><td>4</td><td>+4</td><td>Melt into shadows, not in battle</td></tr>
-<tr><td>Spider Senses</td><td>Perception, min 1</td><td>2</td><td>+2</td><td>Notice surroundings, not in battle</td></tr>
-<tr><td>Rain of Death</td><td>Dexterity, min 2</td><td>4</td><td>+3</td><td>Shoot multiple arrows at targets</td></tr>
-<tr><td>Hunter's Mark</td><td>Survival, min 1</td><td>2</td><td>+2</td><td>Mark target for tracking, 4 rounds</td></tr>
-<tr><td>Camouflage</td><td>Stealth, min 1</td><td>3</td><td>+3</td><td>Blend into natural surroundings, not in battle</td></tr>
-<tr><td>Precision Strike</td><td>Dexterity, min 2</td><td>4</td><td>+4</td><td>Strike a vital point</td></tr>
-<tr><td>Call Companion</td><td>Animal Handling, min 1</td><td>3</td><td>+3</td><td>Summon animal companion, not in battle</td></tr>
-<tr><td>Quick Draw</td><td>Dexterity, min 1</td><td>2</td><td>+3</td><td>Draw and attack in one motion</td></tr>
-<tr><td>Foraging</td><td>Nature, min 1</td><td>2</td><td>+1</td><td>Find food and supplies, not in battle</td></tr>
-<tr><td>Sniper Shot</td><td>Dexterity, min 2</td><td>4</td><td>+4</td><td>Shoot from extreme distance</td></tr>
+<tr><th>Ability</th><th>Check</th><th>DC</th><th>Weakened</th><th>Gain</th><th>Effect</th></tr>
+<tr><td>Steady Shot</td><td>1D20 + Dexterity</td><td>10</td><td>3</td><td>+2</td><td>Arrow hits exactly</td></tr>
+<tr><td>Tame a Beast</td><td>1D20 + Animal Handling</td><td>15</td><td>5</td><td>+5</td><td>Tame beast, not in battle</td></tr>
+<tr><td>Unveil Path</td><td>1D20 + Survival</td><td>10</td><td>2</td><td>+2</td><td>See hidden tracks, not in battle</td></tr>
+<tr><td>Set Trap</td><td>1D20 + Nature</td><td>10</td><td>3</td><td>+3</td><td>Build traps, not in battle</td></tr>
+<tr><td>Shadow Meld</td><td>1D20 + Stealth</td><td>15</td><td>4</td><td>+4</td><td>Melt into shadows, not in battle</td></tr>
+<tr><td>Spider Senses</td><td>1D20 + Perception</td><td>10</td><td>2</td><td>+2</td><td>Notice surroundings, not in battle</td></tr>
+<tr><td>Rain of Death</td><td>1D20 + Dexterity</td><td>15</td><td>4</td><td>+3</td><td>Shoot multiple arrows</td></tr>
+<tr><td>Hunter's Mark</td><td>1D20 + Survival</td><td>10</td><td>2</td><td>+2</td><td>Mark target, 4 rounds</td></tr>
+<tr><td>Camouflage</td><td>1D20 + Stealth</td><td>10</td><td>3</td><td>+3</td><td>Blend into nature, not in battle</td></tr>
+<tr><td>Precision Strike</td><td>1D20 + Dexterity</td><td>15</td><td>4</td><td>+4</td><td>Strike vital point</td></tr>
+<tr><td>Call Companion</td><td>1D20 + Animal Handling</td><td>10</td><td>3</td><td>+3</td><td>Summon companion, not in battle</td></tr>
+<tr><td>Quick Draw</td><td>1D20 + Dexterity</td><td>10</td><td>2</td><td>+3</td><td>Draw and attack instantly</td></tr>
+<tr><td>Foraging</td><td>1D20 + Nature</td><td>10</td><td>2</td><td>+1</td><td>Find food, not in battle</td></tr>
+<tr><td>Sniper Shot</td><td>1D20 + Dexterity</td><td>15</td><td>4</td><td>+4</td><td>Extreme range shot</td></tr>
 </table>
 
 <h3>Outcast Abilities (Weakened-based)</h3>
 <table>
-<tr><th>Ability</th><th>Check</th><th>Weakened Cost</th><th>Gain</th><th>Effect</th></tr>
-<tr><td>Shadow Step</td><td>Stealth, min 1</td><td>3</td><td>+3</td><td>Blend into shadows, move silently, not in battle</td></tr>
-<tr><td>Wilderness Survival</td><td>Nature, min 1</td><td>3</td><td>+2</td><td>Proficiency in tracking & navigation, not in battle</td></tr>
-<tr><td>Street Smarts</td><td>Investigation, min 1</td><td>2</td><td>+2</td><td>Read people and intentions, not in battle</td></tr>
-<tr><td>Unseen Ally</td><td>Nature, min 1</td><td>3</td><td>+2</td><td>Communicate with small creatures, not in battle</td></tr>
-<tr><td>Improvised Weaponry</td><td>Strength, min 1</td><td>3</td><td>+3</td><td>Use anything as weapon, no disadvantage</td></tr>
-<tr><td>Resilient Spirit</td><td>Toughness, min 1</td><td>3</td><td>+3</td><td>Resist mental & emotional manipulation</td></tr>
-<tr><td>Counterculture</td><td>Investigation, min 1</td><td>2</td><td>+2</td><td>Familiarity with forbidden knowledge</td></tr>
-<tr><td>Scavenge</td><td>Investigation, min 1</td><td>2</td><td>+2</td><td>Find useful items in ruins, not in battle</td></tr>
-<tr><td>Blend In</td><td>Stealth, min 1</td><td>2</td><td>+2</td><td>Disappear in crowds, not in battle</td></tr>
-<tr><td>Iron Will</td><td>Toughness, min 1</td><td>3</td><td>+3</td><td>Resist fear and intimidation</td></tr>
-<tr><td>Dirty Fighting</td><td>Strength, min 2</td><td>3</td><td>+3</td><td>Fight without honor for advantage</td></tr>
-<tr><td>Underground Network</td><td>Investigation, min 1</td><td>3</td><td>+3</td><td>Contact hidden allies, not in battle</td></tr>
-<tr><td>Endure Elements</td><td>Toughness, min 1</td><td>2</td><td>+2</td><td>Resist harsh weather, 4 rounds</td></tr>
-<tr><td>Adapt</td><td>Investigation, min 1</td><td>3</td><td>+3</td><td>Quickly learn new skill/trade, not in battle</td></tr>
+<tr><th>Ability</th><th>Check</th><th>DC</th><th>Weakened</th><th>Gain</th><th>Effect</th></tr>
+<tr><td>Shadow Step</td><td>1D20 + Stealth</td><td>10</td><td>3</td><td>+3</td><td>Shadows, not in battle</td></tr>
+<tr><td>Wilderness Survival</td><td>1D20 + Nature</td><td>10</td><td>3</td><td>+2</td><td>Track & navigate, not in battle</td></tr>
+<tr><td>Street Smarts</td><td>1D20 + Investigation</td><td>10</td><td>2</td><td>+2</td><td>Read people, not in battle</td></tr>
+<tr><td>Unseen Ally</td><td>1D20 + Nature</td><td>10</td><td>3</td><td>+2</td><td>Talk to creatures, not in battle</td></tr>
+<tr><td>Improvised Weaponry</td><td>1D20 + Strength</td><td>10</td><td>3</td><td>+3</td><td>Use anything as weapon</td></tr>
+<tr><td>Resilient Spirit</td><td>1D20 + Toughness</td><td>10</td><td>3</td><td>+3</td><td>Resist mental manipulation</td></tr>
+<tr><td>Counterculture</td><td>1D20 + Investigation</td><td>10</td><td>2</td><td>+2</td><td>Forbidden knowledge</td></tr>
+<tr><td>Scavenge</td><td>1D20 + Investigation</td><td>10</td><td>2</td><td>+2</td><td>Find items, not in battle</td></tr>
+<tr><td>Blend In</td><td>1D20 + Stealth</td><td>10</td><td>2</td><td>+2</td><td>Disappear in crowds, not in battle</td></tr>
+<tr><td>Iron Will</td><td>1D20 + Toughness</td><td>10</td><td>3</td><td>+3</td><td>Resist fear and intimidation</td></tr>
+<tr><td>Dirty Fighting</td><td>1D20 + Strength</td><td>15</td><td>3</td><td>+3</td><td>Fight dirty for advantage</td></tr>
+<tr><td>Underground Network</td><td>1D20 + Investigation</td><td>10</td><td>3</td><td>+3</td><td>Contact allies, not in battle</td></tr>
+<tr><td>Endure Elements</td><td>1D20 + Toughness</td><td>10</td><td>2</td><td>+2</td><td>Resist weather, 4 rounds</td></tr>
+<tr><td>Adapt</td><td>1D20 + Investigation</td><td>10</td><td>3</td><td>+3</td><td>Learn skill quickly, not in battle</td></tr>
 </table>
 
 <h3>Mage Spells (Arcana-based)</h3>
@@ -791,11 +808,11 @@
 <ul>
 <li>Each character has <strong>6 Weakened Points</strong></li>
 <li>Using abilities costs Weakened</li>
-<li><strong>When Weakened = 0:</strong> Roll 1D10 + Toughness
+<li><strong>When Weakened = 0:</strong> Roll 1D20 + Toughness modifier vs DC 10
 <ul>
-<li>1-2: Death</li>
-<li>3-5: Unconscious</li>
-<li>6-10: Exhausted (can move but not fight)</li>
+<li>Nat 1: Death</li>
+<li>Under DC: Unconscious</li>
+<li>Meet/beat DC: Exhausted (can move but not fight)</li>
 </ul>
 </li>
 <li><strong>Recovery:</strong> Short rest = +1 Weakened, Long rest = all restored</li>
@@ -806,18 +823,18 @@
 <li>When you receive a critical wound, you start bleeding</li>
 <li><strong>Each round:</strong> Roll 1D6 (1-2 = 3 HP, 3-4 = 2 HP, 5-6 = 1 HP loss)</li>
 <li><strong>Bleed [X]:</strong> Roll X dice, take highest</li>
-<li><strong>Stop bleeding:</strong> Medicine check (1 success per Bleed level), Bandage (Bleed 1), Healing magic (all)</li>
+<li><strong>Stop bleeding:</strong> Medicine check (1D20 + Medicine vs DC 10 per Bleed level), Bandage (Bleed 1), Healing magic (all)</li>
 </ul>
 
 <h3>Other Effects</h3>
 <table>
 <tr><th>Status</th><th>Effect</th></tr>
-<tr><td>Poisoned</td><td>-1D10 on all rolls, take 1 damage/round</td></tr>
+<tr><td>Poisoned</td><td>-2 on all rolls, take 1 damage/round</td></tr>
 <tr><td>Stunned</td><td>Cannot act this round</td></tr>
-<tr><td>Blinded</td><td>-2D10 on attacks and perception</td></tr>
-<tr><td>Deafened</td><td>Cannot hear, -1D10 on perception</td></tr>
-<tr><td>Frightened</td><td>Cannot approach fear source, -1D10 on attacks</td></tr>
-<tr><td>Prone</td><td>-1D10 on attacks, +1D10 for enemies in melee</td></tr>
+<tr><td>Blinded</td><td>-4 on attacks and perception</td></tr>
+<tr><td>Deafened</td><td>Cannot hear, -2 on perception</td></tr>
+<tr><td>Frightened</td><td>Cannot approach fear source, -2 on attacks</td></tr>
+<tr><td>Prone</td><td>-2 on attacks, enemies get +2 in melee</td></tr>
 </table>
 </div>
 
@@ -832,15 +849,16 @@
 
 <h3>Medicine Check</h3>
 <ul>
-<li>1 success: +1D6 HP to patient</li>
-<li>2+ successes: +2D6 HP to patient</li>
-<li>Critical: +3D6 HP to patient</li>
+<li><strong>Roll:</strong> 1D20 + Medicine modifier vs DC 10</li>
+<li>Meet DC: +1D6 HP to patient</li>
+<li>Beat DC by 5+: +2D6 HP to patient</li>
+<li>Natural 20: +3D6 HP to patient</li>
 </ul>
 
 <h3>Potions</h3>
 <table>
 <tr><th>Potion</th><th>Effect</th></tr>
-<tr><td>Adrenaline</td><td>+2D10 on next action</td></tr>
+<tr><td>Adrenaline</td><td>+3 on next action</td></tr>
 <tr><td>Antidote</td><td>Cures Poisoned status</td></tr>
 <tr><td>Poison</td><td>Can be applied to weapons (DM decides effect)</td></tr>
 <tr><td>Arcane Elixir</td><td>+10 Arcana (Mage/Druid only)</td></tr>
@@ -856,7 +874,7 @@
 <ul>
 <li>Tracked with dice (D10 → D6 → out)</li>
 <li><strong>Daily:</strong> Roll your food die. 1-5 = reduce die size</li>
-<li><strong>Without:</strong> 1 day = no effect, 2 days = -1D10 all rolls, 3+ days = 1 dmg/day</li>
+<li><strong>Without:</strong> 1 day = no effect, 2 days = -2 on all rolls, 3+ days = 1 dmg/day</li>
 </ul>
 
 <h3>Ammunition</h3>
@@ -880,7 +898,7 @@
 <li>Choose <strong>Race</strong> (gives base HP, Worthiness, bonuses)</li>
 <li>Choose <strong>Class</strong> (gives HP bonus, equipment, abilities)</li>
 <li>Choose <strong>Religion</strong> (optional, gives bonuses)</li>
-<li>Distribute <strong>10 extra points</strong> among talents (max 5 per talent at start)</li>
+<li>Distribute <strong>7 extra points</strong> among talents (max 3 per talent at start)</li>
 <li>Note starting equipment from Race + Class</li>
 <li>Calculate Total HP = Race HP + Class HP Bonus</li>
 <li>Calculate Total Worthiness = Race + Class + Religion</li>
@@ -892,37 +910,42 @@
 
 <h3>Attack Sequence</h3>
 <pre>
-1. Build Attack Pool = Core Ability + Weapon Attack Bonus (convert to dice)
-2. Roll pool (max 8D10)
-3. Count successes (7-9 = success, 10 = critical + reroll)
-4. Determine hit: 0 = miss, 1 = 50% dmg, 2+ = full dmg
-5. Roll weapon damage dice
+1. Attacker rolls 1D20 + Weapon ATK Bonus + Attribute Modifier (STR or DEX, based on weapon)
+   Modifier = ceil(attribute_value / 2). Str/Dex weapons use the higher modifier.
+2. Defender rolls 1D20 + Defense modifier (varies by defense type)
+3. Compare totals: Attacker wins = hit, Tie/Defender wins = miss
+4. Natural 20 = critical hit (double damage dice), Natural 1 = auto-miss
+5. On hit: Roll weapon damage dice
 </pre>
 
 <h3>Defense Sequence</h3>
 <pre>
 1. Choose defense type (Dodge, Parry, Block, Take Hit)
-2. Build Defense Pool (varies by type)
-3. Roll pool
-4. Count successes
-5. Apply result (success = no damage, barely = partial, fail = full)
+2. Roll 1D20 + defense modifier:
+   - Dodge: Acrobatics modifier
+   - Parry: Weapon ATK Bonus + Attribute Modifier
+   - Block: Shield Defence value (+1 to +5)
+   - Take Hit: Toughness modifier (reduces damage, always "hit")
+3. Compare to attacker's roll: Meet or beat = no damage
+4. Natural 20 = perfect defense (free counter-attack opportunity)
 </pre>
 
 <h3>Spell Casting (Mage/Druid)</h3>
 <pre>
-1. Choose spell
-2. Check Arcana cost
-3. Roll Arcana check (need at least 1 success)
-4. On success: Pay Arcana cost, apply spell effect
-5. On fail: DM decides (fizzle or backlash)
+1. Choose spell, note Arcana cost
+2. Roll 1D20 + INT modifier
+3. Compare to spell DC (listed on each spell)
+4. Meet or beat DC: Pay Arcana cost, apply spell effect
+5. Fail: Spell fizzles, Arcana still consumed
+6. Natural 1: Backlash — spell fails with negative side effect
 </pre>
 
 <h3>Ability Usage (Melee Classes)</h3>
 <pre>
-1. Check ability's Check requirement
-2. Roll the check (e.g., "Stealth, min 2 success")
-3. On success: Pay Weakened cost
-4. Gain the bonus dice for your action
+1. Check ability's requirement (e.g., "1D20 + Stealth, DC 13")
+2. Roll 1D20 + relevant stat modifier vs DC
+3. On success: Pay Weakened cost, gain the modifier bonus for your action
+4. Natural 20 = automatic success, Natural 1 = automatic failure
 </pre>
 </div>
 
