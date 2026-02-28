@@ -881,6 +881,12 @@ function quickRest() {
         }
     }
 
+    // Reset transform charges (Wildshape etc.)
+    if (typeof resetTransformCharges === 'function' && typeof getClassTransform === 'function' && getClassTransform()) {
+        resetTransformCharges();
+        messages.push('Transform charges restored');
+    }
+
     updateStatusBar();
 
     if (messages.length > 0) {

@@ -781,6 +781,20 @@
                 </div>
             </div>
 
+            <!-- Transform Panel (Wildshape etc) - shown only when relevant -->
+            <div id="transform-panel" class="section dashboard-transform" style="display:none">
+                <div class="transform-header">
+                    <span id="transform-name">Wildshape</span>
+                    <span id="transform-charges" class="transform-charges">2/2</span>
+                </div>
+                <div class="transform-forms" id="transform-forms">
+                    <!-- Filled dynamically by updateTransformPanel() -->
+                </div>
+                <button id="transform-revert" class="action-btn transform-revert" style="display:none">
+                    Revert to Humanoid
+                </button>
+            </div>
+
             <!-- Weapons and Abilities Section -->
             <div class="section dashboard-weapons-abilities">
                 <h3 class="section-title">Weapons & Abilities</h3>
@@ -2922,6 +2936,7 @@
     <script src="data/armor.js"></script>
     <script src="data/starting-equipment.js"></script>
     <script src="data/spells.js"></script>
+    <script src="data/transforms.js"></script>
 
     <!-- Load JS Modules -->
     <script src="js/tabs.js"></script>
@@ -2933,6 +2948,7 @@
     <script src="js/focus-fix.js"></script>
     <script src="js/init.js"></script>
     <script src="js/dashboard.js"></script>
+    <script src="js/transforms.js"></script>
     <script src="js/ai-chat.js"></script>
 
     <!-- Toast / Confirm system (load before other modules) -->

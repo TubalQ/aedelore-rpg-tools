@@ -51,6 +51,11 @@ function getAllFields() {
         data.relationships_archived = JSON.stringify(relsArchived);
     }
 
+    // Save transform state
+    if (window._transformState) {
+        data._transformState = JSON.stringify(window._transformState);
+    }
+
     // Note: quest_items and quest_items_archived are NOT included here
     // They are managed via dedicated API endpoints (/give-item, /archive-item, etc.)
     // and preserved server-side in PUT /api/characters/:id
@@ -128,6 +133,29 @@ function setAllFields(data) {
         } catch (e) { /* ignore parse errors */ }
     }
     renderRelationships();
+
+    // Restore transform state
+    window._transformState = { active: null, charges: 2, maxCharges: 2, original: null };
+    if (data._transformState) {
+        try {
+            const ts = typeof data._transformState === 'string'
+                ? JSON.parse(data._transformState) : data._transformState;
+            window._transformState = ts;
+        } catch (e) { /* ignore */ }
+    }
+    if (typeof updateTransformPanel === 'function') updateTransformPanel();
+    // Re-apply body class if transformed
+    if (window._transformState.active) {
+        document.body.classList.add('transformed');
+        // Re-disable arcana if needed
+        const t = typeof getClassTransform === 'function' ? getClassTransform() : null;
+        if (t?.disableArcana) {
+            const arc = document.getElementById('arcana_slider');
+            if (arc) arc.disabled = true;
+        }
+    } else {
+        document.body.classList.remove('transformed');
+    }
 
     // Recalculate weapon ATK with attribute modifiers (saved ATK may be stale)
     if (typeof window.recalculateAllWeaponATK === 'function') {
