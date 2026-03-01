@@ -2351,7 +2351,7 @@
                                 <p style="margin-top: 12px;"><strong>Attack vs Defense (Opposed Roll):</strong></p>
                                 <ul>
                                     <li>Attacker: 1D20 + Weapon ATK + Attribute modifier</li>
-                                    <li>Defender: 1D20 + Defense bonus</li>
+                                    <li>Defender: 1D20 + Defense modifier (or Shield Block AC for Block)</li>
                                     <li>Attacker wins → Roll weapon damage dice → Apply to armor HP</li>
                                     <li>Nat 20 → Double damage dice</li>
                                 </ul>
@@ -2359,6 +2359,28 @@
                                 <p style="margin-top: 12px;"><strong>Damage:</strong> Roll weapon's damage dice (e.g., Longsword = 1D10)</p>
 
                                 <p style="margin-top: 12px;"><strong>Assistance:</strong> Give up your action to grant ally +2 on their next roll. Max 1 assist per round.</p>
+                            </div>
+                        </details>
+
+                        <!-- Armor Class -->
+                        <details class="rules-section">
+                            <summary>Armor Class (AC)</summary>
+                            <div class="rules-content">
+                                <p><strong>Total AC = 10 + sum of armor AC</strong> (passive, always active)</p>
+                                <p style="margin-top: 8px;">Each equipped armor piece contributes AC. An unarmored character has AC 10. Full Plate gives AC 17.</p>
+
+                                <p style="margin-top: 12px;"><strong>Shield Block AC</strong> (separate, only used for Block defense)</p>
+                                <p style="margin-top: 4px;">Shield AC is <em>not</em> added to Total AC. It is only used when you actively choose Block as your defense.</p>
+
+                                <p style="margin-top: 12px; padding: 10px; background: rgba(0, 188, 212, 0.12); border-radius: 6px;">
+                                    <strong style="color: var(--accent-cyan, #00bcd4);">Shield Block AC values:</strong><br>
+                                    <span style="font-size: 0.9em;">Small Shield: 10 · Wooden: 13 · Spiked: 14 · Metal: 15 · Tower: 20</span>
+                                </p>
+
+                                <p style="margin-top: 12px; padding: 10px; background: rgba(255, 215, 0, 0.12); border-radius: 6px;">
+                                    <strong style="color: var(--accent-gold, #ffd700);">Example Total AC:</strong><br>
+                                    <span style="font-size: 0.9em;">Cloth (unarmored): 10 · Full Leather: 13 · Full Chain: 16 · Full Plate: 17</span>
+                                </p>
                             </div>
                         </details>
 
@@ -2374,11 +2396,11 @@
                                 <p style="margin-top: 12px;"><strong>Parry</strong> (1D20 + Weapon ATK + Attribute mod) - Requires weapon</p>
                                 <p style="margin-left: 10px; font-size: 0.9em;">Win → No damage. Lose → Full damage to Armor HP.</p>
 
-                                <p style="margin-top: 12px;"><strong>Block</strong> (1D20 + Shield Defence) - Requires shield</p>
-                                <p style="margin-left: 10px; font-size: 0.9em;">Win → Shield HP absorbs damage. Lose → Armor HP takes damage.</p>
-                                <p style="margin-left: 10px; font-size: 0.85em; color: var(--text-secondary);">Shield values: Small +1, Wooden +2, Metal +3, Spiked +2, Tower +5</p>
+                                <p style="margin-top: 12px;"><strong>Block</strong> (Shield Block AC vs attacker roll) - Requires shield</p>
+                                <p style="margin-left: 10px; font-size: 0.9em;">Attacker must beat your Shield Block AC to hit. Win → Shield HP absorbs damage. Lose → Armor HP takes damage.</p>
+                                <p style="margin-left: 10px; font-size: 0.85em; color: var(--text-secondary);">Small 10 · Wooden 13 · Spiked 14 · Metal 15 · Tower 20</p>
 
-                                <p style="margin-top: 12px;"><strong>Take Hit</strong> (1D20 + Toughness or Armor Bonus)</p>
+                                <p style="margin-top: 12px;"><strong>Take Hit</strong> (1D20 + Toughness or Armor AC)</p>
                                 <p style="margin-left: 10px; font-size: 0.9em;">Win → Armor absorbs, minimal damage. Lose → Full damage + Stun/Knockback.</p>
 
                                 <p style="margin-top: 16px; padding: 10px; background: rgba(168, 85, 247, 0.15); border-radius: 6px;">
