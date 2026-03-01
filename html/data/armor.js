@@ -62,11 +62,11 @@ const ARMOR = Object.keys(ARMOR_DATA);
 
 // Shield data — ac replaces old block/defence
 const SHIELD_DATA = {
-    "Shield (Wooden)": { hp: "15", ac: 2, damage: "1d6" },
-    "Shield (Metal)": { hp: "22", ac: 3, damage: "1d6" },
-    "Shield (Tower)": { hp: "45", ac: 5, damage: "1d6", disadvantage: "Dexterity checks" },
-    "Small Shield": { hp: "5", ac: 1, damage: "1d6" },
-    "Spiked Shield": { hp: "18", ac: 2, damage: "1d10" }
+    "Shield (Wooden)": { hp: "15", ac: 13, damage: "1d6" },
+    "Shield (Metal)": { hp: "22", ac: 15, damage: "1d6" },
+    "Shield (Tower)": { hp: "45", ac: 20, damage: "1d6", disadvantage: "Dexterity checks" },
+    "Small Shield": { hp: "5", ac: 10, damage: "1d6" },
+    "Spiked Shield": { hp: "18", ac: 14, damage: "1d10" }
 };
 
 const SHIELDS = Object.keys(SHIELD_DATA);
