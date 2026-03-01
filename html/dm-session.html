@@ -2091,7 +2091,7 @@
                                 </div>
                                 <div class="ref-quick-card">
                                     <h5>Combat (Opposed)</h5>
-                                    <p><strong>Attacker:</strong> 1D20 + Atk Bonus<br><strong>Defender:</strong> 1D20 + Def Bonus<br>Higher total wins<br>Tie = Defender wins</p>
+                                    <p><strong>Attacker:</strong> 1D20 + Atk Bonus + Attr<br><strong>Defender:</strong> 1D20 + Def Modifier<br>Higher total wins<br>Tie = Defender wins</p>
                                 </div>
                                 <div class="ref-quick-card">
                                     <h5>Initiative</h5>
@@ -2163,10 +2163,10 @@
                                     <tr><th>Defense</th><th>Roll</th><th>Win</th><th>Lose</th></tr>
                                     <tr><td><strong>Dodge</strong></td><td>1D20 + Acrobatics</td><td>No damage</td><td>Full → Armor HP</td></tr>
                                     <tr><td><strong>Parry</strong></td><td>1D20 + Wpn Atk Bonus</td><td>No damage</td><td>Full → Armor HP</td></tr>
-                                    <tr><td><strong>Block</strong></td><td>1D20 + Shield Def</td><td>Shield absorbs</td><td>Full → Armor HP</td></tr>
-                                    <tr><td><strong>Take Hit</strong></td><td>1D20 + Toughness</td><td>Armor absorbs</td><td>Full + Stun</td></tr>
+                                    <tr><td><strong>Block</strong></td><td>Shield Block AC (10-20)</td><td>Shield absorbs</td><td>Full → Armor HP</td></tr>
+                                    <tr><td><strong>Take Hit</strong></td><td>1D20 + Toughness / Armor AC</td><td>Armor absorbs</td><td>Full + Stun</td></tr>
                                 </table>
-                                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: var(--space-2);"><strong>Shield values:</strong> Small +1, Wooden +2, Metal +3, Spiked +2, Tower +5. <strong>Equipment HP = 0?</strong> Destroyed → overflow to Char HP.</p>
+                                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: var(--space-2);"><strong>Shield Block AC:</strong> Small 10 · Wooden 13 · Spiked 14 · Metal 15 · Tower 20. <strong>Armor HP = 0?</strong> Broken → overflow to Char HP.</p>
                             </div>
 
                             <div class="ref-subsection">
@@ -2186,15 +2186,15 @@
                                 <h4>Combat Flow</h4>
                                 <p style="margin-bottom: 10px;">
                                     <strong>1. Initiative:</strong> Everyone rolls (D6 or D10), highest goes first<br>
-                                    <strong>2. Attacker:</strong> Roll 1D20 + Weapon Attack Bonus<br>
+                                    <strong>2. Attacker:</strong> Roll 1D20 + Weapon Attack Bonus + Attribute modifier<br>
                                     <strong>3. Defender Chooses:</strong> Dodge, Parry, Block, Take Hit, or Special<br>
-                                    <strong>4. Defense Roll:</strong> 1D20 + defense bonus (opposed roll)<br>
+                                    <strong>4. Defense Roll:</strong> 1D20 + defense modifier (or Shield Block AC for Block)<br>
                                     <strong>5. Compare:</strong> Attacker beats defender? → Roll damage dice<br>
-                                    <strong>6. Damage:</strong> Apply to Shield HP → Armor HP → Character HP<br>
-                                    <strong>7. Body Part:</strong> DM chooses: Hand, Leg, Chest, Shoulders, Head<br>
+                                    <strong>6. Body Part:</strong> DM picks: Head, Shoulders, Chest, Hands, Legs<br>
+                                    <strong>7. Damage:</strong> All damage → armor slot HP → overflow to Character HP<br>
                                     <strong>8. Next Turn:</strong> Next in initiative order
                                 </p>
-                                <p style="font-size: 0.8rem; color: var(--accent-purple); margin-top: var(--space-2);"><strong>Nat 20 Attack:</strong> Critical — double damage dice. <strong>Nat 1:</strong> Auto-miss.</p>
+                                <p style="font-size: 0.8rem; color: var(--accent-purple); margin-top: var(--space-2);"><strong>Nat 20 Attack:</strong> Double damage dice, 50% to Armor HP, 50% to Character HP. <strong>Nat 20 Defense:</strong> 50% reflected back. <strong>Nat 1:</strong> Auto-miss.</p>
                             </div>
 
                             <div class="ref-subsection">
@@ -2202,12 +2202,12 @@
 
                                 <div class="ref-rule-box" style="margin-bottom: 12px;">
                                     <h5>BLOCK Example (with Shield)</h5>
-                                    <p style="margin-bottom: 8px;"><em>Enemy attacks. You have Metal Shield (Defence +3, HP 20).</em></p>
+                                    <p style="margin-bottom: 8px;"><em>Enemy attacks. You have Metal Shield (Block AC 15, HP 22).</em></p>
                                     <p>
                                         <strong>1.</strong> Enemy rolls: 1D20 + 4 (atk bonus) = 17<br>
-                                        <strong>2.</strong> You roll Block: 1D20 + 3 (shield defence) = 14<br>
-                                        <strong>3.</strong> 17 > 14 → Hit! Enemy rolls damage: 2D6 = 9<br>
-                                        <strong>4.</strong> Shield HP takes 9 damage (20 → 11)
+                                        <strong>2.</strong> Your Shield Block AC: 15<br>
+                                        <strong>3.</strong> 17 > 15 → Hit! Enemy rolls damage: 2D6 = 9<br>
+                                        <strong>4.</strong> Shield HP takes 9 damage (22 → 13)
                                     </p>
                                 </div>
 
@@ -2247,7 +2247,7 @@
                                     <p>
                                         <strong>Dodge:</strong> High Acrobatics? Best chance for zero damage.<br>
                                         <strong>Parry:</strong> High Weapon Atk Bonus? Good for fighters.<br>
-                                        <strong>Block:</strong> Have a shield? Shield absorbs damage.<br>
+                                        <strong>Block:</strong> Have a shield? Attacker must beat Shield Block AC.<br>
                                         <strong>Take Hit:</strong> High Toughness? Reliable but risky on fail.<br>
                                         <strong>Special:</strong> Want to do something creative? Tell DM, they set the DC.
                                     </p>
@@ -2274,7 +2274,8 @@
                                     <p>
                                         <strong>Step 1 — Roll Attack:</strong> Nat 20 + 3 = 23 → <strong>Auto-hit + Critical!</strong><br>
                                         <strong>Step 2 — Double Damage Dice:</strong> Greatsword 2D6 → becomes <strong>4D6</strong><br>
-                                        <strong>Step 3 — Roll Damage:</strong> 4D6 = 3 + 5 + 2 + 6 = <strong>16 damage</strong>
+                                        <strong>Step 3 — Roll Damage:</strong> 4D6 = 3 + 5 + 2 + 6 = <strong>16 damage</strong><br>
+                                        <strong>Step 4 — Split 50/50:</strong> 8 → Armor HP, 8 → Character HP
                                     </p>
                                 </div>
 
@@ -2332,11 +2333,11 @@
 
                                 <div class="ref-rule-box" style="margin-bottom: 12px;">
                                     <h5>WARRIOR ABILITY Example (Last Stand)</h5>
-                                    <p style="margin-bottom: 8px;"><em>Last Stand: 1D20 + Armor bonus, DC 10, Weak cost 2, Gain +2. Armor Block 4 (+2 mod).</em></p>
+                                    <p style="margin-bottom: 8px;"><em>Last Stand: 1D20 + Armor AC, DC 10, Weak cost 2, Gain +2. Total AC 16 (Full Chain).</em></p>
                                     <p>
                                         <strong>1.</strong> Check Weakened: Need 2, have 4 ✓<br>
-                                        <strong>2.</strong> Roll: 1D20 + 2 (armor mod) = <strong>14</strong> vs DC 10<br>
-                                        <strong>3.</strong> 14 ≥ 10 → <strong>Success!</strong> Pay cost: 4 - 2 = 2 Weakened left<br>
+                                        <strong>2.</strong> Roll: 1D20 + 6 (armor AC above 10) = <strong>19</strong> vs DC 10<br>
+                                        <strong>3.</strong> 19 ≥ 10 → <strong>Success!</strong> Pay cost: 4 - 2 = 2 Weakened left<br>
                                         <strong>4.</strong> Gain: <strong>+2</strong> bonus on your next combat action!
                                     </p>
                                 </div>
@@ -2406,9 +2407,11 @@
                             <div class="ref-rule-box">
                                 <h5>Combat Flow</h5>
                                 <p><strong>1. Initiative:</strong> Roll D6 (D10 if 6+ players)<br>
-                                <strong>2. Attack:</strong> 1D20 + Weapon Attack Bonus (opposed roll)<br>
-                                <strong>3. Defense:</strong> 1D20 + defense modifier (dodge/parry/block/take hit)<br>
-                                <strong>4. Damage:</strong> Roll weapon damage dice on hit</p>
+                                <strong>2. Attack:</strong> 1D20 + Weapon Atk Bonus + Attr modifier<br>
+                                <strong>3. Defense:</strong> Dodge/Parry/Take Hit (1D20 + modifier) or Block (Shield Block AC)<br>
+                                <strong>4. Body Part:</strong> DM picks slot (Head/Shoulders/Chest/Hands/Legs)<br>
+                                <strong>5. Damage:</strong> All → armor slot HP, overflow → Character HP<br>
+                                <strong>Nat 20 Atk:</strong> Double dice, 50/50 split. <strong>Nat 20 Def:</strong> 50% reflected.</p>
                             </div>
                             <div class="ref-rule-box">
                                 <h5>Spellcasting</h5>
@@ -2451,12 +2454,12 @@
                                 <h4>Warrior</h4>
                                 <table class="ref-table">
                                     <tr><th>Ability</th><th>Check</th><th>Weak</th><th>Gain</th><th>Condition</th></tr>
-                                    <tr><td>Last Stand</td><td>Armor</td><td class="num">2</td><td>2D10</td><td>—</td></tr>
+                                    <tr><td>Last Stand</td><td>Armor AC</td><td class="num">2</td><td>2D10</td><td>—</td></tr>
                                     <tr><td>Hero Worthiness</td><td>—</td><td class="num">0</td><td>Passive</td><td>—</td></tr>
                                     <tr><td>Me First</td><td>Athletics</td><td class="num">3</td><td>+1 Init</td><td>1 round</td></tr>
                                     <tr><td>Ultimate Sacrifice</td><td>Strength</td><td class="num">3</td><td>2D10</td><td>You take 2 dmg</td></tr>
                                     <tr><td>Paladin's Sacrifice</td><td>Strength</td><td class="num">3</td><td>4D10</td><td>You faint after</td></tr>
-                                    <tr><td>Crusader</td><td>Armor</td><td class="num">3</td><td>2D10</td><td>1 round</td></tr>
+                                    <tr><td>Crusader</td><td>Armor AC</td><td class="num">3</td><td>2D10</td><td>1 round</td></tr>
                                     <tr><td>Give In</td><td>Strength</td><td class="num">4</td><td>4D10</td><td>Lose control</td></tr>
                                 </table>
                             </div>
@@ -2555,42 +2558,43 @@
                             <svg class="toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                         </div>
                         <div class="ref-accordion-content">
+                            <p style="font-size: 0.85rem; color: var(--accent-gold); margin-bottom: var(--space-3);"><strong>Total AC = 10 + sum of armor AC</strong> (passive). <strong>Shield Block AC</strong> = separate (Block defense only).<br>Unarmored: 10 · Leather: 13 · Chain: 16 · Plate: 17</p>
                             <div class="ref-subsection">
                                 <h4>Chest Armor</h4>
                                 <table class="ref-table">
-                                    <tr><th>Name</th><th>Type</th><th>HP</th><th>Block</th><th>Disadvantage</th><th>Cost</th></tr>
-                                    <tr><td>Cloth</td><td>Light</td><td class="num">2</td><td>0+block</td><td>None</td><td>2 sp</td></tr>
-                                    <tr><td>Leather</td><td>Light</td><td class="num">5</td><td>1+block</td><td>None</td><td>10 gp</td></tr>
-                                    <tr><td>Studded Leather</td><td>Light</td><td class="num">6</td><td>2+block</td><td>None</td><td>25 gp</td></tr>
-                                    <tr><td>Chain Shirt</td><td>Medium</td><td class="num">9</td><td>3+block</td><td>Stealth</td><td>50 gp</td></tr>
-                                    <tr><td>Breastplate</td><td>Medium</td><td class="num">11</td><td>3+block</td><td>Stealth</td><td>150 gp</td></tr>
-                                    <tr><td>Half Plate</td><td>Medium</td><td class="num">13</td><td>4+block</td><td>Stealth, -2 Acro</td><td>300 gp</td></tr>
-                                    <tr><td>Chainmail</td><td>Heavy</td><td class="num">13</td><td>4+block</td><td>Stealth, -2 Acro/Athl</td><td>75 gp</td></tr>
-                                    <tr><td>Splint</td><td>Heavy</td><td class="num">14</td><td>5+block</td><td>Stealth, -2 Acro/Athl</td><td>200 gp</td></tr>
-                                    <tr><td>Plate</td><td>Heavy</td><td class="num">15</td><td>6+block</td><td>Stealth, -2 Acro/Athl</td><td>750 gp</td></tr>
+                                    <tr><th>Name</th><th>Type</th><th>HP</th><th>AC</th><th>Disadvantage</th><th>Cost</th></tr>
+                                    <tr><td>Cloth</td><td>Cloth</td><td class="num">2</td><td class="num">0</td><td>None</td><td>2 sp</td></tr>
+                                    <tr><td>Leather</td><td>Light</td><td class="num">5</td><td class="num">1</td><td>None</td><td>10 gp</td></tr>
+                                    <tr><td>Studded Leather</td><td>Light</td><td class="num">6</td><td class="num">1</td><td>None</td><td>25 gp</td></tr>
+                                    <tr><td>Chain Shirt</td><td>Medium</td><td class="num">15</td><td class="num">2</td><td>-1 Stl</td><td>50 gp</td></tr>
+                                    <tr><td>Breastplate</td><td>Medium</td><td class="num">20</td><td class="num">2</td><td>-1 Stl</td><td>150 gp</td></tr>
+                                    <tr><td>Half Plate</td><td>Medium</td><td class="num">25</td><td class="num">2</td><td>-1 Stl, -1 Acro</td><td>300 gp</td></tr>
+                                    <tr><td>Chainmail</td><td>Heavy</td><td class="num">22</td><td class="num">2</td><td>-2 Stl, -1 Acro</td><td>75 gp</td></tr>
+                                    <tr><td>Splint</td><td>Heavy</td><td class="num">28</td><td class="num">3</td><td>-2 Stl, -1 Acro, -1 Ath</td><td>200 gp</td></tr>
+                                    <tr><td>Plate</td><td>Heavy</td><td class="num">35</td><td class="num">3</td><td>-2 Stl, -2 Acro, -1 Ath</td><td>750 gp</td></tr>
                                 </table>
                             </div>
                             <div class="ref-subsection">
                                 <h4>Head Armor</h4>
                                 <table class="ref-table">
-                                    <tr><th>Name</th><th>Type</th><th>HP</th><th>Block</th><th>Disadvantage</th><th>Cost</th></tr>
-                                    <tr><td>Cloth Hood</td><td>Light</td><td class="num">1</td><td>0+block</td><td>None</td><td>2 sp</td></tr>
-                                    <tr><td>Leather Cap</td><td>Light</td><td class="num">2</td><td>0+block</td><td>None</td><td>5 sp</td></tr>
-                                    <tr><td>Chain Coif</td><td>Medium</td><td class="num">4</td><td>1+block</td><td>Stealth, -2 Perc</td><td>15 gp</td></tr>
-                                    <tr><td>Light Helmet</td><td>Medium</td><td class="num">5</td><td>1+block</td><td>-2 Perc</td><td>25 gp</td></tr>
-                                    <tr><td>Heavy Helmet</td><td>Heavy</td><td class="num">6</td><td>2+block</td><td>Stealth, -2 Perc</td><td>45 gp</td></tr>
-                                    <tr><td>Great Helm</td><td>Heavy</td><td class="num">7</td><td>2+block</td><td>Stealth, -2 Perc/Inv</td><td>75 gp</td></tr>
+                                    <tr><th>Name</th><th>Type</th><th>HP</th><th>AC</th><th>Disadvantage</th><th>Cost</th></tr>
+                                    <tr><td>Cloth Hood</td><td>Light</td><td class="num">1</td><td class="num">0</td><td>None</td><td>2 sp</td></tr>
+                                    <tr><td>Leather Cap</td><td>Light</td><td class="num">2</td><td class="num">0</td><td>-1 Per</td><td>5 sp</td></tr>
+                                    <tr><td>Chain Coif</td><td>Medium</td><td class="num">8</td><td class="num">1</td><td>-1 Per</td><td>15 gp</td></tr>
+                                    <tr><td>Light Helmet</td><td>Medium</td><td class="num">10</td><td class="num">1</td><td>-1 Per</td><td>25 gp</td></tr>
+                                    <tr><td>Heavy Helmet</td><td>Heavy</td><td class="num">12</td><td class="num">1</td><td>-2 Per</td><td>45 gp</td></tr>
+                                    <tr><td>Great Helm</td><td>Heavy</td><td class="num">14</td><td class="num">1</td><td>-2 Per</td><td>75 gp</td></tr>
                                 </table>
                             </div>
                             <div class="ref-subsection">
                                 <h4>Shields</h4>
                                 <table class="ref-table">
-                                    <tr><th>Name</th><th>HP</th><th>Block</th><th>Def</th><th>Dmg</th><th>Cost</th></tr>
-                                    <tr><td>Small Shield</td><td class="num">3</td><td class="num">1</td><td class="num">1</td><td>1d4</td><td>3 gp</td></tr>
-                                    <tr><td>Shield (Wooden)</td><td class="num">10</td><td class="num">3</td><td class="num">2</td><td>1d4</td><td>8 gp</td></tr>
-                                    <tr><td>Shield (Metal)</td><td class="num">15</td><td class="num">5</td><td class="num">3</td><td>1d6</td><td>35 gp</td></tr>
-                                    <tr><td>Spiked Shield</td><td class="num">12</td><td class="num">4</td><td class="num">2</td><td>1d8</td><td>45 gp</td></tr>
-                                    <tr><td>Tower Shield</td><td class="num">30</td><td class="num">10</td><td class="num">5</td><td>1d4</td><td>100 gp</td></tr>
+                                    <tr><th>Name</th><th>HP</th><th>Block AC</th><th>Dmg</th><th>Disadvantage</th><th>Cost</th></tr>
+                                    <tr><td>Small Shield</td><td class="num">5</td><td class="num">10</td><td>1d6</td><td>None</td><td>3 gp</td></tr>
+                                    <tr><td>Shield (Wooden)</td><td class="num">15</td><td class="num">13</td><td>1d6</td><td>None</td><td>8 gp</td></tr>
+                                    <tr><td>Spiked Shield</td><td class="num">18</td><td class="num">14</td><td>1d10</td><td>None</td><td>45 gp</td></tr>
+                                    <tr><td>Shield (Metal)</td><td class="num">22</td><td class="num">15</td><td>1d6</td><td>None</td><td>35 gp</td></tr>
+                                    <tr><td>Shield (Tower)</td><td class="num">45</td><td class="num">20</td><td>1d6</td><td>Dex checks</td><td>100 gp</td></tr>
                                 </table>
                             </div>
                         </div>
