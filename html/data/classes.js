@@ -235,8 +235,10 @@ const CLASSES = {
         name: "Ascendant",
         bonuses: [
             "+3 Wisdom",
-            "+2 Force of Will",
+            "+2 Arcana",
             "+1 Intelligence",
+            "+1 Religion",
+            "+1 History",
             "Starting Armor: Cloth (chest, shoulders, legs)",
             "Starting Weapon: Quarterstaff",
             "Starting Gold: 1",
