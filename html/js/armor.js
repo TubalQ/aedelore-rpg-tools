@@ -18,10 +18,10 @@ function setupArmorAutofill() {
                         hpInput.value = armor.hp;
                     }
 
-                    // Auto-fill bonus
-                    const bonusInput = document.getElementById(`armor_${i}_bonus`);
-                    if (bonusInput) {
-                        bonusInput.value = armor.bonus;
+                    // Auto-fill AC
+                    const acInput = document.getElementById(`armor_${i}_ac`);
+                    if (acInput) {
+                        acInput.value = armor.ac;
                     }
 
                     // Auto-fill disadvantage
@@ -42,9 +42,9 @@ function setupArmorAutofill() {
                         hpInput.value = '';
                     }
 
-                    const bonusInput = document.getElementById(`armor_${i}_bonus`);
-                    if (bonusInput) {
-                        bonusInput.value = '';
+                    const acInput = document.getElementById(`armor_${i}_ac`);
+                    if (acInput) {
+                        acInput.value = '';
                     }
 
                     const disadvantageInput = document.getElementById(`armor_${i}_disadvantage`);
@@ -57,6 +57,9 @@ function setupArmorAutofill() {
                         currentInput.value = '';
                     }
                 }
+
+                // Update Total AC after any armor change
+                if (typeof updateTotalAC === 'function') updateTotalAC();
             };
 
             // Listen to multiple events
@@ -84,16 +87,10 @@ function setupArmorAutofill() {
                     hpInput.value = shield.hp;
                 }
 
-                // Auto-fill block value
-                const blockInput = document.getElementById('shield_block');
-                if (blockInput) {
-                    blockInput.value = shield.block;
-                }
-
-                // Auto-fill defence value
-                const defenceInput = document.getElementById('shield_defence');
-                if (defenceInput) {
-                    defenceInput.value = shield.defence;
+                // Auto-fill AC
+                const acInput = document.getElementById('shield_ac');
+                if (acInput) {
+                    acInput.value = shield.ac;
                 }
 
                 // Auto-fill damage
@@ -120,14 +117,9 @@ function setupArmorAutofill() {
                     hpInput.value = '';
                 }
 
-                const blockInput = document.getElementById('shield_block');
-                if (blockInput) {
-                    blockInput.value = '';
-                }
-
-                const defenceInput = document.getElementById('shield_defence');
-                if (defenceInput) {
-                    defenceInput.value = '';
+                const acInput = document.getElementById('shield_ac');
+                if (acInput) {
+                    acInput.value = '';
                 }
 
                 const dmgInput = document.getElementById('shield_dmg');
@@ -145,6 +137,9 @@ function setupArmorAutofill() {
                     currentInput.value = '';
                 }
             }
+
+            // Update Total AC after shield change
+            if (typeof updateTotalAC === 'function') updateTotalAC();
         };
 
         // Listen to multiple events
@@ -152,6 +147,22 @@ function setupArmorAutofill() {
         shieldInput.addEventListener('blur', fillShieldData);
         shieldInput.addEventListener('input', function() {
             setTimeout(fillShieldData, 100);
+        });
+    }
+
+    // Listen for manual AC field edits to update Total AC
+    for (let i = 1; i <= 5; i++) {
+        const acInput = document.getElementById('armor_' + i + '_ac');
+        if (acInput) {
+            acInput.addEventListener('input', function() {
+                if (typeof updateTotalAC === 'function') updateTotalAC();
+            });
+        }
+    }
+    const shieldAcInput = document.getElementById('shield_ac');
+    if (shieldAcInput) {
+        shieldAcInput.addEventListener('input', function() {
+            if (typeof updateTotalAC === 'function') updateTotalAC();
         });
     }
 }

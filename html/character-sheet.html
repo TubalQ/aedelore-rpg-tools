@@ -1421,6 +1421,14 @@
 
         <!-- Page: Combat & Equipment -->
         <div id="page-combat" class="tab-content">
+            <!-- Total AC Display -->
+            <div class="section" style="text-align: center; padding: var(--space-3) var(--space-4);">
+                <div id="total-ac-display" style="display: inline-flex; align-items: center; gap: 12px; padding: 10px 24px; background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 10px;">
+                    <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);">Total AC</span>
+                    <span id="total-ac-value" style="font-size: 1.8rem; font-weight: 700; color: var(--accent-gold, #ffd700);">10</span>
+                </div>
+            </div>
+
             <!-- Shield -->
             <div class="section collapsible" data-section-id="combat-shield">
                 <h2 class="section-title">Shield</h2>
@@ -1430,8 +1438,7 @@
                             <tr>
                                 <th>Type</th>
                                 <th>Hitpoints</th>
-                                <th>Block Value</th>
-                                <th>Defence</th>
+                                <th>AC</th>
                                 <th>Damage</th>
                                 <th>Current HP</th>
                                 <th>Broken</th>
@@ -1450,8 +1457,7 @@
                                     </select>
                                 </td>
                                 <td><input type="number" id="shield_hp" placeholder="HP"></td>
-                                <td><input type="number" id="shield_block" placeholder="Block"></td>
-                                <td><input type="number" id="shield_defence" placeholder="Defence"></td>
+                                <td><input type="number" id="shield_ac" placeholder="0"></td>
                                 <td><input type="text" id="shield_dmg" placeholder="Damage"></td>
                                 <td>
                                     <div class="value-controls">
@@ -1484,7 +1490,7 @@
                             <tr>
                                 <th>Type</th>
                                 <th>Hitpoints</th>
-                                <th>Block</th>
+                                <th>AC</th>
                                 <th>Current HP</th>
                                 <th>Disadvantage</th>
                                 <th>Broken</th>
@@ -1505,7 +1511,7 @@
                                     </select>
                                 </td>
                                 <td><input type="number" id="armor_1_hp" placeholder="HP"></td>
-                                <td><input type="text" id="armor_1_bonus" placeholder="4+block"></td>
+                                <td><input type="number" id="armor_1_ac" placeholder="0"></td>
                                 <td>
                                     <div class="value-controls">
                                         <button type="button" class="value-btn minus" onclick="adjustValue('armor_1_current', -1)">−</button>
@@ -1529,7 +1535,7 @@
                                     </select>
                                 </td>
                                 <td><input type="number" id="armor_2_hp" placeholder="HP"></td>
-                                <td><input type="text" id="armor_2_bonus" placeholder="4+block"></td>
+                                <td><input type="number" id="armor_2_ac" placeholder="0"></td>
                                 <td>
                                     <div class="value-controls">
                                         <button type="button" class="value-btn minus" onclick="adjustValue('armor_2_current', -1)">−</button>
@@ -1561,7 +1567,7 @@
                                     </select>
                                 </td>
                                 <td><input type="number" id="armor_3_hp" placeholder="HP"></td>
-                                <td><input type="text" id="armor_3_bonus" placeholder="4+block"></td>
+                                <td><input type="number" id="armor_3_ac" placeholder="0"></td>
                                 <td>
                                     <div class="value-controls">
                                         <button type="button" class="value-btn minus" onclick="adjustValue('armor_3_current', -1)">−</button>
@@ -1585,7 +1591,7 @@
                                     </select>
                                 </td>
                                 <td><input type="number" id="armor_4_hp" placeholder="HP"></td>
-                                <td><input type="text" id="armor_4_bonus" placeholder="4+block"></td>
+                                <td><input type="number" id="armor_4_ac" placeholder="0"></td>
                                 <td>
                                     <div class="value-controls">
                                         <button type="button" class="value-btn minus" onclick="adjustValue('armor_4_current', -1)">−</button>
@@ -1609,7 +1615,7 @@
                                     </select>
                                 </td>
                                 <td><input type="number" id="armor_5_hp" placeholder="HP"></td>
-                                <td><input type="text" id="armor_5_bonus" placeholder="4+block"></td>
+                                <td><input type="number" id="armor_5_ac" placeholder="0"></td>
                                 <td>
                                     <div class="value-controls">
                                         <button type="button" class="value-btn minus" onclick="adjustValue('armor_5_current', -1)">−</button>

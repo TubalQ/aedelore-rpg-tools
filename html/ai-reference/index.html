@@ -138,14 +138,14 @@ Tie = defender wins</pre>
 </ul>
 
 <h4>Block (requires shield)</h4>
-<pre>1D20 + Shield Defence value (Small +1, Wooden +2, Metal +3, Spiked +2, Tower +5)</pre>
+<pre>1D20 + Shield AC (Small +1, Wooden +2, Metal +3, Spiked +2, Tower +5)</pre>
 <ul>
 <li>Win: Shield HP absorbs damage</li>
 <li>Lose: Full damage to Armor HP</li>
 </ul>
 
 <h4>Take Hit</h4>
-<pre>1D20 + Toughness modifier (or Armor Bonus)</pre>
+<pre>1D20 + Toughness modifier (or Armor AC)</pre>
 <ul>
 <li>Win: Armor absorbs, minimal damage</li>
 <li>Lose: Full damage to Armor HP + Stun/Knockback</li>
@@ -153,7 +153,7 @@ Tie = defender wins</pre>
 
 <h3>Combat Round Sequence</h3>
 <pre>1. Attacker rolls: 1D20 + Weapon ATK Bonus + Attribute Modifier (STR or DEX)
-2. Defender chooses defense and rolls: 1D20 + defense bonus
+2. Defender chooses defense and rolls: 1D20 + defense modifier
 3. Compare totals — attacker wins? → Roll weapon damage dice
 4. Apply damage to Shield HP → Armor HP → Character HP
 5. DM chooses body part for armor damage: Hand, Leg, Chest, Shoulders, Head</pre>
@@ -517,73 +517,87 @@ Tie = defender wins</pre>
 <div class="section">
 <h2>9. Armor</h2>
 
+<div class="note"><strong>Total AC = 10 + Armor AC (sum of all slots) + Shield AC</strong><br>
+Unarmored = AC 10. Full Plate + Metal Shield = AC 20.</div>
+
 <h3>Head Armor</h3>
 <table>
-<tr><th>Armor</th><th>Type</th><th>HP</th><th>Bonus</th><th>Disadvantage</th></tr>
-<tr><td>Cloth Hood</td><td>Light</td><td>1</td><td>0+block</td><td>None</td></tr>
-<tr><td>Leather Cap</td><td>Light</td><td>2</td><td>0+block</td><td>-1 Perception</td></tr>
-<tr><td>Chain Coif</td><td>Medium</td><td>8</td><td>1+block</td><td>-1 Perception</td></tr>
-<tr><td>Light Helmet</td><td>Medium</td><td>10</td><td>1+block</td><td>-1 Perception</td></tr>
-<tr><td>Heavy Helmet</td><td>Heavy</td><td>12</td><td>2+block</td><td>-2 Perception</td></tr>
-<tr><td>Great Helm</td><td>Heavy</td><td>14</td><td>2+block</td><td>-2 Perception</td></tr>
+<tr><th>Armor</th><th>Type</th><th>HP</th><th>AC</th><th>Disadvantage</th></tr>
+<tr><td>Cloth Hood</td><td>Light</td><td>1</td><td>0</td><td>None</td></tr>
+<tr><td>Leather Cap</td><td>Light</td><td>2</td><td>0</td><td>-1 Perception</td></tr>
+<tr><td>Chain Coif</td><td>Medium</td><td>8</td><td>1</td><td>-1 Perception</td></tr>
+<tr><td>Light Helmet</td><td>Medium</td><td>10</td><td>1</td><td>-1 Perception</td></tr>
+<tr><td>Heavy Helmet</td><td>Heavy</td><td>12</td><td>1</td><td>-2 Perception</td></tr>
+<tr><td>Great Helm</td><td>Heavy</td><td>14</td><td>1</td><td>-2 Perception</td></tr>
 </table>
 
 <h3>Shoulder Armor</h3>
 <table>
-<tr><th>Armor</th><th>Type</th><th>HP</th><th>Bonus</th><th>Disadvantage</th></tr>
-<tr><td>Cloth Mantle</td><td>Light</td><td>1</td><td>0+block</td><td>None</td></tr>
-<tr><td>Leather Pauldrons</td><td>Light</td><td>3</td><td>1+block</td><td>None</td></tr>
-<tr><td>Studded Pauldrons</td><td>Light</td><td>3</td><td>1+block</td><td>None</td></tr>
-<tr><td>Chain Pauldrons</td><td>Medium</td><td>10</td><td>1+block</td><td>-1 Acrobatics</td></tr>
-<tr><td>Plate Pauldrons</td><td>Heavy</td><td>14</td><td>2+block</td><td>-2 Acrobatics</td></tr>
+<tr><th>Armor</th><th>Type</th><th>HP</th><th>AC</th><th>Disadvantage</th></tr>
+<tr><td>Cloth Mantle</td><td>Light</td><td>1</td><td>0</td><td>None</td></tr>
+<tr><td>Leather Pauldrons</td><td>Light</td><td>3</td><td>1</td><td>None</td></tr>
+<tr><td>Studded Pauldrons</td><td>Light</td><td>3</td><td>1</td><td>None</td></tr>
+<tr><td>Chain Pauldrons</td><td>Medium</td><td>10</td><td>1</td><td>-1 Acrobatics</td></tr>
+<tr><td>Plate Pauldrons</td><td>Heavy</td><td>14</td><td>1</td><td>-2 Acrobatics</td></tr>
 </table>
 
 <h3>Chest Armor</h3>
 <table>
-<tr><th>Armor</th><th>Type</th><th>HP</th><th>Bonus</th><th>Disadvantage</th></tr>
-<tr><td>Cloth</td><td>Cloth</td><td>2</td><td>0+block</td><td>None</td></tr>
-<tr><td>Padded</td><td>Light</td><td>3</td><td>1+block</td><td>None</td></tr>
-<tr><td>Leather</td><td>Light</td><td>5</td><td>1+block</td><td>None</td></tr>
-<tr><td>Studded Leather</td><td>Light</td><td>6</td><td>2+block</td><td>None</td></tr>
-<tr><td>Hide</td><td>Medium</td><td>10</td><td>2+block</td><td>-1 Stealth</td></tr>
-<tr><td>Chain Shirt</td><td>Medium</td><td>15</td><td>3+block</td><td>-1 Stealth</td></tr>
-<tr><td>Scale Mail</td><td>Medium</td><td>18</td><td>3+block</td><td>-1 Stealth</td></tr>
-<tr><td>Breastplate</td><td>Medium</td><td>20</td><td>3+block</td><td>-1 Stealth</td></tr>
-<tr><td>Half Plate</td><td>Medium</td><td>25</td><td>4+block</td><td>-1 Stealth, -1 Acrobatics</td></tr>
-<tr><td>Ring Mail</td><td>Heavy</td><td>16</td><td>3+block</td><td>-1 Stealth, -1 Acrobatics</td></tr>
-<tr><td>Chainmail</td><td>Heavy</td><td>22</td><td>4+block</td><td>-2 Stealth, -1 Acrobatics</td></tr>
-<tr><td>Splint</td><td>Heavy</td><td>28</td><td>5+block</td><td>-2 Stealth, -1 Acrobatics, -1 Athletics</td></tr>
-<tr><td>Plate</td><td>Heavy</td><td>35</td><td>6+block</td><td>-2 Stealth, -2 Acrobatics, -1 Athletics</td></tr>
+<tr><th>Armor</th><th>Type</th><th>HP</th><th>AC</th><th>Disadvantage</th></tr>
+<tr><td>Cloth</td><td>Cloth</td><td>2</td><td>0</td><td>None</td></tr>
+<tr><td>Padded</td><td>Light</td><td>3</td><td>1</td><td>None</td></tr>
+<tr><td>Leather</td><td>Light</td><td>5</td><td>1</td><td>None</td></tr>
+<tr><td>Studded Leather</td><td>Light</td><td>6</td><td>1</td><td>None</td></tr>
+<tr><td>Hide</td><td>Medium</td><td>10</td><td>1</td><td>-1 Stealth</td></tr>
+<tr><td>Chain Shirt</td><td>Medium</td><td>15</td><td>2</td><td>-1 Stealth</td></tr>
+<tr><td>Scale Mail</td><td>Medium</td><td>18</td><td>2</td><td>-1 Stealth</td></tr>
+<tr><td>Breastplate</td><td>Medium</td><td>20</td><td>2</td><td>-1 Stealth</td></tr>
+<tr><td>Half Plate</td><td>Medium</td><td>25</td><td>2</td><td>-1 Stealth, -1 Acrobatics</td></tr>
+<tr><td>Ring Mail</td><td>Heavy</td><td>16</td><td>2</td><td>-1 Stealth, -1 Acrobatics</td></tr>
+<tr><td>Chainmail</td><td>Heavy</td><td>22</td><td>2</td><td>-2 Stealth, -1 Acrobatics</td></tr>
+<tr><td>Splint</td><td>Heavy</td><td>28</td><td>3</td><td>-2 Stealth, -1 Acrobatics, -1 Athletics</td></tr>
+<tr><td>Plate</td><td>Heavy</td><td>35</td><td>3</td><td>-2 Stealth, -2 Acrobatics, -1 Athletics</td></tr>
 </table>
 
 <h3>Hand Armor</h3>
 <table>
-<tr><th>Armor</th><th>Type</th><th>HP</th><th>Bonus</th><th>Disadvantage</th></tr>
-<tr><td>Cloth Gloves</td><td>Light</td><td>1</td><td>0+block</td><td>None</td></tr>
-<tr><td>Leather Gloves</td><td>Light</td><td>2</td><td>0+block</td><td>None</td></tr>
-<tr><td>Studded Gloves</td><td>Light</td><td>3</td><td>1+block</td><td>None</td></tr>
-<tr><td>Chain Gloves</td><td>Medium</td><td>8</td><td>1+block</td><td>-1 Sleight of Hand</td></tr>
-<tr><td>Plate Gauntlets</td><td>Heavy</td><td>12</td><td>2+block</td><td>-2 Sleight of Hand</td></tr>
+<tr><th>Armor</th><th>Type</th><th>HP</th><th>AC</th><th>Disadvantage</th></tr>
+<tr><td>Cloth Gloves</td><td>Light</td><td>1</td><td>0</td><td>None</td></tr>
+<tr><td>Leather Gloves</td><td>Light</td><td>2</td><td>0</td><td>None</td></tr>
+<tr><td>Studded Gloves</td><td>Light</td><td>3</td><td>1</td><td>None</td></tr>
+<tr><td>Chain Gloves</td><td>Medium</td><td>8</td><td>1</td><td>-1 Sleight of Hand</td></tr>
+<tr><td>Plate Gauntlets</td><td>Heavy</td><td>12</td><td>1</td><td>-2 Sleight of Hand</td></tr>
 </table>
 
 <h3>Leg Armor</h3>
 <table>
-<tr><th>Armor</th><th>Type</th><th>HP</th><th>Bonus</th><th>Disadvantage</th></tr>
-<tr><td>Cloth Pants</td><td>Light</td><td>1</td><td>0+block</td><td>None</td></tr>
-<tr><td>Leather Greaves</td><td>Light</td><td>3</td><td>1+block</td><td>None</td></tr>
-<tr><td>Studded Greaves</td><td>Light</td><td>3</td><td>1+block</td><td>None</td></tr>
-<tr><td>Chain Greaves</td><td>Medium</td><td>10</td><td>1+block</td><td>-1 Athletics</td></tr>
-<tr><td>Plate Greaves</td><td>Heavy</td><td>14</td><td>2+block</td><td>-2 Athletics, -1 Acrobatics</td></tr>
+<tr><th>Armor</th><th>Type</th><th>HP</th><th>AC</th><th>Disadvantage</th></tr>
+<tr><td>Cloth Pants</td><td>Light</td><td>1</td><td>0</td><td>None</td></tr>
+<tr><td>Leather Greaves</td><td>Light</td><td>3</td><td>1</td><td>None</td></tr>
+<tr><td>Studded Greaves</td><td>Light</td><td>3</td><td>1</td><td>None</td></tr>
+<tr><td>Chain Greaves</td><td>Medium</td><td>10</td><td>1</td><td>-1 Athletics</td></tr>
+<tr><td>Plate Greaves</td><td>Heavy</td><td>14</td><td>1</td><td>-2 Athletics, -1 Acrobatics</td></tr>
 </table>
 
 <h3>Shields</h3>
 <table>
-<tr><th>Shield</th><th>HP</th><th>Block</th><th>Defence</th><th>Damage</th><th>Notes</th></tr>
-<tr><td>Small Shield</td><td>5</td><td>1</td><td>1</td><td>1d6</td><td>-</td></tr>
-<tr><td>Shield (Wooden)</td><td>15</td><td>3</td><td>2</td><td>1d6</td><td>-</td></tr>
-<tr><td>Shield (Metal)</td><td>22</td><td>5</td><td>3</td><td>1d6</td><td>-</td></tr>
-<tr><td>Spiked Shield</td><td>18</td><td>4</td><td>2</td><td>1d10</td><td>-</td></tr>
-<tr><td>Shield (Tower)</td><td>45</td><td>10</td><td>5</td><td>1d6</td><td>Disadvantage on Dexterity checks</td></tr>
+<tr><th>Shield</th><th>HP</th><th>AC</th><th>Damage</th><th>Notes</th></tr>
+<tr><td>Small Shield</td><td>5</td><td>1</td><td>1d6</td><td>-</td></tr>
+<tr><td>Shield (Wooden)</td><td>15</td><td>2</td><td>1d6</td><td>-</td></tr>
+<tr><td>Shield (Metal)</td><td>22</td><td>3</td><td>1d6</td><td>-</td></tr>
+<tr><td>Spiked Shield</td><td>18</td><td>2</td><td>1d10</td><td>-</td></tr>
+<tr><td>Shield (Tower)</td><td>45</td><td>5</td><td>1d6</td><td>Disadvantage on Dexterity checks</td></tr>
+</table>
+
+<h3>Example AC Totals</h3>
+<table>
+<tr><th>Set</th><th>Head</th><th>Shoulders</th><th>Chest</th><th>Hands</th><th>Legs</th><th>Shield</th><th>Total AC</th></tr>
+<tr><td>Unarmored (Cloth)</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>-</td><td><strong>10</strong></td></tr>
+<tr><td>Full Leather</td><td>0</td><td>1</td><td>1</td><td>0</td><td>1</td><td>-</td><td><strong>13</strong></td></tr>
+<tr><td>Full Chain</td><td>1</td><td>1</td><td>2</td><td>1</td><td>1</td><td>-</td><td><strong>16</strong></td></tr>
+<tr><td>Full Plate</td><td>1</td><td>1</td><td>3</td><td>1</td><td>1</td><td>-</td><td><strong>17</strong></td></tr>
+<tr><td>Plate + Metal Shield</td><td>1</td><td>1</td><td>3</td><td>1</td><td>1</td><td>+3</td><td><strong>20</strong></td></tr>
+<tr><td>Plate + Tower Shield</td><td>1</td><td>1</td><td>3</td><td>1</td><td>1</td><td>+5</td><td><strong>22</strong></td></tr>
 </table>
 </div>
 
@@ -594,12 +608,12 @@ Tie = defender wins</pre>
 <p>Activation: 1D20 + stat modifier vs DC. Gain = bonus to next relevant roll.</p>
 <table>
 <tr><th>Ability</th><th>Check</th><th>DC</th><th>Weakened</th><th>Gain</th><th>Effect</th></tr>
-<tr><td>Last Stand</td><td>1D20 + Armor bonus</td><td>10</td><td>2</td><td>+2</td><td>Take focus from enemy</td></tr>
+<tr><td>Last Stand</td><td>1D20 + Armor AC</td><td>10</td><td>2</td><td>+2</td><td>Take focus from enemy</td></tr>
 <tr><td>Hero</td><td>Passive</td><td>-</td><td>Worthiness</td><td>-</td><td>Hero of the people</td></tr>
 <tr><td>Me First</td><td>1D20 + Athletics</td><td>15</td><td>3</td><td>+3</td><td>Ignore initiative, 1 round</td></tr>
 <tr><td>Ultimate Sacrifice</td><td>1D20 + Strength</td><td>10</td><td>2</td><td>+3</td><td>Adrenaline, take 2 dmg</td></tr>
 <tr><td>Paladin's Sacrifice</td><td>1D20 + Strength</td><td>10</td><td>4</td><td>+3</td><td>Ignore pain, faint after</td></tr>
-<tr><td>Crusader</td><td>1D20 + Armor bonus</td><td>10</td><td>2</td><td>+3</td><td>Use armor, 1 round</td></tr>
+<tr><td>Crusader</td><td>1D20 + Armor AC</td><td>10</td><td>2</td><td>+3</td><td>Use armor, 1 round</td></tr>
 <tr><td>Give In</td><td>1D20 + Strength</td><td>15</td><td>4</td><td>+4</td><td>Massive adrenaline, lose control</td></tr>
 <tr><td>Shield Wall</td><td>1D20 + Toughness</td><td>15</td><td>3</td><td>+3</td><td>Protect allies, req. shield, 2 rounds</td></tr>
 <tr><td>Battle Cry</td><td>1D20 + Intimidation</td><td>10</td><td>2</td><td>+2</td><td>Inspire nearby allies, 1 round</td></tr>
@@ -924,7 +938,7 @@ Tie = defender wins</pre>
 2. Roll 1D20 + defense modifier:
    - Dodge: Acrobatics modifier
    - Parry: Weapon ATK Bonus + Attribute Modifier
-   - Block: Shield Defence value (+1 to +5)
+   - Block: Shield AC (+1 to +5)
    - Take Hit: Toughness modifier (reduces damage, always "hit")
 3. Compare to attacker's roll: Meet or beat = no damage
 4. Natural 20 = perfect defense (free counter-attack opportunity)

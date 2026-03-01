@@ -1029,13 +1029,13 @@ function createMcpServer(token) {
             const armorSlots = { 1: 'Head', 2: 'Shoulders', 3: 'Chest', 4: 'Hands', 5: 'Legs' };
             for (let i = 1; i <= 5; i++) {
                 if (d[`armor_${i}_type`]) {
-                    summary += `**Armor (${armorSlots[i]}):** ${d[`armor_${i}_type`]} (HP:${d[`armor_${i}_hp`] || '?'} Current:${d[`armor_${i}_current`] || '?'} Bonus:${d[`armor_${i}_bonus`] || '?'}${d[`armor_${i}_broken`] ? ' BROKEN' : ''})\n`;
+                    summary += `**Armor (${armorSlots[i]}):** ${d[`armor_${i}_type`]} (HP:${d[`armor_${i}_hp`] || '?'} Current:${d[`armor_${i}_current`] || '?'} AC:${d[`armor_${i}_ac`] || '0'}${d[`armor_${i}_broken`] ? ' BROKEN' : ''})\n`;
                 }
             }
 
             // Shield
             if (d.shield_type) {
-                summary += `**Shield:** ${d.shield_type} (HP:${d.shield_hp || '?'} Current:${d.shield_current || '?'} Block:${d.shield_block || '?'} Def:${d.shield_defence || '?'}${d.shield_broken ? ' BROKEN' : ''})\n`;
+                summary += `**Shield:** ${d.shield_type} (HP:${d.shield_hp || '?'} Current:${d.shield_current || '?'} AC:${d.shield_ac || '0'}${d.shield_broken ? ' BROKEN' : ''})\n`;
             }
 
             // Abilities
@@ -1177,7 +1177,7 @@ function createMcpServer(token) {
                         if (armorInfo) {
                             data[`armor_${slot}_hp`] = armorInfo.hp || '';
                             data[`armor_${slot}_current`] = armorInfo.hp || '';
-                            data[`armor_${slot}_bonus`] = armorInfo.bonus || '';
+                            data[`armor_${slot}_ac`] = armorInfo.ac ?? 0;
                             data[`armor_${slot}_disadvantage`] = armorInfo.disadvantage || '';
                         }
                     }
@@ -1190,8 +1190,7 @@ function createMcpServer(token) {
                     if (shieldInfo) {
                         data.shield_hp = shieldInfo.hp || '';
                         data.shield_current = shieldInfo.hp || '';
-                        data.shield_block = shieldInfo.block || '';
-                        data.shield_defence = shieldInfo.defence || '';
+                        data.shield_ac = shieldInfo.ac ?? 0;
                         data.shield_dmg = shieldInfo.damage || '';
                     }
                 }
@@ -1344,7 +1343,7 @@ function createMcpServer(token) {
     );
 
     safeTool('equip_armor',
-        'Equip armor or shield. Slot: 1=Head, 2=Shoulders, 3=Chest, 4=Hands, 5=Legs. Auto-fills HP, bonus, disadvantage.',
+        'Equip armor or shield. Slot: 1=Head, 2=Shoulders, 3=Chest, 4=Hands, 5=Legs. Auto-fills HP, AC, disadvantage.',
         {
             character_id: z.number().describe('Character ID'),
             slot: z.number().min(1).max(5).optional().describe('Armor slot: 1=Head, 2=Shoulders, 3=Chest, 4=Hands, 5=Legs'),
@@ -1364,11 +1363,11 @@ function createMcpServer(token) {
                 data[`armor_${slot}_type`] = armor_name;
                 data[`armor_${slot}_hp`] = armorInfo.hp || '';
                 data[`armor_${slot}_current`] = armorInfo.hp || '';
-                data[`armor_${slot}_bonus`] = armorInfo.bonus || '';
+                data[`armor_${slot}_ac`] = armorInfo.ac ?? 0;
                 data[`armor_${slot}_disadvantage`] = armorInfo.disadvantage || '';
                 data[`armor_${slot}_broken`] = false;
                 const slotNames = { 1: 'Head', 2: 'Shoulders', 3: 'Chest', 4: 'Hands', 5: 'Legs' };
-                results.push(`Equipped ${armor_name} on ${slotNames[slot]} (HP:${armorInfo.hp} Bonus:${armorInfo.bonus})`);
+                results.push(`Equipped ${armor_name} on ${slotNames[slot]} (HP:${armorInfo.hp} AC:${armorInfo.ac})`);
             }
 
             if (shield_name) {
@@ -1379,11 +1378,10 @@ function createMcpServer(token) {
                 data.shield_type = shield_name;
                 data.shield_hp = shieldInfo.hp || '';
                 data.shield_current = shieldInfo.hp || '';
-                data.shield_block = shieldInfo.block || '';
-                data.shield_defence = shieldInfo.defence || '';
+                data.shield_ac = shieldInfo.ac ?? 0;
                 data.shield_dmg = shieldInfo.damage || '';
                 data.shield_broken = false;
-                results.push(`Equipped ${shield_name} (HP:${shieldInfo.hp} Block:${shieldInfo.block} Def:${shieldInfo.defence})`);
+                results.push(`Equipped ${shield_name} (HP:${shieldInfo.hp} AC:${shieldInfo.ac})`);
             }
 
             if (results.length === 0) {

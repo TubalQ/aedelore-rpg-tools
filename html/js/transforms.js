@@ -62,12 +62,12 @@ const TRANSFORM_FIELDS = {
         'weapon_3_type', 'weapon_3_atk', 'weapon_3_dmg', 'weapon_3_range'
     ],
     armor: [
-        'shield_type', 'shield_hp', 'shield_block', 'shield_defence',
-        'armor_1_type', 'armor_1_hp', 'armor_1_bonus', 'armor_1_current',
-        'armor_2_type', 'armor_2_hp', 'armor_2_bonus', 'armor_2_current',
-        'armor_3_type', 'armor_3_hp', 'armor_3_bonus', 'armor_3_current',
-        'armor_4_type', 'armor_4_hp', 'armor_4_bonus', 'armor_4_current',
-        'armor_5_type', 'armor_5_hp', 'armor_5_bonus', 'armor_5_current'
+        'shield_type', 'shield_hp', 'shield_ac',
+        'armor_1_type', 'armor_1_hp', 'armor_1_ac', 'armor_1_current',
+        'armor_2_type', 'armor_2_hp', 'armor_2_ac', 'armor_2_current',
+        'armor_3_type', 'armor_3_hp', 'armor_3_ac', 'armor_3_current',
+        'armor_4_type', 'armor_4_hp', 'armor_4_ac', 'armor_4_current',
+        'armor_5_type', 'armor_5_hp', 'armor_5_ac', 'armor_5_current'
     ]
 };
 
@@ -378,14 +378,12 @@ function activateTransform(formKey) {
         _setField('weapon_' + i + '_range', '');
     }
 
-    // Clear armor, set block
+    // Clear armor
     TRANSFORM_FIELDS.armor.forEach(function(id) {
-        if (id === 'shield_block') {
-            _setField(id, form.block || 0);
-        } else {
-            _setField(id, '');
-        }
+        _setField(id, '');
     });
+    // Update Total AC (will show base 10 while transformed)
+    if (typeof updateTotalAC === 'function') updateTotalAC();
 
     // Disable arcana if configured
     if (t.disableArcana) {
@@ -422,6 +420,7 @@ function deactivateTransform(reason) {
     }
 
     document.body.classList.remove('transformed');
+    if (typeof updateTotalAC === 'function') updateTotalAC();
     updateTransformPanel();
     if (typeof updateDashboard === 'function') updateDashboard();
     if (typeof updateStatusBar === 'function') updateStatusBar();

@@ -63,8 +63,45 @@ function getAllFields() {
     return data;
 }
 
+// Migrate old armor field names to new AC system
+function _migrateArmorFields(data) {
+    // armor_X_bonus → armor_X_ac (convert "N+block" to just N)
+    for (var i = 1; i <= 5; i++) {
+        var oldKey = 'armor_' + i + '_bonus';
+        var newKey = 'armor_' + i + '_ac';
+        if (data[oldKey] !== undefined && data[newKey] === undefined) {
+            var val = String(data[oldKey]);
+            // Extract numeric part from "N+block" format
+            var num = parseInt(val) || 0;
+            // Look up correct AC from ARMOR_DATA if armor type is present
+            var typeName = data['armor_' + i + '_type'];
+            if (typeName && typeof ARMOR_DATA !== 'undefined' && ARMOR_DATA[typeName]) {
+                num = ARMOR_DATA[typeName].ac;
+            }
+            data[newKey] = num;
+            delete data[oldKey];
+        }
+    }
+    // shield_defence → shield_ac
+    if (data.shield_defence !== undefined && data.shield_ac === undefined) {
+        var shieldName = data.shield_type;
+        if (shieldName && typeof SHIELD_DATA !== 'undefined' && SHIELD_DATA[shieldName]) {
+            data.shield_ac = SHIELD_DATA[shieldName].ac;
+        } else {
+            data.shield_ac = parseInt(data.shield_defence) || 0;
+        }
+        delete data.shield_defence;
+    }
+    // Remove shield_block (no longer used)
+    delete data.shield_block;
+    return data;
+}
+
 // Set all form fields from an object
 function setAllFields(data) {
+    // Migrate old armor bonus/block fields to new AC system
+    data = _migrateArmorFields(data);
+
     // First, set race and class to ensure proper initialization
     // This is critical for Mage class (which needs 10 spell slots) and race-specific HP
     const priorityFields = ['race', 'class'];
@@ -166,6 +203,9 @@ function setAllFields(data) {
     if (typeof window.updateDashboard === 'function') {
         window.updateDashboard();
     }
+
+    // Update Total AC display
+    if (typeof updateTotalAC === 'function') updateTotalAC();
 
     // Sync notes between desktop and mobile
     syncNotesToMobile();
