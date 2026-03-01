@@ -2403,6 +2403,34 @@
                                 <p style="margin-top: 12px;"><strong>Take Hit</strong> (1D20 + Toughness or Armor AC)</p>
                                 <p style="margin-left: 10px; font-size: 0.9em;">Win → Armor absorbs, minimal damage. Lose → Full damage + Stun/Knockback.</p>
 
+                                <p style="margin-top: 16px; padding: 10px; background: rgba(34, 197, 94, 0.12); border-radius: 6px;">
+                                    <strong style="color: var(--primary-green, #22c55e);">Damage Flow:</strong><br>
+                                    <span style="font-size: 0.9em;">
+                                    1. DM picks body part (Head, Shoulders, Chest, Hands, Legs)<br>
+                                    2. <strong>All damage → that armor slot's HP</strong><br>
+                                    3. If armor HP reaches 0 → broken, excess damage → Character HP<br>
+                                    4. No armor on that slot? → All damage directly to Character HP
+                                    </span>
+                                </p>
+
+                                <p style="margin-top: 12px; padding: 10px; background: rgba(255, 215, 0, 0.12); border-radius: 6px;">
+                                    <strong style="color: var(--accent-gold, #ffd700);">Nat 20 (Critical Hit):</strong><br>
+                                    <span style="font-size: 0.9em;">Double damage dice. <strong>50% of total damage goes directly to Character HP</strong>, the other 50% to Armor HP as normal.</span><br>
+                                    <span style="font-size: 0.85em;"><em>Example: Nat 20 with Longsword = 2D10 = 14 dmg → 7 to Armor HP, 7 to Character HP</em></span>
+                                </p>
+
+                                <p style="margin-top: 12px; padding: 10px; background: rgba(0, 188, 212, 0.12); border-radius: 6px;">
+                                    <strong style="color: var(--accent-cyan, #00bcd4);">Nat 20 (Defense):</strong><br>
+                                    <span style="font-size: 0.9em;">Perfect defense — <strong>50% of attacker's damage is reflected back</strong> to the attacker.</span><br>
+                                    <span style="font-size: 0.85em;"><em>Example: Attacker deals 10 dmg, Defender rolls Nat 20 → Attacker takes 5 damage</em></span>
+                                </p>
+
+                                <p style="margin-top: 16px; padding: 10px; background: rgba(239, 68, 68, 0.15); border-radius: 6px;">
+                                    <strong style="color: #ef4444;">When Armor HP = 0:</strong><br>
+                                    Armor is broken. All further damage to that slot goes directly to <strong>Character HP</strong>.<br>
+                                    <span style="font-size: 0.9em;"><em>Example: Armor HP 5, incoming 12 dmg → Armor destroyed, Character takes 7 HP damage</em></span>
+                                </p>
+
                                 <p style="margin-top: 16px; padding: 10px; background: rgba(168, 85, 247, 0.15); border-radius: 6px;">
                                     <strong style="color: #a855f7;">Special Maneuver:</strong><br>
                                     Want to do something beyond the four options? Tell your DM what you want to do.<br>
@@ -2410,15 +2438,9 @@
                                     <span style="font-size: 0.9em;"><em>Example: "I want to duck under the sword and roll behind the enemy" → DM may say "Roll 1D20 + Acrobatics, DC 16"</em></span>
                                 </p>
 
-                                <p style="margin-top: 16px; padding: 10px; background: rgba(239, 68, 68, 0.15); border-radius: 6px;">
-                                    <strong style="color: #ef4444;">When Equipment HP = 0:</strong><br>
-                                    Equipment is destroyed. All remaining damage goes directly to <strong>Character HP</strong>.<br>
-                                    <span style="font-size: 0.9em;"><em>Example: Armor HP 5, incoming 12 dmg → Armor destroyed, Character takes 7 HP damage</em></span>
-                                </p>
-
                                 <p style="margin-top: 16px; padding: 10px; background: rgba(240, 192, 64, 0.15); border-radius: 6px;">
-                                    <strong style="color: #f0c040;">Equipment Damage:</strong><br>
-                                    DM decides how much damage equipment takes. <strong>Recommendation: 50%</strong> of attack's intended damage.<br>
+                                    <strong style="color: #f0c040;">Equipment Damage (optional DM rule):</strong><br>
+                                    By default all damage goes to armor HP. DM may optionally split differently for narrative reasons.<br>
                                     <span style="font-size: 0.9em;"><em>Example: Enemy deals 12 dmg → Shield/Armor takes 6 HP damage</em></span>
                                 </p>
 

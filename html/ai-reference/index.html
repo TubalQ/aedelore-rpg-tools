@@ -117,9 +117,17 @@ Highest total wins → attacker wins = hit → roll weapon damage dice → apply
 Tie = defender wins</pre>
 
 <ul>
-<li><strong>Natural 20 attack:</strong> Critical hit — auto-hit, double damage dice</li>
+<li><strong>Natural 20 attack:</strong> Critical hit — auto-hit, double damage dice, 50% of damage bypasses armor to Character HP</li>
+<li><strong>Natural 20 defense:</strong> Perfect defense — 50% of attacker's damage is reflected back to attacker</li>
 <li><strong>Natural 1 attack:</strong> Auto-miss regardless of total</li>
 </ul>
+
+<h3>Damage Flow</h3>
+<pre>1. DM picks body part (Head, Shoulders, Chest, Hands, Legs)
+2. All damage → that armor slot's HP
+3. If armor HP reaches 0 → broken, excess damage → Character HP
+4. No armor on that slot → all damage directly to Character HP
+5. Nat 20 attack: 50% to Armor HP, 50% directly to Character HP</pre>
 
 <h3>Defense Options (choose one when attacked)</h3>
 
@@ -127,36 +135,37 @@ Tie = defender wins</pre>
 <pre>1D20 + Acrobatics modifier</pre>
 <ul>
 <li>Win: No damage</li>
-<li>Lose: Full damage to Armor HP</li>
+<li>Lose: DM picks body part, full damage to that armor slot's HP</li>
 </ul>
 
 <h4>Parry (requires weapon)</h4>
 <pre>1D20 + Weapon ATK Bonus + Attribute Modifier (STR or DEX)</pre>
 <ul>
 <li>Win: No damage</li>
-<li>Lose: Full damage to Armor HP</li>
+<li>Lose: DM picks body part, full damage to that armor slot's HP</li>
 </ul>
 
 <h4>Block (requires shield)</h4>
-<pre>1D20 + Shield AC (Small 10, Wooden 13, Spiked 14, Metal 15, Tower 20)</pre>
+<pre>Shield Block AC (Small 10, Wooden 13, Spiked 14, Metal 15, Tower 20)</pre>
 <ul>
+<li>Attacker must beat Shield Block AC to hit</li>
 <li>Win: Shield HP absorbs damage</li>
-<li>Lose: Full damage to Armor HP</li>
+<li>Lose: DM picks body part, full damage to that armor slot's HP</li>
 </ul>
 
 <h4>Take Hit</h4>
 <pre>1D20 + Toughness modifier (or Armor AC)</pre>
 <ul>
 <li>Win: Armor absorbs, minimal damage</li>
-<li>Lose: Full damage to Armor HP + Stun/Knockback</li>
+<li>Lose: Full damage to armor slot HP + Stun/Knockback</li>
 </ul>
 
 <h3>Combat Round Sequence</h3>
 <pre>1. Attacker rolls: 1D20 + Weapon ATK Bonus + Attribute Modifier (STR or DEX)
-2. Defender chooses defense and rolls: 1D20 + defense modifier
+2. Defender chooses defense and rolls
 3. Compare totals — attacker wins? → Roll weapon damage dice
-4. Apply damage to Shield HP → Armor HP → Character HP
-5. DM chooses body part for armor damage: Hand, Leg, Chest, Shoulders, Head</pre>
+4. DM picks body part → damage goes to that armor slot's HP
+5. Armor HP 0 = broken, overflow → Character HP</pre>
 
 <h3>Assistance</h3>
 <p>Give up your action to grant ally +2 on their next roll. Max 1 assist per round.</p>
