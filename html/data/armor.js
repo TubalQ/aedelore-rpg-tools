@@ -71,21 +71,27 @@ const SHIELD_DATA = {
 
 const SHIELDS = Object.keys(SHIELD_DATA);
 
-// Calculate Total AC from equipped armor + shield
-// Formula: 10 + Σ armor_X_ac + shield_ac
+// Calculate Total AC from equipped armor (passive, no shield)
+// Formula: 10 + Σ armor_X_ac
 function getTotalAC() {
     var total = 10;
     for (var i = 1; i <= 5; i++) {
         var el = document.getElementById('armor_' + i + '_ac');
         if (el && el.value) total += parseInt(el.value) || 0;
     }
-    var shieldAC = document.getElementById('shield_ac');
-    if (shieldAC && shieldAC.value) total += parseInt(shieldAC.value) || 0;
     return total;
 }
 
-// Update Total AC display element
+// Get Shield Block AC (separate, used for Block defense)
+function getShieldBlockAC() {
+    var el = document.getElementById('shield_ac');
+    return (el && el.value) ? (parseInt(el.value) || 0) : 0;
+}
+
+// Update Total AC and Shield Block AC displays
 function updateTotalAC() {
     var display = document.getElementById('total-ac-value');
     if (display) display.textContent = getTotalAC();
+    var shieldDisplay = document.getElementById('shield-block-ac-value');
+    if (shieldDisplay) shieldDisplay.textContent = getShieldBlockAC();
 }

@@ -1421,11 +1421,17 @@
 
         <!-- Page: Combat & Equipment -->
         <div id="page-combat" class="tab-content">
-            <!-- Total AC Display -->
+            <!-- Total AC + Shield Block AC Display -->
             <div class="section" style="text-align: center; padding: var(--space-3) var(--space-4);">
-                <div id="total-ac-display" style="display: inline-flex; align-items: center; gap: 12px; padding: 10px 24px; background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 10px;">
-                    <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);">Total AC</span>
-                    <span id="total-ac-value" style="font-size: 1.8rem; font-weight: 700; color: var(--accent-gold, #ffd700);">10</span>
+                <div style="display: inline-flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: center;">
+                    <div id="total-ac-display" style="display: inline-flex; align-items: center; gap: 12px; padding: 10px 24px; background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 10px;">
+                        <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);">Total AC</span>
+                        <span id="total-ac-value" style="font-size: 1.8rem; font-weight: 700; color: var(--accent-gold, #ffd700);">10</span>
+                    </div>
+                    <div id="shield-block-ac-display" style="display: inline-flex; align-items: center; gap: 12px; padding: 10px 24px; background: linear-gradient(135deg, rgba(0, 188, 212, 0.1) 0%, rgba(0, 188, 212, 0.05) 100%); border: 1px solid rgba(0, 188, 212, 0.3); border-radius: 10px;">
+                        <span style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);">Shield Block AC</span>
+                        <span id="shield-block-ac-value" style="font-size: 1.8rem; font-weight: 700; color: var(--accent-cyan, #00bcd4);">0</span>
+                    </div>
                 </div>
             </div>
 
