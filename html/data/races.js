@@ -163,5 +163,29 @@ const RACES = {
             worthiness: 2,
             hp: 20
         }
+    },
+    "Half-Elf": {
+        name: "Half-Elf",
+        bonuses: [
+            "+1 Strength",
+            "+1 Toughness",
+            "+2 Force of Will",
+            "+2 Performance",
+            "+1 Perception",
+            "+1 Insight",
+            "+1 Endurance",
+            "+1 Resistance",
+            "Starting Weapon: Rapier",
+            "Starting Food: 1D6",
+            "Starting Worthiness: 5",
+            "Starting HP: 18"
+        ],
+        startingEquipment: {
+            weapon: "Rapier",
+            food: "1D6",
+            gold: 0,
+            worthiness: 5,
+            hp: 18
+        }
     }
 };
