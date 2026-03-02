@@ -147,7 +147,7 @@ async function validateMcpToken(token) {
 }
 
 // Allowed redirect URI hosts for OAuth (prevent authorization code theft)
-const ALLOWED_REDIRECT_HOSTS = (process.env.ALLOWED_REDIRECT_HOSTS || 'claude.ai,localhost,127.0.0.1').split(',').map(h => h.trim());
+const ALLOWED_REDIRECT_HOSTS = (process.env.ALLOWED_REDIRECT_HOSTS || 'claude.ai,chatgpt.com,chat.openai.com,localhost,127.0.0.1').split(',').map(h => h.trim());
 
 // --- OAuth 2.0 for MCP ---
 // Temporary auth codes: code -> { token, redirectUri, clientId, expiresAt }

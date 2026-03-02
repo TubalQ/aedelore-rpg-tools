@@ -262,5 +262,39 @@ const CLASSES = {
             hpBonus: 0
         },
         abilityType: "arcana"
+    },
+    "Revenant": {
+        name: "Revenant",
+        bonuses: [
+            "+1 Dexterity",
+            "+1 Wisdom",
+            "+2 Religion",
+            "+1 Medicine",
+            "+1 Athletics",
+            "+1 Survival",
+            "+1 Stealth",
+            "Starting Armor: Chain Shirt (chest), Leather (shoulders, legs)",
+            "Starting Weapon: Longsword",
+            "Starting Gold: 1",
+            "Starting Food: 1D6",
+            "Starting Worthiness: 0",
+            "Ability Capacity: 3 (melee abilities)",
+            "A warrior who met death and chose to return",
+            "HP Bonus: +4"
+        ],
+        startingEquipment: {
+            armor: {
+                chest: "Chain Shirt",
+                shoulders: "Leather Pauldrons",
+                legs: "Leather Greaves"
+            },
+            weapon: "Longsword",
+            gold: 1,
+            food: "1D6",
+            worthiness: 0,
+            abilities: 3,
+            hpBonus: 4
+        },
+        abilityType: "weakened"
     }
 };

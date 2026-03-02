@@ -1,5 +1,5 @@
 // Armor data organized by body part
-// AC system (D20-based) — converted 2026-03-01
+// AC system (D20-based) - converted 2026-03-01
 // Total AC = 10 + Σ armor slot AC + shield AC
 
 const ARMOR_DATA = {
@@ -60,7 +60,7 @@ const ARMOR_BY_BODYPART = {
 // Simple array for datalist (backward compatibility)
 const ARMOR = Object.keys(ARMOR_DATA);
 
-// Shield data — ac replaces old block/defence
+// Shield data - ac replaces old block/defence
 const SHIELD_DATA = {
     "Shield (Wooden)": { hp: "15", ac: 13, damage: "1d6" },
     "Shield (Metal)": { hp: "22", ac: 15, damage: "1d6" },

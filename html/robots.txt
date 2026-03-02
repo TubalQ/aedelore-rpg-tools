@@ -1,15 +1,46 @@
 # Robots.txt for aedelore.nu
+
+# ChatGPT - allowed
+User-agent: ChatGPT-User
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /wiki-admin
+Disallow: /api/
+
+# Claude - allowed
+User-agent: ClaudeBot
+User-agent: Claude-Web
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: anthropic-ai
+Allow: /
+Disallow: /wiki-admin
+Disallow: /api/
+
+# Block known AI training scrapers
+User-agent: CCBot
+User-agent: Bytespider
+User-agent: PetalBot
+User-agent: Scrapy
+User-agent: img2dataset
+User-agent: Diffbot
+User-agent: cohere-ai
+User-agent: cohere-training-data-crawler
+User-agent: FacebookBot
+User-agent: Meta-ExternalAgent
+User-agent: meta-externalagent
+User-agent: TikTokSpider
+User-agent: SemrushBot-OCOB
+User-agent: SemrushBot-SWA
+Disallow: /
+
+# Default - allow (regular search engines etc)
 User-agent: *
 Allow: /
-
-# Sitemap location
-Sitemap: https://aedelore.nu/sitemap.xml
-
-# Crawl-delay for polite crawling
-Crawl-delay: 1
-
-# Disallow non-public pages
 Disallow: /wiki-admin
-Disallow: /test-*.html
-Disallow: /.claude/
 Disallow: /api/
+Disallow: /.claude/
+
+# Sitemap
+Sitemap: https://aedelore.nu/sitemap.xml
